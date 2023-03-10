@@ -1,15 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>bpmn-visualization demo template</title>
-    <script type="module" src="/src/main.ts"></script>
-  </head>
-  <body>
-    <h1>bpmn-visualization demo template</h1>
-    <div id="bpmn-container"></div>
-    <footer></footer>
-  </body>
+<head>
+    <title>ICP demo 2022 based on BPI 2019</title>
+    <meta charset="UTF-8"/>
+    <link rel="icon" type="image/svg+xml" href="src/assets/favicon.svg">
+    <!-- The documentation of Spectre CSS: https://github.com/picturepan2/spectre -->
+    <link rel="stylesheet" href="node_modules/spectre.css/dist/spectre.min.css">
+    <link rel="stylesheet" href="src/style.css">
+    <script type="module" src="src/main.ts"></script>
+</head>
+<body>
+<header class="navbar">
+    <ul class="breadcrumb ml-2 pl-2 text-large">
+        <li class="breadcrumb-item">
+            <a href="#" onclick="loadBpmnDiagram('main')">Purchase orders</a>
+        </li>
+    </ul>
+</header>
+<div class="divider m-0"></div>
+<section class="container text-capitalize">
+    <div class="columns col-11 col-mx-auto mt-2">
+        <div class="col-12 my-2">
+            <div id="main-bpmn-container" class="bpmn-container"></div>
+            <div id="secondary-bpmn-container" class="bpmn-container d-hide"></div>
+        </div>
+
+        <div id="control" class="col-12 col-mx-auto form-horizontal mt-2 pt-2 pb-2">
+            <div class="form-group">
+                <div class="col-auto col-sm-10 mr-2" style="margin-left: auto">
+                    <label class="form-label label-lg text-bold">Use case</label>
+                </div>
+                <div class="col-auto col-sm-10 ml-2" style="margin-right: auto">
+                    <label class="form-radio form-inline input-lg">
+                        <input id="reset_all" type="radio" name="use_case" value="reset_all" checked>
+                        <i class="form-icon"></i> None
+                    </label>
+                    <label class="form-radio form-inline input-lg">
+                        <input id="happy_path" type="radio" name="use_case" value="happy_path">
+                        <i class="form-icon"></i> Process Monitoring
+                    </label>
+                    <label class="form-radio form-inline input-lg">
+                        <input id="monitoring" type="radio" value="monitoring" name="use_case">
+                        <i class="form-icon"></i> Case Monitoring
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
 </html>
+
