@@ -10,16 +10,17 @@ export function configureRadioButtons(bpmnVisualization: BpmnVisualization) {
   }, () => {
     hideMonitoringData(bpmnVisualization);
   });
-  new RadioButton('reset_all', () => {}, () => () => {});
+  new RadioButton('reset_all', () => {
+    // Do nothing on purpose
+  }, () => () => {
+    // Do nothing on purpose
+  });
 }
 
 class RadioButton {
   private static checkedRadioButton: RadioButton | undefined = undefined;
-  private readonly hideCallback: () => void;
 
-  constructor(id: string, showCallback: () => void, hideCallback: () => void) {
-    this.hideCallback = hideCallback;
-
+  constructor(id: string, showCallback: () => void, private readonly hideCallback: () => void) {
     document.querySelector(`#${id}`)?.addEventListener('click', () => {
       if (RadioButton.checkedRadioButton !== this) {
         RadioButton.checkedRadioButton?.hide();

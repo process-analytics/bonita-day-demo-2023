@@ -166,8 +166,6 @@ function registerBpmnElement(bpmnElement: BpmnElement) {
 }
 
 function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
-  const bpmnSemantic = registeredBpmnElements.get(htmlElement);
-  const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
   let popoverContent = `
         <div class="popover-container">
             <table>
@@ -179,13 +177,15 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
                 <tbody>
     `;
 
-  for (const key in activityRecommendationData) {
+  const bpmnSemantic = registeredBpmnElements.get(htmlElement);
+  const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
+  for (const recommendation of activityRecommendationData) {
     // Replace space with hypen (-) to be passed as the button id
-    const buttonId = key.replace(/\s+/g, '-');
+    const buttonId = recommendation.title.replace(/\s+/g, '-');
     popoverContent += `
             <tr class="popover-row">
-                <td class="popover-key">${key}</td>
-                <td class="popover-value">${activityRecommendationData[key]}</td>
+                <td class="popover-key">${recommendation.title}</td>
+                <td class="popover-value">${recommendation.description}</td>
                 <td class="popover-action">
                     <button id="${buttonId}">Act</button>
                 </td>
