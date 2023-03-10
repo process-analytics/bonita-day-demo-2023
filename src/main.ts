@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 import {BpmnVisualization, FitType} from 'bpmn-visualization';
-
+// eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import collapsedDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
 
 // 'bpmn-visualization' API documentation: https://process-analytics.github.io/bpmn-visualization-js/api/index.html
