@@ -17,7 +17,7 @@ limitations under the License.
 import {BpmnVisualization, FitType} from 'bpmn-visualization';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import collapsedDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
-import { loadBpmnDiagram } from './diagram';
+import {loadBpmnDiagram} from './diagram';
 
 // 'bpmn-visualization' API documentation: https://process-analytics.github.io/bpmn-visualization-js/api/index.html
 const mainBpmnVisualization = new BpmnVisualization({
@@ -29,14 +29,14 @@ const mainBpmnVisualization = new BpmnVisualization({
 mainBpmnVisualization.load(collapsedDiagram, {fit: {type: FitType.Center, margin: 20}});
 
 // Interaction
-let subProcessId = 'Activity_0ec8azh';
-mainBpmnVisualization.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement.onclick = () => {
+const subProcessId = 'Activity_0ec8azh';
+mainBpmnVisualization.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement.addEventListener('click', () => {
   loadBpmnDiagram('secondary');
-}
+});
 
-//return to main diagram
-document.getElementById('breadcrumb-main-diagram')!.onclick = () => {
+// Return to main diagram
+document.querySelector('#breadcrumb-main-diagram')!.addEventListener('click', () => {
   loadBpmnDiagram('main');
-}
+});
 
 mainBpmnVisualization.bpmnElementsRegistry.addCssClasses(subProcessId, 'c-hand');
