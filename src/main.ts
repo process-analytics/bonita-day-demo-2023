@@ -17,6 +17,7 @@ limitations under the License.
 import {BpmnVisualization, FitType} from 'bpmn-visualization';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import collapsedDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
+import { loadBpmnDiagram } from './diagram';
 
 // 'bpmn-visualization' API documentation: https://process-analytics.github.io/bpmn-visualization-js/api/index.html
 const mainBpmnVisualization = new BpmnVisualization({
@@ -26,3 +27,16 @@ const mainBpmnVisualization = new BpmnVisualization({
 // Load BPMN diagram
 // Try the "Center" type to fit the whole container and center the diagram
 mainBpmnVisualization.load(collapsedDiagram, {fit: {type: FitType.Center, margin: 20}});
+
+// Interaction
+let subProcessId = 'Activity_0ec8azh';
+mainBpmnVisualization.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement.onclick = () => {
+  loadBpmnDiagram('secondary');
+}
+
+//return to main diagram
+document.getElementById('breadcrumb-main-diagram')!.onclick = () => {
+  loadBpmnDiagram('main');
+}
+
+mainBpmnVisualization.bpmnElementsRegistry.addCssClasses(subProcessId, 'c-hand');
