@@ -10,7 +10,7 @@ const registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
 let alreadyExecutedElements = new Set<string>();
 
-export function showMonitoringData(bpmnVisualization: BpmnVisualization) {
+export function showCaseMonitoringData(bpmnVisualization: BpmnVisualization) {
   const alreadyExecutedShapes = getAlreadyExecutedShapes();
   const alreadyVisitedEdges = getConnectingEdgeIds(new Set<string>([...alreadyExecutedShapes, ...(getRunningActivities()), ...getPendingElements()]), bpmnVisualization);
   alreadyExecutedElements = new Set<string>([...alreadyExecutedShapes, ...alreadyVisitedEdges]);
@@ -23,7 +23,7 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization) {
   // registerInteractions(bpmnVisualization);
 }
 
-export function hideMonitoringData(bpmnVisualization: BpmnVisualization) {
+export function hideCaseMonitoringData(bpmnVisualization: BpmnVisualization) {
   restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization);
   resetRunningElements(bpmnVisualization);
 }
