@@ -1,4 +1,4 @@
-import tippy, {type Instance, type Props, type ReferenceElement} from 'tippy.js';
+import tippy, {type Instance, type ReferenceElement} from 'tippy.js';
 import {getElementIdByName} from './bpmn-elements.js';
 import {getActivityRecommendationData} from './recommendation-data.js';
 import 'tippy.js/dist/tippy.css';
