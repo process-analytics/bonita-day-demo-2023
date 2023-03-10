@@ -1,45 +1,22 @@
-import tippy, {type Instance, type ReferenceElement} from 'tippy.js';
+import tippy, {type Instance, type Props, type ReferenceElement} from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import type {BpmnElement, BpmnSemantic, BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
 import {getElementIdByName} from './bpmn-elements.js';
 import {getActivityRecommendationData} from './recommendation-data.js';
 
-const tippyInstances = [];
+const tippyInstances: Instance[] = [];
 
 const registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
+let alreadyExecutedElements = new Set<string>();
+
 export function showMonitoringData(bpmnVisualization: BpmnVisualization) {
-  // Get already executed shapes: activities, gateways, events, ...
   const alreadyExecutedShapes = getAlreadyExecutedShapes();
+  const alreadyVisitedEdges = getConnectingEdgeIds(new Set<string>([...alreadyExecutedShapes, ...(getRunningActivities()), ...getPendingElements()]), bpmnVisualization);
+  alreadyExecutedElements = new Set<string>([...alreadyExecutedShapes, ...alreadyVisitedEdges]);
 
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  /* TODO
-        refactor: set of pending shapes
-        one call to getVisitedEdges
-    */
-
-  // get visited edges of alreadyExecutedElements
-  const alreadyVisitedEdges = getConnectingEdgeIds(alreadyExecutedShapes, bpmnVisualization);
-
-  // Running elements
-  const runningActivities = getRunningActivities();
-  // Add the incomingIds of the running elements
-  for (const activityId of runningActivities) {
-    const activity = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(activityId)[0];
-    const incomingEdges = (activity.bpmnSemantic as ShapeBpmnSemantic).incomingIds;
-    for (const edge of incomingEdges) {
-      alreadyVisitedEdges.add(edge);
-    }
-  }
-
-  const alreadyExecutedElements = new Set<string>([...alreadyExecutedShapes, ...alreadyVisitedEdges]);
-
-  reduceVisibilityOfAlreadyExecutedElements(alreadyExecutedElements, bpmnVisualization);
-  highlightRunningElements(runningActivities, bpmnVisualization);
-  for (const activityId of runningActivities) {
-    addPopover(activityId, bpmnVisualization);
-    addOverlay(activityId, bpmnVisualization);
-  }
+  reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization);
+  highlightRunningElements(bpmnVisualization);
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO what is it for?
@@ -47,11 +24,11 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization) {
 }
 
 export function hideMonitoringData(bpmnVisualization: BpmnVisualization) {
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO implement hideMonitoringData
-  console.info('hideMonitoringData (bpmn-visualization version %s)', bpmnVisualization.getVersion().lib);
+  restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization);
+  resetRunningElements(bpmnVisualization);
 }
 
+// Already executed shapes: activities, gateways, events, ...
 function getAlreadyExecutedShapes() {
   const alreadyExecutedShapes = new Set<string>();
   addNonNullElement(alreadyExecutedShapes, getElementIdByName('New POI Needed')); // Start event
@@ -73,19 +50,47 @@ function getRunningActivities() {
   return runningActivities;
 }
 
-function reduceVisibilityOfAlreadyExecutedElements(alreadyExecutedElements: Set<string>, bpmnVisualization: BpmnVisualization) {
+function getPendingElements() {
+  return new Set<string>(['Gateway_0domayw']);
+}
+
+function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
   bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(alreadyExecutedElements), 'state-already-executed');
+}
+
+function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
+  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(Array.from(alreadyExecutedElements), 'state-already-executed');
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO: rename CSS class
-function highlightRunningElements(runningActivities: Set<string>, bpmnVisualization: BpmnVisualization) {
+function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
+  const runningActivities = getRunningActivities();
   bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(runningActivities), 'state-predicted-late');
+  for (const activityId of runningActivities) {
+    addPopover(activityId, bpmnVisualization);
+    addOverlay(activityId, bpmnVisualization);
+  }
 }
 
-function getConnectingEdgeIds(shapeSet: Set<string>, bpmnVisualization: BpmnVisualization) {
+function resetRunningElements(bpmnVisualization: BpmnVisualization) {
+  const runningActivities = Array.from(getRunningActivities());
+  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(runningActivities, 'state-predicted-late');
+  for (const activityId of runningActivities) {
+    bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
+  }
+
+  // Unregister tippy instances
+  for (const instance of tippyInstances) {
+    instance.destroy();
+  }
+
+  tippyInstances.length = 0;
+}
+
+function getConnectingEdgeIds(shapeIds: Set<string>, bpmnVisualization: BpmnVisualization) {
   const edgeIds = new Set<string>();
-  for (const shape of shapeSet) {
+  for (const shape of shapeIds) {
     const shapeElt = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(shape)[0];
     const bpmnSemantic = shapeElt.bpmnSemantic as ShapeBpmnSemantic;
     const incomingEdges = bpmnSemantic.incomingIds;
@@ -93,7 +98,7 @@ function getConnectingEdgeIds(shapeSet: Set<string>, bpmnVisualization: BpmnVisu
     for (const edgeId of incomingEdges) {
       const edgeElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
       const sourceRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).sourceRefId;
-      if (shapeSet.has(sourceRef)) {
+      if (shapeIds.has(sourceRef)) {
         edgeIds.add(edgeId);
       }
     }
@@ -101,7 +106,7 @@ function getConnectingEdgeIds(shapeSet: Set<string>, bpmnVisualization: BpmnVisu
     for (const edgeId of outgoingEdges) {
       const edgeElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
       const targetRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).targetRefId;
-      if (shapeSet.has(targetRef)) {
+      if (shapeIds.has(targetRef)) {
         edgeIds.add(edgeId);
       }
     }
@@ -127,7 +132,7 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
     onShown(instance: Instance): void {
       instance.setContent(getRecommendationInfoAsHtml(instance.reference));
     },
-  });
+  } as Partial<Props>);
 
   tippyInstances.push(tippyInstance);
 
