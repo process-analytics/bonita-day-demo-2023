@@ -81,8 +81,8 @@ function getHappyPathClasses(index: number, elementId: string) {
   } else {
     // Flow
     styleInnerHtml
-        = `.animate-${elementId} > path:nth-child(2) { animation-delay: ${delay}s; animation-duration: ${animationDurationOfEdgeLine}s; } \n`
-        + `.animate-${elementId} > path:nth-child(3) { animation-delay: ${delay + animationDurationOfEdgeLine / 2}s; animation-duration: ${animationDurationOfEdgeArrow}s; }`;
+        = `.animate-${elementId} > path:nth-child(2) { animation-delay: ${delay}s; animation-duration: ${animationDurationOfEdgeLine}s; }
+.animate-${elementId} > path:nth-child(3) { animation-delay: ${delay + (animationDurationOfEdgeLine / 2)}s; animation-duration: ${animationDurationOfEdgeArrow}s; }`;
     classToAdd = 'growing-happy';
   }
 
@@ -99,7 +99,6 @@ export function showHappyPath(bpmnVisualization: BpmnVisualization) {
 
     const style = document.createElement('style');
     style.id = elementId;
-    // TODO deprecated
     style.type = 'text/css';
     style.innerHTML = styleInnerHtml;
     headElt.append(style);
