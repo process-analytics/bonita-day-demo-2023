@@ -13,7 +13,8 @@
     "ts": "tsc"
   },
   "dependencies": {
-    "bpmn-visualization": "~0.32.0"
+    "bpmn-visualization": "~0.32.0",
+    "spectre.css": "0.5.9"
   },
   "devDependencies": {
     "typescript": "~4.9.5",
