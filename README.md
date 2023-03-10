@@ -1,27 +1,11 @@
-# bpmn-visualization-demo-template
+# bonita-day-demo-2023
 
-A template repository to quickly initiate a [bpmn-visualization](https://github.com/process-analytics/bpmn-visualization-js) demo
-- powered by [Vite](https://vitejs.dev/)
-- written in [TypeScript](https://www.typescriptlang.org/)
-
-
-## Using the template
-
-- Create your repository based on this repository template: see https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template
-
-- Update the repository settings
-  - GitHub pages: enable _Build and deployment_ with _Source_ [GitHub Actions](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-with-a-custom-github-actions-workflow)
-  - Dependabot: a configuration is provided by the template, see the [configuration documentation](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates) for more details.
-  - GH actions: enable and manage secrets (it may require to manage them at GitHub organization level)
-  - Other settings: apply guidelines described in the [.github](https://github.com/process-analytics/.github/) repository
+TODO explain
 
 
 ## 🎮 Live demo
 
-<!--
-TODO: this is the url of the template repository. Change the url to match the URL of the actual repository.
--->
-The live demo is available at ⏩ https://process-analytics.github.io/bpmn-visualization-demo-template/
+The live demo is available at ⏩ https://process-analytics.github.io/bonita-day-demo-2023/
 
 
 ## ⚒️ Development Setup
