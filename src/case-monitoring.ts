@@ -1,12 +1,6 @@
 import tippy, {type Instance, type ReferenceElement} from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-import {
-  type BpmnElement,
-  type BpmnSemantic,
-  type BpmnVisualization,
-  type EdgeBpmnSemantic,
-  type ShapeBpmnSemantic,
-} from 'bpmn-visualization';
+import type {BpmnElement, BpmnSemantic, BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
 import {getElementIdByName} from './bpmn-elements.js';
 import {getActivityRecommendationData} from './recommendation-data.js';
 
@@ -18,7 +12,8 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization) {
   // Get already executed shapes: activities, gateways, events, ...
   const alreadyExecutedShapes = getAlreadyExecutedShapes();
 
-  /* TO DO
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
+  /* TODO
         refactor: set of pending shapes
         one call to getVisitedEdges
     */
@@ -46,11 +41,13 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization) {
     addOverlay(activityId, bpmnVisualization);
   }
 
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO what is it for?
   // registerInteractions(bpmnVisualization);
 }
 
 export function hideMonitoringData(bpmnVisualization: BpmnVisualization) {
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO implement hideMonitoringData
   console.info('hideMonitoringData (bpmn-visualization version %s)', bpmnVisualization.getVersion().lib);
 }
@@ -80,7 +77,8 @@ function reduceVisibilityOfAlreadyExecutedElements(alreadyExecutedElements: Set<
   bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(alreadyExecutedElements), 'state-already-executed');
 }
 
-/* TO DO: rename CSS class
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+/* TODO: rename CSS class
           change toggle to add */
 function highlightRunningElements(runningActivities: Set<string>, bpmnVisualization: BpmnVisualization) {
   bpmnVisualization.bpmnElementsRegistry.toggleCssClasses(Array.from(runningActivities), 'state-predicted-late');
@@ -124,7 +122,7 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
     content: 'Loading...',
     arrow: true,
     interactive: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
     allowHTML: true,
     trigger: 'mouseenter',
     onShown(instance: Instance): void {
@@ -134,6 +132,7 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
 
   tippyInstances.push(tippyInstance);
 
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO make it work
   // get references to the buttons in the Tippy popover
   // const allocateResourceBtn = tippyInstance.popper.querySelector('#Allocate-Resource');
