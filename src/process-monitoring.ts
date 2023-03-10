@@ -68,25 +68,25 @@ function getHappyPathClasses(index: number, elementId: string) {
   const delay = index * animationDelay;
 
   let classToAdd;
-  let styleInnerHTML;
+  let styleInnerHtml;
   if (isActivity(elementId)) {
-    styleInnerHTML = `.animate-${elementId} > rect { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
+    styleInnerHtml = `.animate-${elementId} > rect { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'pulse-happy';
   } else if (isEvent(elementId)) {
-    styleInnerHTML = `.animate-${elementId} > ellipse { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
+    styleInnerHtml = `.animate-${elementId} > ellipse { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'pulse-happy';
   } else if (isGateway(elementId)) {
-    styleInnerHTML = `.animate-${elementId} > path { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
+    styleInnerHtml = `.animate-${elementId} > path { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'gateway-happy';
   } else {
     // Flow
-    styleInnerHTML
+    styleInnerHtml
         = `.animate-${elementId} > path:nth-child(2) { animation-delay: ${delay}s; animation-duration: ${animationDurationOfEdgeLine}s; } \n`
         + `.animate-${elementId} > path:nth-child(3) { animation-delay: ${delay + animationDurationOfEdgeLine / 2}s; animation-duration: ${animationDurationOfEdgeArrow}s; }`;
     classToAdd = 'growing-happy';
   }
 
-  return {classToAdd, styleInnerHTML};
+  return {classToAdd, styleInnerHtml};
 }
 
 export function showHappyPath(bpmnVisualization: BpmnVisualization) {
@@ -95,13 +95,13 @@ export function showHappyPath(bpmnVisualization: BpmnVisualization) {
   /* Iterate over the elements in the happyPath
    apply css and add a delay so that we see the css applied in a sequential manner */
   for (const [index, elementId] of happyPath.entries()) {
-    const {classToAdd, styleInnerHTML} = getHappyPathClasses(index, elementId);
+    const {classToAdd, styleInnerHtml} = getHappyPathClasses(index, elementId);
 
     const style = document.createElement('style');
     style.id = elementId;
     // TODO deprecated
     style.type = 'text/css';
-    style.innerHTML = styleInnerHTML;
+    style.innerHTML = styleInnerHtml;
     headElt.append(style);
 
     bpmnVisualization.bpmnElementsRegistry.addCssClasses(elementId, [classToAdd, `animate-${elementId}`]);
@@ -128,7 +128,7 @@ export function hideHappyPath(bpmnVisualization: BpmnVisualization) {
     'gateway-happy',
     'growing-happy',
     ...happyPath.map(elementId => {
-      const styleOfElement = document.getElementById(elementId);
+      const styleOfElement = document.querySelector(`#${elementId}`);
       styleOfElement?.parentNode?.removeChild(styleOfElement);
       return `animate-${elementId}`;
     }),
