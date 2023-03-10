@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "bpmn-visualization": "~0.32.0",
-    "spectre.css": "0.5.9"
+    "spectre.css": "0.5.9",
+    "tippy.js": "6.3.7"
   },
   "devDependencies": {
     "typescript": "~4.9.5",
