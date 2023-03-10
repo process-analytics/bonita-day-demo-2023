@@ -1,12 +1,18 @@
 import tippy, {type Instance, type ReferenceElement} from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+import {
+  type BpmnElement,
+  type BpmnSemantic,
+  type BpmnVisualization,
+  type EdgeBpmnSemantic,
+  type ShapeBpmnSemantic,
+} from 'bpmn-visualization';
 import {getElementIdByName} from './bpmn-elements.js';
 import {getActivityRecommendationData} from './recommendation-data.js';
-import 'tippy.js/dist/tippy.css';
-import {type BpmnElement, type BpmnVisualization, type EdgeBpmnSemantic, type ShapeBpmnSemantic} from 'bpmn-visualization/*';
 
 const tippyInstances = [];
 
-const registeredBpmnElements = new Map();
+const registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
 export function showMonitoringData(bpmnVisualization: BpmnVisualization) {
   // Get already executed shapes: activities, gateways, events, ...
@@ -25,7 +31,7 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization) {
   // Add the incomingIds of the running elements
   for (const activityId of runningActivities) {
     const activity = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(activityId)[0];
-    const incomingEdges = (<ShapeBpmnSemantic>activity.bpmnSemantic).incomingIds;
+    const incomingEdges = (activity.bpmnSemantic as ShapeBpmnSemantic).incomingIds;
     for (const edge of incomingEdges) {
       alreadyVisitedEdges.add(edge);
     }
@@ -58,8 +64,10 @@ function getAlreadyExecutedShapes() {
   return alreadyExecutedShapes;
 }
 
-function addNonNullElement(eltSet: Set<string>, elt: string | undefined) {
-  elt != null && eltSet.add(elt);
+function addNonNullElement(elements: Set<string>, elt: string | undefined) {
+  if (elt) {
+    elements.add(elt);
+  }
 }
 
 function getRunningActivities() {
@@ -82,12 +90,12 @@ function getConnectingEdgeIds(shapeSet: Set<string>, bpmnVisualization: BpmnVisu
   const edgeIds = new Set<string>();
   for (const shape of shapeSet) {
     const shapeElt = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(shape)[0];
-    const bpmnSemantic = <ShapeBpmnSemantic>shapeElt.bpmnSemantic;
+    const bpmnSemantic = shapeElt.bpmnSemantic as ShapeBpmnSemantic;
     const incomingEdges = bpmnSemantic.incomingIds;
     const outgoingEdges = bpmnSemantic.outgoingIds;
     for (const edgeId of incomingEdges) {
       const edgeElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
-      const sourceRef = (<EdgeBpmnSemantic>edgeElement.bpmnSemantic).sourceRefId;
+      const sourceRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).sourceRefId;
       if (shapeSet.has(sourceRef)) {
         edgeIds.add(edgeId);
       }
@@ -95,7 +103,7 @@ function getConnectingEdgeIds(shapeSet: Set<string>, bpmnVisualization: BpmnVisu
 
     for (const edgeId of outgoingEdges) {
       const edgeElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
-      const targetRef = (<EdgeBpmnSemantic>edgeElement.bpmnSemantic).targetRefId;
+      const targetRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).targetRefId;
       if (shapeSet.has(targetRef)) {
         edgeIds.add(edgeId);
       }
@@ -116,6 +124,7 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
     content: 'Loading...',
     arrow: true,
     interactive: true,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     allowHTML: true,
     trigger: 'mouseenter',
     onShown(instance: Instance): void {
@@ -158,7 +167,7 @@ function registerBpmnElement(bpmnElement: BpmnElement) {
 
 function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
   const bpmnSemantic = registeredBpmnElements.get(htmlElement);
-  const activityRecommendationData = getActivityRecommendationData(bpmnSemantic.name);
+  const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
   let popoverContent = `
         <div class="popover-container">
             <table>

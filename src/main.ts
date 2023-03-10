@@ -18,7 +18,7 @@ import {BpmnVisualization, FitType} from 'bpmn-visualization';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import collapsedDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
 import {loadBpmnDiagram} from './diagram.js';
-import {configureRadioButtons} from './radio-buttons';
+import {configureRadioButtons} from './radio-buttons.js';
 
 // 'bpmn-visualization' API documentation: https://process-analytics.github.io/bpmn-visualization-js/api/index.html
 const mainBpmnVisualization = new BpmnVisualization({

@@ -14,13 +14,13 @@ export function configureRadioButtons(bpmnVisualization: BpmnVisualization) {
 }
 
 class RadioButton {
-  private readonly hideCallback: () => void;
   private static checkedRadioButton: RadioButton | undefined = undefined;
+  private readonly hideCallback: () => void;
 
   constructor(id: string, showCallback: () => void, hideCallback: () => void) {
     this.hideCallback = hideCallback;
 
-    document.getElementById(id)?.addEventListener('click', () => {
+    document.querySelector(`#${id}`)?.addEventListener('click', () => {
       if (RadioButton.checkedRadioButton !== this) {
         RadioButton.checkedRadioButton?.hide();
         showCallback();
