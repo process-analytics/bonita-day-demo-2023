@@ -1,7 +1,7 @@
 import {BpmnVisualization, FitType} from 'bpmn-visualization';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import subDiagram from './diagrams/SRM-subprocess.bpmn?raw';
-import {removeSectionInBreadcrumb, addSectionInBreadcrumb} from './breadcrumb';
+import {removeSectionInBreadcrumb, addSectionInBreadcrumb} from './breadcrumb.js';
 
 let secondaryBpmnDiagramIsAlreadyLoad = false;
 let currentView = 'main';
@@ -14,21 +14,14 @@ export function loadBpmnDiagram(tabIndex: string): void {
     return;
   }
 
-  const mainBPMNContainerElt = document.querySelector('#main-bpmn-container')!;
-  const secondaryBPMNContainerElt = document.querySelector('#secondary-bpmn-container')!;
+  const mainBpmnContainerElt = document.querySelector('#main-bpmn-container')!;
+  const secondaryBpmnContainerElt = document.querySelector('#secondary-bpmn-container')!;
 
   switch (tabIndex) {
-    case 'main': {
-      removeSectionInBreadcrumb();
-      mainBPMNContainerElt.classList.remove('d-hide');
-      secondaryBPMNContainerElt.classList.add('d-hide');
-      break;
-    }
-
     case 'secondary': {
       addSectionInBreadcrumb();
-      mainBPMNContainerElt.classList.add('d-hide');
-      secondaryBPMNContainerElt.classList.remove('d-hide');
+      mainBpmnContainerElt.classList.add('d-hide');
+      secondaryBpmnContainerElt.classList.remove('d-hide');
 
       if (!secondaryBpmnDiagramIsAlreadyLoad) {
         // Load secondary diagram. Need to have the container displayed
@@ -36,6 +29,13 @@ export function loadBpmnDiagram(tabIndex: string): void {
         secondaryBpmnDiagramIsAlreadyLoad = true;
       }
 
+      break;
+    }
+
+    default: {
+      removeSectionInBreadcrumb();
+      mainBpmnContainerElt.classList.remove('d-hide');
+      secondaryBpmnContainerElt.classList.add('d-hide');
       break;
     }
   }
