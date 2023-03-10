@@ -14,47 +14,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+html {
+  font-family: sans-serif;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  color: #2c3e50;
-
-  display: flex;
-  place-items: center;
-  flex-direction: column;
+  background-color: #f9f9fa;
 }
 
-#bpmn-container {
-  height: 80vh;
-  width: 80vw;
+header {
+  background-color: #f1f3f5;
+}
+
+.btn {
+  /* Override class of Spectre CSS. To be declare after Spectre CSS to override it*/
+  overflow-wrap: break-word;
+  height: auto;
+  white-space: inherit;
+}
+
+.divider {
+  /* Override class of Spectre CSS. To be declare after Spectre CSS to override it*/
+  border-color: #d3d5d6;
+}
+
+/* ****************************************************************************************************************** */
+/* BPMN Container */
+/* ****************************************************************************************************************** */
+.bpmn-container {
+  /* use absolute values for height to ensure that the vertical diagram is not fully displayed when the page is opened. */
+  /* width is relative to the window size */
+  height: calc(100vh - 8rem);
+  border-radius: .3rem;
+  /* This ensures that the parts of the diagram outside of the container are not displayed. */
   overflow: hidden;
-  border-style: solid;
-  border-color: #b0b0b0;
-  border-width: .1rem;
-  border-radius: .2rem;
-
-  margin: auto;
-}
-
-footer {
-  margin-top: auto;
-  margin-bottom: 2rem;
-  font-style: italic;
-}
-
-/* Added dynamically with bpmn-visualization */
-.bpmn-highlight.bpmn-task  > rect {
-  fill: pink;
-  fill-opacity: 30%;
-  stroke: coral;
-}
-.bpmn-highlight.bpmn-task >rect:hover {
-  fill-opacity: 70%;
+  background-color: white;
 }
