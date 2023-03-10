@@ -78,10 +78,9 @@ function reduceVisibilityOfAlreadyExecutedElements(alreadyExecutedElements: Set<
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
-/* TODO: rename CSS class
-          change toggle to add */
+// TODO: rename CSS class
 function highlightRunningElements(runningActivities: Set<string>, bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.toggleCssClasses(Array.from(runningActivities), 'state-predicted-late');
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(runningActivities), 'state-predicted-late');
 }
 
 function getConnectingEdgeIds(shapeSet: Set<string>, bpmnVisualization: BpmnVisualization) {
