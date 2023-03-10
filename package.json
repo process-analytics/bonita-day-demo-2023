@@ -10,7 +10,7 @@
     "lint": "xo --fix",
     "preview": "vite preview --base ./",
     "test": "xo",
-    "ts": "tsc"
+    "tsc": "tsc"
   },
   "dependencies": {
     "bpmn-visualization": "~0.32.0",

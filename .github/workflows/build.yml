@@ -35,6 +35,6 @@ jobs:
       - name: Build
         uses: ./.github/actions/build
         with:
-          npm-script: 'ts'
+          npm-script: 'tsc'
       - name: Check
         run: npm test

@@ -1,16 +1,16 @@
 // Remove section of secondary diagram in Breadcrumb
 export function removeSectionInBreadcrumb(): void {
-  const breadcrumbElt = document.querySelectorAll('.breadcrumb').item(0);
-  if (breadcrumbElt) {
-    const secondaryDiagramElt = document.querySelector('#secondary-diagram');
-    if (secondaryDiagramElt) {
-      secondaryDiagramElt.remove();
-    }
-  }
+  const secondaryDiagramElt = document.querySelectorAll('.breadcrumb > #secondary-diagram').item(0);
+  secondaryDiagramElt?.remove();
 }
 
 // Add section of secondary diagram in Breadcrumb
 export function addSectionInBreadcrumb(): void {
+  const breadcrumbElt = document.querySelectorAll('.breadcrumb').item(0);
+  if (!breadcrumbElt) {
+    return;
+  }
+
   const aElt = document.createElement('a');
   aElt.setAttribute('href', '#');
   aElt.append(document.createTextNode('SRM subprocess'));
@@ -20,8 +20,5 @@ export function addSectionInBreadcrumb(): void {
   liElt.setAttribute('class', 'breadcrumb-item');
   liElt.append(aElt);
 
-  const breadcrumbElt = document.querySelectorAll('.breadcrumb').item(0);
-  if (breadcrumbElt) {
-    breadcrumbElt.append(liElt);
-  }
+  breadcrumbElt.append(liElt);
 }

@@ -1,9 +1,6 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {hideMonitoringData, showMonitoringData} from './case-monitoring.js';
 
-/**
- * @param {BpmnVisualization} bpmnVisualization
- */
 export function configureRadioButtons(bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO try to having calling constructor for side effects
