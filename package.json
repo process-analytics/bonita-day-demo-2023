@@ -1,0 +1,23 @@
+{
+  "name": "bpmn-visualization-demo-vitejs-template",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build-demo": "vite build --base ./",
+    "build-for-surge": "vite build",
+    "lint": "xo --fix",
+    "preview": "vite preview --base ./",
+    "test": "xo",
+    "ts": "tsc"
+  },
+  "dependencies": {
+    "bpmn-visualization": "~0.32.0"
+  },
+  "devDependencies": {
+    "typescript": "~4.9.5",
+    "vite": "~4.1.4",
+    "xo": "~0.53.1"
+  }
+}

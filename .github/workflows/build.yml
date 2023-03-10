@@ -1,0 +1,40 @@
+name: Build and Check
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '.github/actions/build/**/*'
+      - '.github/workflows/build.yml'
+      - 'src/**/*'
+      - '.nvmrc'
+      - '.xo-config.json'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/actions/build/**/*'
+      - '.github/workflows/build.yml'
+      - 'src/**/*'
+      - '.nvmrc'
+      - '.xo-config.json'
+      - 'index.html'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          npm-script: 'ts'
+      - name: Check
+        run: npm test
