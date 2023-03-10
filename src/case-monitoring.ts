@@ -1,6 +1,6 @@
 import {getElementIdByName} from "./bpmn-elements.js";
 import {getActivityRecommendationData} from "./recommendation-data.js";
-import tippy, { Props, ReferenceElement } from "tippy.js";
+import tippy, {type Instance, type Props, type ReferenceElement} from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import { BpmnElement, BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic } from "bpmn-visualization/*";
 
@@ -11,7 +11,7 @@ const registeredBpmnElements = new Map();
 export function showMonitoringData(bpmnVisualization: BpmnVisualization){
     //get already executed shapes: activities, gateways, events, ...
     const alreadyExecutedShapes = getAlreadyExecutedShapes();
-    
+
     /* TO DO
         refactor: set of pending shapes
         one call to getVisitedEdges
@@ -44,7 +44,8 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization){
 }
 
 export function hideMonitoringData(bpmnVisualization: BpmnVisualization){
-
+    // TODO implement hideMonitoringData
+    console.info('bpmn-visualization version', bpmnVisualization.getVersion().lib);
 }
 
 function getAlreadyExecutedShapes(){
@@ -100,7 +101,7 @@ function getConnectingEdgeIds(shapeSet: Set<string>, bpmnVisualization: BpmnVisu
             }
         });
     });
-    return edgeIds;   
+    return edgeIds;
 }
 
 function addPopover(activityId: string, bpmnVisualization: BpmnVisualization){
@@ -116,16 +117,17 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization){
         interactive: true,
         allowHTML: true,
         trigger: 'mouseenter',
-        onShown(instance) {
+        onShown: (instance: Instance<Props>): void => {
             instance.setContent(getRecommendationInfoAsHtml(instance.reference));
-        },
+        }
       });
 
     tippyInstances.push(tippyInstance);
 
+    // TODO make it work
     // get references to the buttons in the Tippy popover
-    const allocateResourceBtn = tippyInstance.popper.querySelector('#Allocate-Resource');
-    const contactClientBtn = tippyInstance.popper.querySelector('#Contact-Client');
+    // const allocateResourceBtn = tippyInstance.popper.querySelector('#Allocate-Resource');
+    // const contactClientBtn = tippyInstance.popper.querySelector('#Contact-Client');
 
     // add event listeners to the buttons
     /*allocateResourceBtn.addEventListener('click', function() {
@@ -166,7 +168,7 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement<Props>){
                 </thead>
                 <tbody>
     `;
-    
+
     for (let key in activityRecommendationData) {
         //replace space with hypen (-) to be passed as the button id
         const buttonId = key.replace(/\s+/g, '-');
@@ -180,7 +182,7 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement<Props>){
             </tr>
         `;
     }
-    
+
     popoverContent += `
                 </tbody>
             </table>
