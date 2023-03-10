@@ -18,7 +18,7 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization){
     */
 
     //get visited edges of alreadyExecutedElements
-    const alreadyVisistedEdges = getConnectingEdgeIds(alreadyExecutedShapes, bpmnVisualization);
+    const alreadyVisitedEdges = getConnectingEdgeIds(alreadyExecutedShapes, bpmnVisualization);
 
     //running elements
     const runningActivities = getRunningActivities();
@@ -27,11 +27,11 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization){
         const activity = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(activityId)[0];
         const incomingEdges = (<ShapeBpmnSemantic>activity.bpmnSemantic).incomingIds;
         for (let edge of incomingEdges) {
-            alreadyVisistedEdges.add(edge);
+            alreadyVisitedEdges.add(edge);
           }
     })
 
-    const alreadyExecutedElements = new Set<string>([...alreadyExecutedShapes, ...alreadyVisistedEdges]);
+    const alreadyExecutedElements = new Set<string>([...alreadyExecutedShapes, ...alreadyVisitedEdges]);
 
     reduceVisibilityOfAlreadyExecutedElements(alreadyExecutedElements, bpmnVisualization);
     highlightRunningElements(runningActivities, bpmnVisualization)
@@ -39,13 +39,14 @@ export function showMonitoringData(bpmnVisualization: BpmnVisualization){
         addPopover(activityId, bpmnVisualization);
         addOverlay(activityId, bpmnVisualization);
     })
-    //registerInteractions(bpmnVisualization);
 
+    // TODO what is it for?
+    //registerInteractions(bpmnVisualization);
 }
 
 export function hideMonitoringData(bpmnVisualization: BpmnVisualization){
     // TODO implement hideMonitoringData
-    console.info('bpmn-visualization version', bpmnVisualization.getVersion().lib);
+    console.info('hideMonitoringData (bpmn-visualization version %s)', bpmnVisualization.getVersion().lib);
 }
 
 function getAlreadyExecutedShapes(){

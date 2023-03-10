@@ -18,6 +18,7 @@ import {BpmnVisualization, FitType} from 'bpmn-visualization';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import collapsedDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
 import {loadBpmnDiagram} from './diagram.js';
+import {configureRadioButtons} from "./radio-buttons";
 
 // 'bpmn-visualization' API documentation: https://process-analytics.github.io/bpmn-visualization-js/api/index.html
 const mainBpmnVisualization = new BpmnVisualization({
@@ -40,3 +41,6 @@ document.querySelector('#breadcrumb-main-diagram')!.addEventListener('click', ()
 });
 
 mainBpmnVisualization.bpmnElementsRegistry.addCssClasses(subProcessId, 'c-hand');
+
+
+configureRadioButtons(mainBpmnVisualization)
