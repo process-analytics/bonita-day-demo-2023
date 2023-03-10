@@ -9,13 +9,13 @@ export function configureRadioButtons(bpmnVisualization: BpmnVisualization) {
   // TODO try to having calling constructor for side effects
 
   // eslint-disable-next-line no-new
-  new RadioButton('monitoring', () => {
+  new RadioButton('radio-case-monitoring', () => {
     showMonitoringData(bpmnVisualization);
   }, () => {
     hideMonitoringData(bpmnVisualization);
   });
   // eslint-disable-next-line no-new
-  new RadioButton('reset_all', () => {
+  new RadioButton('radio-reset-all', () => {
     // Do nothing on purpose
   }, () => () => {
     // Do nothing on purpose
