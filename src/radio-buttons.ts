@@ -1,5 +1,6 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {hideMonitoringData, showMonitoringData} from './case-monitoring.js';
+import {hideHappyPath, showHappyPath} from "./process-monitoring";
 
 /**
  * @param {BpmnVisualization} bpmnVisualization
@@ -7,6 +8,9 @@ import {hideMonitoringData, showMonitoringData} from './case-monitoring.js';
 export function configureRadioButtons(bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO try to having calling constructor for side effects
+
+  new RadioButton("radio-process-monitoring", () => showHappyPath(bpmnVisualization), () => hideHappyPath(bpmnVisualization));
+
 
   // eslint-disable-next-line no-new
   new RadioButton('radio-case-monitoring', () => {
