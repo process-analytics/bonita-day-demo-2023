@@ -22,6 +22,8 @@ The demo is accessible at http://localhost:5173/
 
 The code should be linted with [xo](https://github.com/xojs/xo). To have support in your favorite IDE, see the [how-to used in IDE](https://github.com/xojs/xo#editor-plugins) documentation. 
 
+To lint the code, run `npm run lint`.
+
 
 ## 📃 License
 
