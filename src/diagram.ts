@@ -3,7 +3,9 @@ import {BpmnVisualization, FitType, type LoadOptions} from 'bpmn-visualization';
 import subDiagram from './diagrams/SRM-subprocess.bpmn?raw';
 import {removeSectionInBreadcrumb, addSectionInBreadcrumb} from './breadcrumb.js';
 
-export const sharedLoadOptions: LoadOptions = {fit: {type: FitType.Center, margin: 20}};
+const sharedFitOptions = {type: FitType.Center, margin: 20};
+
+export const sharedLoadOptions: LoadOptions = {fit: sharedFitOptions};
 
 let secondaryBpmnDiagramIsAlreadyLoad = false;
 let currentView = 'main';
@@ -43,4 +45,67 @@ export function displayBpmnDiagram(tabIndex: string): void {
   }
 
   currentView = tabIndex;
+}
+
+const poolIdOfSubProcess = 'Participant_03ba50e';
+
+export class ProcessVisualizer {
+  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+
+  showManuallyTriggeredProcess = (): void => {
+    this.changePoolVisibility(false, true);
+  };
+
+  hideManuallyTriggeredProcess = (fitDiagram = false): void => {
+    this.changePoolVisibility(true, fitDiagram);
+  };
+
+  private changePoolVisibility(hide = false, fitDiagram = false) {
+    const model = this.bpmnVisualization.graph.getModel();
+
+    // If hide and not fit
+    // make it visible, then fit, then hide
+    if (hide && !fitDiagram) {
+      this.bpmnVisualization.graph.batchUpdate(() => {
+        for (const cell of [poolIdOfSubProcess].map(id => model.getCell(id))) {
+          model.setVisible(cell, true);
+        }
+      });
+      this.bpmnVisualization.navigation.fit(sharedFitOptions);
+    }
+
+    this.bpmnVisualization.graph.batchUpdate(() => {
+      for (const cell of [poolIdOfSubProcess].map(id => model.getCell(id))) {
+        model.setVisible(cell, !hide);
+      }
+    });
+
+    if (fitDiagram) {
+      this.bpmnVisualization.navigation.fit(sharedFitOptions);
+    }
+  }
+}
+
+const subProcessId = 'Activity_0ec8azh';
+
+const doSubProcessNavigation = () => {
+  displayBpmnDiagram('secondary');
+};
+
+export class SubProcessNavigator {
+  private readonly subProcessHtmlElement: HTMLElement;
+
+  constructor(private readonly bpmnVisualization: BpmnVisualization) {
+    this.subProcessHtmlElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement;
+  }
+
+  enable() {
+    this.subProcessHtmlElement.addEventListener('click', doSubProcessNavigation);
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(subProcessId, 'c-hand');
+  }
+
+  disable() {
+    this.subProcessHtmlElement.removeEventListener('click', doSubProcessNavigation);
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(subProcessId, 'c-hand');
+  }
 }

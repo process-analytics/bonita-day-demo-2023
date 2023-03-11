@@ -1,3 +1,11 @@
+import {displayBpmnDiagram} from './diagram.js';
+
+export const configureBreadcrumb = (): void => {
+  document.querySelector('#breadcrumb-main-diagram')!.addEventListener('click', () => {
+    displayBpmnDiagram('main');
+  });
+};
+
 // Remove section of secondary diagram in Breadcrumb
 export function removeSectionInBreadcrumb(): void {
   const secondaryDiagramElt = document.querySelectorAll('.breadcrumb > #secondary-diagram').item(0);
