@@ -1,5 +1,5 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
-import {hideMonitoringData, showMonitoringData} from './case-monitoring.js';
+import {hideCaseMonitoringData, showCaseMonitoringData} from './case-monitoring.js';
 import {hideHappyPath, showHappyPath} from './process-monitoring.js';
 
 /**
@@ -17,9 +17,9 @@ export function configureRadioButtons(bpmnVisualization: BpmnVisualization) {
   });
   // eslint-disable-next-line no-new
   new RadioButton('radio-case-monitoring', () => {
-    showMonitoringData(bpmnVisualization);
+    showCaseMonitoringData(bpmnVisualization);
   }, () => {
-    hideMonitoringData(bpmnVisualization);
+    hideCaseMonitoringData(bpmnVisualization);
   });
   // eslint-disable-next-line no-new
   new RadioButton('radio-reset-all', () => {
