@@ -110,7 +110,8 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
       if (currentView === 'main') {
         instance.setContent(getRecommendationInfoAsHtml(instance.reference));
       } else {
-        instance.setContent(getWarningInfoAsHtml(instance.reference));
+        instance.setContent(getWarningInfoAsHtml());
+        // instance.setContent(getWarningInfoAsHtml(instance.reference));
       }
     },
   } as Partial<Props>);
@@ -207,7 +208,8 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
   return popoverContent;
 }
 
-function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
+function getWarningInfoAsHtml() {
+// function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
   const popoverContent = `
         <div class="popover-container">
           <h4>Resource not available</h4>
@@ -273,11 +275,11 @@ function showResourceAllocationAction() {
       The listener is NOT WORKING
     */
     popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
-      console.log('hello there');
       const target = event.target as HTMLElement;
-      if (target.nodeName === 'TD') {
-        const selectedRow = target.parentElement as HTMLTableRowElement;
-      }
+      console.info('listener mouseover, target', target);
+      // if (target.nodeName === 'TD') {
+      //   const selectedRow = target.parentElement as HTMLTableRowElement;
+      // }
     });
   } else {
     console.log('instance not found');
