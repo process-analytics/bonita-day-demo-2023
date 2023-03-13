@@ -8,10 +8,10 @@ const sharedFitOptions = {type: FitType.Center, margin: 20};
 export const sharedLoadOptions: LoadOptions = {fit: sharedFitOptions};
 
 let secondaryBpmnDiagramIsAlreadyLoad = false;
-let currentView = 'main';
+export let currentView = 'main';
 
 // Secondary BPMN Container
-const secondaryBpmnVisualization = new BpmnVisualization({container: 'secondary-bpmn-container'});
+export const secondaryBpmnVisualization = new BpmnVisualization({container: 'secondary-bpmn-container'});
 
 export function displayBpmnDiagram(tabIndex: string): void {
   if (currentView === tabIndex) {
