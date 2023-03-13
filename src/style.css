@@ -205,7 +205,7 @@ header {
 .bpmn-type-activity.state-enabled> rect {
   fill: var(--color-state-enabled);
 }
-  
+
 /* parallel gateway icon */
 .bpmn-parallel-gateway.state-enabled > path:nth-child(2),
 /* message flow arrow */
@@ -232,6 +232,7 @@ header {
 
 /* ================================================================================================================== */
 /* RECOMMENDATION POPOVER */
+/* More generally case-monitoring */
 /* ================================================================================================================== */
 
 /*padding: 10px;
@@ -247,6 +248,11 @@ th.popover-title {
   font-weight: bold;
   font-size: 16px;
   padding: 10px;
+}
+
+tr.popover-row:hover {
+  background-color: lightgray;
+  color: black;
 }
 
 td.popover-key {
@@ -281,7 +287,3 @@ button {
 button:hover {
   background-color: #3e8e41;
 }
-
-/*.popover-row:nth-child(even) {*/
-/*  background-color: #f2f2f2;*/
-/*}*/

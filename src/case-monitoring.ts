@@ -139,28 +139,6 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
       }
     });
   }
-
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO use CSS classes to handle hover on table within the tippy instance
-  // Add mouseover and mouseout event listeners to the table rows
-  tippyInstance.popper.addEventListener('mouseover', (event: Event) => {
-    const target = event.target as HTMLElement;
-    if (target.nodeName === 'TD') {
-      const selectedRow = target.parentElement as HTMLTableRowElement;
-      selectedRow.style.backgroundColor = 'lightgray';
-      selectedRow.style.color = 'black';
-    }
-  });
-
-  tippyInstance.popper.addEventListener('mouseout', (event: Event) => {
-    const target = event.target as HTMLElement;
-    if (target.nodeName === 'TD') {
-      const selectedRow = target.parentElement as HTMLTableRowElement;
-      selectedRow.style.backgroundColor = '';
-      selectedRow.style.color = '';
-    }
-  });
-  // END of -- TO DO use CSS classes to handle hover on table within the tippy instance
 }
 
 function addOverlay(activityId: string, bpmnVisualization: BpmnVisualization) {
@@ -227,21 +205,21 @@ function getWarningInfoAsHtml() {
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr class="popover-row">
                 <td>Resource 1</td>
                 <td>Yes</td>
                 <td class="popover-action">
                     <button>Assign</button>
                 </td>
               </tr>
-              <tr>
+              <tr class="popover-row">
                 <td>Resource 2</td>
                 <td>Yes</td>
                 <td class="popover-action">
                     <button>Assign</button>
                 </td>
               </tr>
-              <tr>
+              <tr class="popover-row">
                 <td>Resource 3</td>
                 <td>Yes</td>
                 <td class="popover-action">
