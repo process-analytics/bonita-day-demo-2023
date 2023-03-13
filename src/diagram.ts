@@ -1,7 +1,9 @@
-import {BpmnVisualization, FitType} from 'bpmn-visualization';
+import {BpmnVisualization, FitType, type LoadOptions} from 'bpmn-visualization';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import subDiagram from './diagrams/SRM-subprocess.bpmn?raw';
 import {removeSectionInBreadcrumb, addSectionInBreadcrumb} from './breadcrumb.js';
+
+export const sharedLoadOptions: LoadOptions = {fit: {type: FitType.Center, margin: 20}};
 
 let secondaryBpmnDiagramIsAlreadyLoad = false;
 let currentView = 'main';
@@ -9,7 +11,7 @@ let currentView = 'main';
 // Secondary BPMN Container
 const secondaryBpmnVisualization = new BpmnVisualization({container: 'secondary-bpmn-container'});
 
-export function loadBpmnDiagram(tabIndex: string): void {
+export function displayBpmnDiagram(tabIndex: string): void {
   if (currentView === tabIndex) {
     return;
   }
@@ -25,7 +27,7 @@ export function loadBpmnDiagram(tabIndex: string): void {
 
       if (!secondaryBpmnDiagramIsAlreadyLoad) {
         // Load secondary diagram. Need to have the container displayed
-        secondaryBpmnVisualization.load(subDiagram, {fit: {type: FitType.Center, margin: 10}});
+        secondaryBpmnVisualization.load(subDiagram, sharedLoadOptions);
         secondaryBpmnDiagramIsAlreadyLoad = true;
       }
 

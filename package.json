@@ -5,12 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build-demo": "vite build --base ./",
-    "build-for-surge": "vite build",
+    "build": "vite build --base ./",
     "lint": "xo --fix",
     "preview": "vite preview --base ./",
     "test": "xo",
-    "ts": "tsc"
+    "tsc": "tsc"
   },
   "dependencies": {
     "bpmn-visualization": "~0.32.0",

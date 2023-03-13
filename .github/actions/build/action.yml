@@ -4,7 +4,7 @@ inputs:
   npm-script:
     description: 'The name of the npm script to run.'
     required: false
-    default: 'build-demo'
+    default: 'build'
 
 runs:
   using: 'composite'
@@ -13,10 +13,8 @@ runs:
       uses: actions/setup-node@v3
       with:
         node-version-file: '.nvmrc'
-        cache: "npm"
     - name: Install dependencies
-      shell: bash
-      run: npm ci
+      uses: bahmutov/npm-install@v1
     - name: Build
       shell: bash
       run: npm run ${{ inputs.npm-script }}

@@ -28,8 +28,6 @@ jobs:
       - name: Build
         uses: ./.github/actions/build
         if: github.event.action != 'closed'
-        with:
-          npm-script: 'build-for-surge'
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         if: github.event.action != 'closed'
