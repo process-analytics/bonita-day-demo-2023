@@ -6,7 +6,6 @@ import {removeSectionInBreadcrumb, addSectionInBreadcrumb} from './breadcrumb.js
 const sharedFitOptions = {type: FitType.Center, margin: 20};
 
 export const sharedLoadOptions: LoadOptions = {fit: sharedFitOptions};
-
 export let secondaryBpmnDiagramIsAlreadyLoad = false;
 export let currentView = 'main';
 

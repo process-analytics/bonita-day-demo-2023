@@ -22,17 +22,16 @@ export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) 
     showCaseMonitoringData('main', bpmnVisualization);
   }, () => {
     hideCaseMonitoringData('main', bpmnVisualization);
-    if(secondaryBpmnDiagramIsAlreadyLoad){
+    if (secondaryBpmnDiagramIsAlreadyLoad) {
       hideCaseMonitoringData('secondary', secondaryBpmnVisualization);
     }
-    
   });
 
   const initialUseCase = new UseCaseSelector('radio-reset-all', () => {
     processVisualizer.showManuallyTriggeredProcess();
     subProcessNavigator.enable();
   }, () => {
-    subProcessNavigator.disable(); 
+    subProcessNavigator.disable();
   });
   initialUseCase.select();
 }
