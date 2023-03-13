@@ -63,8 +63,8 @@ export class ProcessVisualizer {
   private changePoolVisibility(hide = false, fitDiagram = false) {
     const model = this.bpmnVisualization.graph.getModel();
 
-    // If hide and not fit
-    // make it visible, then fit, then hide
+    // To ensure that the rendering is not affected by previous "hide then fit"
+    // Fit the whole diagram again: make it visible, then fit, then hide
     if (hide && !fitDiagram) {
       this.bpmnVisualization.graph.batchUpdate(() => {
         for (const cell of [poolIdOfSubProcess].map(id => model.getCell(id))) {
