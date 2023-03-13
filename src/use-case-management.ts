@@ -19,7 +19,7 @@ export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) 
   // eslint-disable-next-line no-new
   new UseCaseSelector('radio-case-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess();
-    showCaseMonitoringData(bpmnVisualization);
+    showCaseMonitoringData('main', bpmnVisualization);
   }, () => {
     hideCaseMonitoringData(bpmnVisualization);
   });
