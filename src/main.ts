@@ -17,27 +17,14 @@ limitations under the License.
 import {BpmnVisualization} from 'bpmn-visualization';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import collapsedDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
-import {displayBpmnDiagram, sharedLoadOptions} from './diagram.js';
-import {configureRadioButtons} from './radio-buttons.js';
+import {configureBreadcrumb} from './breadcrumb.js';
+import {sharedLoadOptions} from './diagram.js';
+import {configureUseCaseSelectors} from './use-case-management.js';
 
-// 'bpmn-visualization' API documentation: https://process-analytics.github.io/bpmn-visualization-js/api/index.html
-const mainBpmnVisualization = new BpmnVisualization({
+const bpmnVisualization = new BpmnVisualization({
   container: 'main-bpmn-container',
 });
+bpmnVisualization.load(collapsedDiagram, sharedLoadOptions);
 
-// Load BPMN diagram
-mainBpmnVisualization.load(collapsedDiagram, sharedLoadOptions);
-
-// Interaction: open the sub-process
-const subProcessId = 'Activity_0ec8azh';
-mainBpmnVisualization.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement.addEventListener('click', () => {
-  displayBpmnDiagram('secondary');
-});
-mainBpmnVisualization.bpmnElementsRegistry.addCssClasses(subProcessId, 'c-hand');
-
-// Return to main diagram
-document.querySelector('#breadcrumb-main-diagram')!.addEventListener('click', () => {
-  displayBpmnDiagram('main');
-});
-
-configureRadioButtons(mainBpmnVisualization);
+configureBreadcrumb();
+configureUseCaseSelectors(bpmnVisualization);
