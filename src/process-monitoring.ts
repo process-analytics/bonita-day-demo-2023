@@ -69,13 +69,13 @@ function getHappyPathClasses(index: number, elementId: string) {
 
   let classToAdd;
   let styleInnerHtml;
-  if (isActivity(elementId)) {
+  if (isActivity(elementId, 'main')) {
     styleInnerHtml = `.animate-${elementId} > rect { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'pulse-happy';
-  } else if (isEvent(elementId)) {
+  } else if (isEvent(elementId, 'main')) {
     styleInnerHtml = `.animate-${elementId} > ellipse { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'pulse-happy';
-  } else if (isGateway(elementId)) {
+  } else if (isGateway(elementId, 'main')) {
     styleInnerHtml = `.animate-${elementId} > path { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'gateway-happy';
   } else {

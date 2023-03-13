@@ -1,23 +1,20 @@
 import tippy, {type Instance, type Props, type ReferenceElement} from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-import type {BpmnElement, BpmnSemantic, BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
-import {getElementIdByName} from './bpmn-elements.js';
+import type {BpmnElement, BpmnSemantic, BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
-import {CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
-import { currentView, displayBpmnDiagram, secondaryBpmnVisualization } from './diagram.js';
+import {type CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
+import {currentView, displayBpmnDiagram, secondaryBpmnVisualization} from './diagram.js';
 
 const tippyInstances: Instance[] = [];
 
 const registeredBpmnElements = new Map<Element, BpmnSemantic>();
-
-let alreadyExecutedElements = new Set<string>();
 
 let caseMonitoringData: CaseMonitoringData = {
   executedShapes: new Set<string>(),
   enabledShapes: new Set<string>(),
   pendingShapes: new Set<string>(),
   runningActivities: new Set<string>(),
-  visitedEdges: new Set<string>()
+  visitedEdges: new Set<string>(),
 };
 
 export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
@@ -32,7 +29,8 @@ export function showCaseMonitoringData(processId: string, bpmnVisualization: Bpm
   // registerInteractions(bpmnVisualization);
 }
 
-export function hideCaseMonitoringData(bpmnVisualization: BpmnVisualization) {
+export function hideCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
+  caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
   restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization);
   resetRunningElements(bpmnVisualization);
 }
@@ -52,7 +50,7 @@ function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisua
 function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
   const runningActivities = caseMonitoringData.runningActivities;
   bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(runningActivities), 'state-running-late');
-  if(currentView === 'main'){
+  if (currentView === 'main') {
     addInfoOnRunningElements(runningActivities, bpmnVisualization);
   }
 }
@@ -60,14 +58,14 @@ function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
 export function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
   const enabledActivities = caseMonitoringData.enabledShapes;
   bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(enabledActivities), 'state-enabled');
-  if(currentView === 'secondary'){
+  if (currentView === 'secondary') {
     addInfoOnEnabledElements(enabledActivities, bpmnVisualization);
   }
 }
 
 function resetRunningElements(bpmnVisualization: BpmnVisualization) {
   const runningActivities = Array.from(caseMonitoringData.runningActivities);
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(runningActivities, 'state-predicted-late');
+  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(runningActivities, 'state-running-late');
   for (const activityId of runningActivities) {
     bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
   }
@@ -80,14 +78,14 @@ function resetRunningElements(bpmnVisualization: BpmnVisualization) {
   tippyInstances.length = 0;
 }
 
-function addInfoOnRunningElements(runningActivities: Set<string>, bpmnVisualization: BpmnVisualization){
+function addInfoOnRunningElements(runningActivities: Set<string>, bpmnVisualization: BpmnVisualization) {
   for (const activityId of runningActivities) {
     addPopover(activityId, bpmnVisualization);
     addOverlay(activityId, bpmnVisualization);
   }
 }
 
-function addInfoOnEnabledElements(enabledActivities: Set<string>, bpmnVisualization: BpmnVisualization){
+function addInfoOnEnabledElements(enabledActivities: Set<string>, bpmnVisualization: BpmnVisualization) {
   for (const activityId of enabledActivities) {
     addPopover(activityId, bpmnVisualization);
     addOverlay(activityId, bpmnVisualization);
@@ -109,10 +107,9 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
     allowHTML: true,
     trigger: 'mouseenter',
     onShown(instance: Instance): void {
-      if(currentView === 'main'){
+      if (currentView === 'main') {
         instance.setContent(getRecommendationInfoAsHtml(instance.reference));
-      }
-      else{
+      } else {
         instance.setContent(getWarningInfoAsHtml(instance.reference));
       }
     },
@@ -123,22 +120,25 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO make it work
   // get references to the buttons in the Tippy popover
-  if(currentView == 'main'){
-    tippyInstance.popper.addEventListener("mouseover", (event: MouseEvent) => {
-      const allocateResourceBtn = (<HTMLElement>event.target).querySelector('#Allocate-Resource');
-      const contactClientBtn = (<HTMLElement>event.target).querySelector('#Contact-Client');
+  if (currentView === 'main') {
+    tippyInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      const allocateResourceBtn = target.querySelector('#Allocate-Resource');
+      const contactClientBtn = target.querySelector('#Contact-Client');
       if (allocateResourceBtn) {
         allocateResourceBtn.addEventListener('click', () => {
           showResourceAllocationAction();
         });
       }
+
       if (contactClientBtn) {
         contactClientBtn.addEventListener('click', () => {
           showContactClientAction();
-      });
-    }
+        });
+      }
     });
   }
+
   // Add mouseover and mouseout event listeners to the table rows
   tippyInstance.popper.addEventListener('mouseover', (event: Event) => {
     const target = event.target as HTMLElement;
@@ -148,7 +148,7 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
       selectedRow.style.color = 'black';
     }
   });
-    
+
   tippyInstance.popper.addEventListener('mouseout', (event: Event) => {
     const target = event.target as HTMLElement;
     if (target.nodeName === 'TD') {
@@ -208,7 +208,7 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
 }
 
 function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
-  let popoverContent = `
+  const popoverContent = `
         <div class="popover-container">
           <h4>Resource not available</h4>
           <p>The resource "pierre" is not available to execute this task.</p>
@@ -250,40 +250,41 @@ function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
   return popoverContent;
 }
 
-function showResourceAllocationAction(){
+function showResourceAllocationAction() {
   displayBpmnDiagram('secondary');
   showCaseMonitoringData('secondary', secondaryBpmnVisualization);
   /*
     TO FIX: currently the code assumes that there's only one enabled shape
   */
-  //TO COMPLETE: add interaction on the popover: on hover, highlight some activities
-  const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value;
+  // TO COMPLETE: add interaction on the popover: on hover, highlight some activities
+  const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
   const enabledShape = secondaryBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
-  const popoverInstance = tippyInstances.find((instance) => {
-      if(instance.reference === enabledShape.htmlElement){
-          return instance;
-      }
-      return null;
-  });  
-  
+  const popoverInstance = tippyInstances.find(instance => {
+    if (instance.reference === enabledShape.htmlElement) {
+      return instance;
+    }
+
+    return null;
+  });
+
   if (popoverInstance) {
-    // add additional actions to the existing mouseover event listener
+    // Add additional actions to the existing mouseover event listener
     /*
       The listener is NOT WORKING
     */
     popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
-      console.log("hello there")
+      console.log('hello there');
       const target = event.target as HTMLElement;
       if (target.nodeName === 'TD') {
         const selectedRow = target.parentElement as HTMLTableRowElement;
       }
     });
   } else {
-    console.log("instance not found");
+    console.log('instance not found');
   }
 }
 
-function showContactClientAction(){
-  //TO BE IMPLEMENTED
+function showContactClientAction() {
+  // TO BE IMPLEMENTED
 }
 

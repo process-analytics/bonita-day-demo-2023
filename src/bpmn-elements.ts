@@ -43,53 +43,51 @@ secondaryEvents.set('Event_1dnxra5', 'New SRM entry');
 secondaryEvents.set('Event_0bp3ymm', 'endEvent');
 
 export function isActivity(elementId: string, processId: string): boolean {
-  if(processId === "main"){
+  if (processId === 'main') {
     return mainActivities.has(elementId);
   }
-  else{
-    return secondaryActivities.has(elementId);
-  }
+
+  return secondaryActivities.has(elementId);
 }
 
 export function isGateway(elementId: string, processId: string): boolean {
-  if(processId === "main"){
+  if (processId === 'main') {
     return mainGateways.has(elementId);
   }
-  else{
-    return secondaryGateways.has(elementId);
-  }
+
+  return secondaryGateways.has(elementId);
 }
 
 export function isEvent(elementId: string, processId: string): boolean {
-  if(processId === "main"){
+  if (processId === 'main') {
     return mainEvents.has(elementId);
   }
-  else{
-    return secondaryEvents.has(elementId);
-  } 
+
+  return secondaryEvents.has(elementId);
 }
 
 export function getElementIdByName(elementName: string, processId: string): string | undefined {
   let activities = new Map<string, string>();
   let events = new Map<string, string>();
-  if(processId === "main"){
+  if (processId === 'main') {
     activities = mainActivities;
-    events= mainEvents;
-  }
-  else{
+    events = mainEvents;
+  } else {
     activities = secondaryActivities;
     events = secondaryEvents;
   }
 
   for (const [key, value] of activities.entries()) {
-      if (value === elementName) {
-        return key;
-      }
+    if (value === elementName) {
+      return key;
+    }
   }
+
   for (const [key, value] of events.entries()) {
     if (value === elementName) {
       return key;
     }
   }
+
   return undefined;
 }
