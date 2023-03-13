@@ -7,7 +7,7 @@ const sharedFitOptions = {type: FitType.Center, margin: 20};
 
 export const sharedLoadOptions: LoadOptions = {fit: sharedFitOptions};
 
-let secondaryBpmnDiagramIsAlreadyLoad = false;
+export let secondaryBpmnDiagramIsAlreadyLoad = false;
 export let currentView = 'main';
 
 // Secondary BPMN Container
