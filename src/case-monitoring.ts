@@ -111,7 +111,7 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
         instance.setContent(getRecommendationInfoAsHtml(instance.reference));
       } else {
         instance.setContent(getWarningInfoAsHtml());
-        // instance.setContent(getWarningInfoAsHtml(instance.reference));
+        // Instance.setContent(getWarningInfoAsHtml(instance.reference));
       }
     },
   } as Partial<Props>);
@@ -140,7 +140,7 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
     });
   }
 
-
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO use CSS classes to handle hover on table within the tippy instance
   // Add mouseover and mouseout event listeners to the table rows
   tippyInstance.popper.addEventListener('mouseover', (event: Event) => {
@@ -212,7 +212,7 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
 }
 
 function getWarningInfoAsHtml() {
-// function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
+// Function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
   return `
         <div class="popover-container">
           <h4>Resource not available</h4>
@@ -279,7 +279,7 @@ function showResourceAllocationAction() {
     popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       console.info('listener mouseover, target', target);
-      // if (target.nodeName === 'TD') {
+      // If (target.nodeName === 'TD') {
       //   const selectedRow = target.parentElement as HTMLTableRowElement;
       // }
     });
