@@ -140,6 +140,8 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
     });
   }
 
+
+  // TODO use CSS classes to handle hover on table within the tippy instance
   // Add mouseover and mouseout event listeners to the table rows
   tippyInstance.popper.addEventListener('mouseover', (event: Event) => {
     const target = event.target as HTMLElement;
@@ -158,6 +160,7 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
       selectedRow.style.color = '';
     }
   });
+  // END of -- TO DO use CSS classes to handle hover on table within the tippy instance
 }
 
 function addOverlay(activityId: string, bpmnVisualization: BpmnVisualization) {
@@ -187,7 +190,7 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
   const bpmnSemantic = registeredBpmnElements.get(htmlElement);
   const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
   for (const recommendation of activityRecommendationData) {
-    // Replace space with hypen (-) to be passed as the button id
+    // Replace space with hyphen (-) to be passed as the button id
     const buttonId = recommendation.title.replace(/\s+/g, '-');
     popoverContent += `
             <tr class="popover-row">
@@ -210,7 +213,7 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
 
 function getWarningInfoAsHtml() {
 // function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
-  const popoverContent = `
+  return `
         <div class="popover-container">
           <h4>Resource not available</h4>
           <p>The resource "pierre" is not available to execute this task.</p>
@@ -249,7 +252,6 @@ function getWarningInfoAsHtml() {
           </table>
         </div>
     `;
-  return popoverContent;
 }
 
 function showResourceAllocationAction() {
