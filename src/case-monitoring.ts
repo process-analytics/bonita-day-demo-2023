@@ -3,6 +3,8 @@ import 'tippy.js/dist/tippy.css';
 import type {BpmnElement, BpmnSemantic, BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
 import {getElementIdByName} from './bpmn-elements.js';
 import {getActivityRecommendationData} from './recommendation-data.js';
+import {CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
+import { currentView, displayBpmnDiagram, secondaryBpmnVisualization } from './diagram.js';
 
 const tippyInstances: Instance[] = [];
 
@@ -10,13 +12,20 @@ const registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
 let alreadyExecutedElements = new Set<string>();
 
-export function showCaseMonitoringData(bpmnVisualization: BpmnVisualization) {
-  const alreadyExecutedShapes = getAlreadyExecutedShapes();
-  const alreadyVisitedEdges = getConnectingEdgeIds(new Set<string>([...alreadyExecutedShapes, ...(getRunningActivities()), ...getPendingElements()]), bpmnVisualization);
-  alreadyExecutedElements = new Set<string>([...alreadyExecutedShapes, ...alreadyVisitedEdges]);
+let caseMonitoringData: CaseMonitoringData = {
+  executedShapes: new Set<string>(),
+  enabledShapes: new Set<string>(),
+  pendingShapes: new Set<string>(),
+  runningActivities: new Set<string>(),
+  visitedEdges: new Set<string>()
+};
+
+export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
+  caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
 
   reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization);
   highlightRunningElements(bpmnVisualization);
+  highlightEnabledElements(bpmnVisualization);
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO what is it for?
@@ -28,53 +37,36 @@ export function hideCaseMonitoringData(bpmnVisualization: BpmnVisualization) {
   resetRunningElements(bpmnVisualization);
 }
 
-// Already executed shapes: activities, gateways, events, ...
-function getAlreadyExecutedShapes() {
-  const alreadyExecutedShapes = new Set<string>();
-  addNonNullElement(alreadyExecutedShapes, getElementIdByName('New POI Needed')); // Start event
-  addNonNullElement(alreadyExecutedShapes, 'Gateway_0xh0plz'); // Parallel gateway after start event
-  addNonNullElement(alreadyExecutedShapes, getElementIdByName('Vendor Creates Invoice'));
-  addNonNullElement(alreadyExecutedShapes, getElementIdByName('Create Purchase Order Item'));
-  return alreadyExecutedShapes;
-}
-
-function addNonNullElement(elements: Set<string>, elt: string | undefined) {
-  if (elt) {
-    elements.add(elt);
-  }
-}
-
-function getRunningActivities() {
-  const runningActivities = new Set<string>();
-  addNonNullElement(runningActivities, getElementIdByName('SRM subprocess'));
-  return runningActivities;
-}
-
-function getPendingElements() {
-  return new Set<string>(['Gateway_0domayw']);
-}
-
 function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(alreadyExecutedElements), 'state-already-executed');
+  const executedElements = new Set<string>([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges]);
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(executedElements), 'state-already-executed');
 }
 
 function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(Array.from(alreadyExecutedElements), 'state-already-executed');
+  const executedElements = new Set<string>([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges]);
+  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(Array.from(executedElements), 'state-already-executed');
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO: rename CSS class
 function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
-  const runningActivities = getRunningActivities();
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(runningActivities), 'state-predicted-late');
-  for (const activityId of runningActivities) {
-    addPopover(activityId, bpmnVisualization);
-    addOverlay(activityId, bpmnVisualization);
+  const runningActivities = caseMonitoringData.runningActivities;
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(runningActivities), 'state-running-late');
+  if(currentView === 'main'){
+    addInfoOnRunningElements(runningActivities, bpmnVisualization);
+  }
+}
+
+export function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
+  const enabledActivities = caseMonitoringData.enabledShapes;
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(enabledActivities), 'state-enabled');
+  if(currentView === 'secondary'){
+    addInfoOnEnabledElements(enabledActivities, bpmnVisualization);
   }
 }
 
 function resetRunningElements(bpmnVisualization: BpmnVisualization) {
-  const runningActivities = Array.from(getRunningActivities());
+  const runningActivities = Array.from(caseMonitoringData.runningActivities);
   bpmnVisualization.bpmnElementsRegistry.removeCssClasses(runningActivities, 'state-predicted-late');
   for (const activityId of runningActivities) {
     bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
@@ -88,31 +80,18 @@ function resetRunningElements(bpmnVisualization: BpmnVisualization) {
   tippyInstances.length = 0;
 }
 
-function getConnectingEdgeIds(shapeIds: Set<string>, bpmnVisualization: BpmnVisualization) {
-  const edgeIds = new Set<string>();
-  for (const shape of shapeIds) {
-    const shapeElt = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(shape)[0];
-    const bpmnSemantic = shapeElt.bpmnSemantic as ShapeBpmnSemantic;
-    const incomingEdges = bpmnSemantic.incomingIds;
-    const outgoingEdges = bpmnSemantic.outgoingIds;
-    for (const edgeId of incomingEdges) {
-      const edgeElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
-      const sourceRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).sourceRefId;
-      if (shapeIds.has(sourceRef)) {
-        edgeIds.add(edgeId);
-      }
-    }
-
-    for (const edgeId of outgoingEdges) {
-      const edgeElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
-      const targetRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).targetRefId;
-      if (shapeIds.has(targetRef)) {
-        edgeIds.add(edgeId);
-      }
-    }
+function addInfoOnRunningElements(runningActivities: Set<string>, bpmnVisualization: BpmnVisualization){
+  for (const activityId of runningActivities) {
+    addPopover(activityId, bpmnVisualization);
+    addOverlay(activityId, bpmnVisualization);
   }
+}
 
-  return edgeIds;
+function addInfoOnEnabledElements(enabledActivities: Set<string>, bpmnVisualization: BpmnVisualization){
+  for (const activityId of enabledActivities) {
+    addPopover(activityId, bpmnVisualization);
+    addOverlay(activityId, bpmnVisualization);
+  }
 }
 
 function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
@@ -130,7 +109,12 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
     allowHTML: true,
     trigger: 'mouseenter',
     onShown(instance: Instance): void {
-      instance.setContent(getRecommendationInfoAsHtml(instance.reference));
+      if(currentView === 'main'){
+        instance.setContent(getRecommendationInfoAsHtml(instance.reference));
+      }
+      else{
+        instance.setContent(getWarningInfoAsHtml(instance.reference));
+      }
     },
   } as Partial<Props>);
 
@@ -139,27 +123,50 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO make it work
   // get references to the buttons in the Tippy popover
-  // const allocateResourceBtn = tippyInstance.popper.querySelector('#Allocate-Resource');
-  // const contactClientBtn = tippyInstance.popper.querySelector('#Contact-Client');
-
-  // add event listeners to the buttons
-  /* allocateResourceBtn.addEventListener('click', function() {
-        //showhMonitoringDataSubProcess();
+  if(currentView == 'main'){
+    tippyInstance.popper.addEventListener("mouseover", (event: MouseEvent) => {
+      const allocateResourceBtn = (<HTMLElement>event.target).querySelector('#Allocate-Resource');
+      const contactClientBtn = (<HTMLElement>event.target).querySelector('#Contact-Client');
+      if (allocateResourceBtn) {
+        allocateResourceBtn.addEventListener('click', () => {
+          showResourceAllocationAction();
+        });
+      }
+      if (contactClientBtn) {
+        contactClientBtn.addEventListener('click', () => {
+          showContactClientAction();
+      });
+    }
     });
-
-    contactClientBtn.addEventListener('click', function() {
-        //complete
-    }); */
+  }
+  // Add mouseover and mouseout event listeners to the table rows
+  tippyInstance.popper.addEventListener('mouseover', (event: Event) => {
+    const target = event.target as HTMLElement;
+    if (target.nodeName === 'TD') {
+      const selectedRow = target.parentElement as HTMLTableRowElement;
+      selectedRow.style.backgroundColor = 'lightgray';
+      selectedRow.style.color = 'black';
+    }
+  });
+    
+  tippyInstance.popper.addEventListener('mouseout', (event: Event) => {
+    const target = event.target as HTMLElement;
+    if (target.nodeName === 'TD') {
+      const selectedRow = target.parentElement as HTMLTableRowElement;
+      selectedRow.style.backgroundColor = '';
+      selectedRow.style.color = '';
+    }
+  });
 }
 
 function addOverlay(activityId: string, bpmnVisualization: BpmnVisualization) {
   bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
-    position: 'top-center',
-    label: ' ℹ️ ',
+    position: 'top-right',
+    label: '?',
     style: {
       font: {color: '#fff', size: 16},
-      fill: {color: 'rgba(0, 0, 0, 0.5)'},
-      stroke: {color: 'rgba(0, 0, 0, 0.5)', width: 2},
+      fill: {color: '#4169E1'},
+      stroke: {color: '#4169E1', width: 2},
     },
   });
 }
@@ -171,14 +178,10 @@ function registerBpmnElement(bpmnElement: BpmnElement) {
 function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
   let popoverContent = `
         <div class="popover-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th colspan="3" class="popover-title">Recommendation</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
+        <h4>Task running late</h4>
+        <p>Here are some suggestions:</p>
+        <table>
+          <tbody>`;
 
   const bpmnSemantic = registeredBpmnElements.get(htmlElement);
   const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
@@ -203,3 +206,84 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
     `;
   return popoverContent;
 }
+
+function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
+  let popoverContent = `
+        <div class="popover-container">
+          <h4>Resource not available</h4>
+          <p>The resource "pierre" is not available to execute this task.</p>
+          <p>Here are some other suggestions:</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Resource Name</th>
+                <th>Availability</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Resource 1</td>
+                <td>Yes</td>
+                <td class="popover-action">
+                    <button>Assign</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Resource 2</td>
+                <td>Yes</td>
+                <td class="popover-action">
+                    <button>Assign</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Resource 3</td>
+                <td>Yes</td>
+                <td class="popover-action">
+                    <button>Assign</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    `;
+  return popoverContent;
+}
+
+function showResourceAllocationAction(){
+  displayBpmnDiagram('secondary');
+  showCaseMonitoringData('secondary', secondaryBpmnVisualization);
+  /*
+    TO FIX: currently the code assumes that there's only one enabled shape
+  */
+  //TO COMPLETE: add interaction on the popover: on hover, highlight some activities
+  const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value;
+  const enabledShape = secondaryBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
+  const popoverInstance = tippyInstances.find((instance) => {
+      if(instance.reference === enabledShape.htmlElement){
+          return instance;
+      }
+      return null;
+  });  
+  
+  if (popoverInstance) {
+    // add additional actions to the existing mouseover event listener
+    /*
+      The listener is NOT WORKING
+    */
+    popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
+      console.log("hello there")
+      const target = event.target as HTMLElement;
+      if (target.nodeName === 'TD') {
+        const selectedRow = target.parentElement as HTMLTableRowElement;
+      }
+    });
+  } else {
+    console.log("instance not found");
+  }
+}
+
+function showContactClientAction(){
+  //TO BE IMPLEMENTED
+}
+
