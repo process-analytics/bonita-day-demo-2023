@@ -1,5 +1,6 @@
-import {type BpmnVisualization, type EdgeBpmnSemantic, type ShapeBpmnSemantic} from 'bpmn-visualization';
+import {type BpmnVisualization} from 'bpmn-visualization';
 import {getElementIdByName} from './bpmn-elements.js';
+import {PathResolver} from './utils/paths.js';
 
 export type CaseMonitoringData = {
   executedShapes: string[];
@@ -15,7 +16,7 @@ export function getCaseMonitoringData(processId: string, bpmnVisualization: Bpmn
   const enabledShapes = getEnabledShapes(processId, caseId);
   const pendingShapes = getPendingShapes(processId, caseId);
 
-  const visitedEdges = Array.from(getVisitedEdges(new Set<string>([...executedShapes, ...runningActivities, ...enabledShapes, ...pendingShapes]), bpmnVisualization));
+  const visitedEdges = new PathResolver(bpmnVisualization).getVisitedEdges([...executedShapes, ...runningActivities, ...enabledShapes, ...pendingShapes]);
   return {
     executedShapes,
     runningActivities,
@@ -84,33 +85,6 @@ function getPendingShapes(processId: string, caseId: string) {
   }
 
   return pendingShapes;
-}
-
-function getVisitedEdges(shapeIds: Set<string>, bpmnVisualization: BpmnVisualization) {
-  const edgeIds = new Set<string>();
-  for (const shape of shapeIds) {
-    const shapeElt = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(shape)[0];
-    const bpmnSemantic = shapeElt.bpmnSemantic as ShapeBpmnSemantic;
-    const incomingEdges = bpmnSemantic.incomingIds;
-    const outgoingEdges = bpmnSemantic.outgoingIds;
-    for (const edgeId of incomingEdges) {
-      const edgeElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
-      const sourceRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).sourceRefId;
-      if (shapeIds.has(sourceRef)) {
-        edgeIds.add(edgeId);
-      }
-    }
-
-    for (const edgeId of outgoingEdges) {
-      const edgeElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
-      const targetRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).targetRefId;
-      if (shapeIds.has(targetRef)) {
-        edgeIds.add(edgeId);
-      }
-    }
-  }
-
-  return edgeIds;
 }
 
 function addNonNullElement(elements: string[], elt: string | undefined) {
