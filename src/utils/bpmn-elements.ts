@@ -35,7 +35,7 @@ export class BpmnElementsSearcher {
     for (const kind of kinds) {
       console.info('lookup kind', kind);
       const elements = this.bpmnVisualization.bpmnElementsRegistry.getElementsByKinds(kind);
-      if (elements.length > 0 && elements[0].bpmnSemantic.name === 'name') {
+      if (elements.length > 0 && elements[0].bpmnSemantic.name === name ) {
         return elements[0].bpmnSemantic;
       }
     }
