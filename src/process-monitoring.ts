@@ -1,7 +1,7 @@
 // Initially taken from https://github.com/process-analytics/icpm-demo-2022/blob/v1.0.0/src/happy-path.js
 
 import {type BpmnVisualization} from 'bpmn-visualization';
-import {isActivity, isEvent, isGateway} from './bpmn-elements.js';
+import {BpmnElementsIdentifier} from './utils/bpmn-elements.js';
 
 /* Start event --> SRM subprocess
   --> vendor creates order item --> create purchase order item
@@ -64,18 +64,20 @@ const animationDurationOfEdgeArrow = 0.3 * speedFactor;
 const animationDelay = animationDuration / 2;
 const animationDurationOfEdgeLine = animationDuration - animationDurationOfEdgeArrow;
 
-function getHappyPathClasses(index: number, elementId: string) {
+function getHappyPathClasses(bpmnVisualization: BpmnVisualization, index: number, elementId: string) {
+  const bpmnElementsIdentifier = new BpmnElementsIdentifier(bpmnVisualization);
+
   const delay = index * animationDelay;
 
   let classToAdd;
   let styleInnerHtml;
-  if (isActivity(elementId)) {
+  if (bpmnElementsIdentifier.isActivity(elementId)) {
     styleInnerHtml = `.animate-${elementId} > rect { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'pulse-happy';
-  } else if (isEvent(elementId)) {
+  } else if (bpmnElementsIdentifier.isEvent(elementId)) {
     styleInnerHtml = `.animate-${elementId} > ellipse { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'pulse-happy';
-  } else if (isGateway(elementId)) {
+  } else if (bpmnElementsIdentifier.isGateway(elementId)) {
     styleInnerHtml = `.animate-${elementId} > path { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
     classToAdd = 'gateway-happy';
   } else {
@@ -95,7 +97,7 @@ export function showHappyPath(bpmnVisualization: BpmnVisualization) {
   /* Iterate over the elements in the happyPath
    apply css and add a delay so that we see the css applied in a sequential manner */
   for (const [index, elementId] of happyPath.entries()) {
-    const {classToAdd, styleInnerHtml} = getHappyPathClasses(index, elementId);
+    const {classToAdd, styleInnerHtml} = getHappyPathClasses(bpmnVisualization, index, elementId);
 
     const style = document.createElement('style');
     style.id = elementId;
