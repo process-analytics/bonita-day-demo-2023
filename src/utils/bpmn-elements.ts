@@ -39,6 +39,8 @@ export class BpmnElementsSearcher {
         return elements[0].bpmnSemantic;
       }
     }
+
+    return undefined;
   }
 }
 
