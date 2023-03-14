@@ -1,7 +1,7 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {hideCaseMonitoringData, showCaseMonitoringData} from './case-monitoring.js';
 import {hideHappyPath, showHappyPath} from './process-monitoring.js';
-import {ProcessVisualizer, SubProcessNavigator} from './diagram.js';
+import {ProcessVisualizer, secondaryBpmnDiagramIsAlreadyLoad, secondaryBpmnVisualization, SubProcessNavigator} from './diagram.js';
 
 export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
@@ -19,9 +19,12 @@ export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) 
   // eslint-disable-next-line no-new
   new UseCaseSelector('radio-case-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess();
-    showCaseMonitoringData(bpmnVisualization);
+    showCaseMonitoringData('main', bpmnVisualization);
   }, () => {
-    hideCaseMonitoringData(bpmnVisualization);
+    hideCaseMonitoringData('main', bpmnVisualization);
+    if (secondaryBpmnDiagramIsAlreadyLoad) {
+      hideCaseMonitoringData('secondary', secondaryBpmnVisualization);
+    }
   });
 
   const initialUseCase = new UseCaseSelector('radio-reset-all', () => {

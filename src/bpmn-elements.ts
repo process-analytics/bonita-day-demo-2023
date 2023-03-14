@@ -33,19 +33,3 @@ export function isGateway(elementId: string): boolean {
 export function isEvent(elementId: string): boolean {
   return events.has(elementId);
 }
-
-export function getElementIdByName(elementName: string): string | undefined {
-  for (const [key, value] of activities.entries()) {
-    if (value === elementName) {
-      return key;
-    }
-  }
-
-  for (const [key, value] of events.entries()) {
-    if (value === elementName) {
-      return key;
-    }
-  }
-
-  return undefined;
-}
