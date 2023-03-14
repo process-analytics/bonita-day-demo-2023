@@ -10,6 +10,40 @@ export type CaseMonitoringData = {
   visitedEdges: string[];
 };
 
+/**
+ * Simulate fetching data from an execution system.
+ */
+abstract class AbstractCaseMonitoringDataProvider {
+  private readonly pathResolver: PathResolver;
+  protected constructor(protected readonly bpmnVisualization: BpmnVisualization) {
+    this.pathResolver = new PathResolver(bpmnVisualization);
+  }
+
+  fetch(): CaseMonitoringData {
+    const executedShapes = this.getExecutedShapes();
+    const runningActivities = this.getRunningActivities();
+    const enabledShapes = this.getEnabledShapes();
+    const pendingShapes = this.getPendingShapes();
+
+    const visitedEdges = this.pathResolver.getVisitedEdges([...executedShapes, ...runningActivities, ...enabledShapes, ...pendingShapes]);
+    return {
+      executedShapes,
+      runningActivities,
+      enabledShapes,
+      pendingShapes,
+      visitedEdges,
+    };
+  }
+
+  protected abstract getExecutedShapes(): string[];
+
+  protected abstract getRunningActivities(): string[];
+
+  protected abstract getEnabledShapes(): string[];
+
+  protected abstract getPendingShapes(): string[];
+}
+
 export function getCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization, caseId = '1'): CaseMonitoringData {
   const executedShapes = getExecutedShapes(processId, caseId);
   const runningActivities = getRunningActivities(processId, caseId);
