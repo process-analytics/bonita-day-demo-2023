@@ -21,15 +21,17 @@ abstract class AbstractCaseMonitoring {
     caseMonitoringData = this.caseMonitoringData;
   }
 
-  // LoadData(processId: string): void {
-  //   this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
-  // }
-
   showData(): void {
     this.reduceVisibilityOfAlreadyExecutedElements();
     this.highlightRunningElements();
     this.highlightEnabledElements();
   }
+
+  hideData(): void {
+    this.restoreVisibilityOfAlreadyExecutedElements();
+    this.resetRunningElements();
+  }
+
 
   protected highlightRunningElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.runningActivities, 'state-running-late');
@@ -41,6 +43,28 @@ abstract class AbstractCaseMonitoring {
 
   private reduceVisibilityOfAlreadyExecutedElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
+  }
+
+  private restoreVisibilityOfAlreadyExecutedElements() {
+    // eslint-disable-next-line no-warning-comments -- question to answer by Nour
+    // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.pendingShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
+  }
+
+  private resetRunningElements() {
+    const elements = this.caseMonitoringData.runningActivities;
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
+    for (const elementId of elements) {
+      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(elementId);
+    }
+
+    // TODO tippy instances should be managed in a dedicated class
+    // Unregister tippy instances
+    for (const instance of tippyInstances) {
+      instance.destroy();
+    }
+
+    tippyInstances.length = 0;
   }
 }
 
@@ -80,21 +104,27 @@ export function showCaseMonitoringData(processId: string, bpmnVisualization: Bpm
   // registerInteractions(bpmnVisualization);
 }
 
+
 export function hideCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
-  caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
-  restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization);
-  resetRunningElements(bpmnVisualization);
+  // TODO should not instantiated again here
+  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SecondaryProcessCaseMonitoring(bpmnVisualization, processId);
+  caseMonitoring.hideData();
+
+
+  // caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
+  // restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization);
+  // resetRunningElements(bpmnVisualization);
 }
 
 // function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
 //   bpmnVisualization.bpmnElementsRegistry.addCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
 // }
 
-function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  // eslint-disable-next-line no-warning-comments -- question to answer by Nour
-  // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
-}
+// function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
+//   // eslint-disable-next-line no-warning-comments -- question to answer by Nour
+//   // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
+//   bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
+// }
 
 // function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
 //   const elements = caseMonitoringData.runningActivities;
@@ -112,21 +142,22 @@ function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisua
 //   }
 // }
 
-function resetRunningElements(bpmnVisualization: BpmnVisualization) {
-  const elements = caseMonitoringData.runningActivities;
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
-  for (const activityId of elements) {
-    bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
-  }
+// function resetRunningElements(bpmnVisualization: BpmnVisualization) {
+//   const elements = caseMonitoringData.runningActivities;
+//   bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
+//   for (const activityId of elements) {
+//     bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
+//   }
+//
+//   // Unregister tippy instances
+//   for (const instance of tippyInstances) {
+//     instance.destroy();
+//   }
+//
+//   tippyInstances.length = 0;
+// }
 
-  // Unregister tippy instances
-  for (const instance of tippyInstances) {
-    instance.destroy();
-  }
-
-  tippyInstances.length = 0;
-}
-
+// TODO only used by the main case monitoring
 function addInfoOnRunningElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
   for (const bpmnElementId of bpmnElementIds) {
     addPopover(bpmnElementId, bpmnVisualization);
@@ -134,6 +165,7 @@ function addInfoOnRunningElements(bpmnElementIds: string[], bpmnVisualization: B
   }
 }
 
+// TODO only used by the subprocess case monitoring
 function addInfoOnEnabledElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
   for (const bpmnElementId of bpmnElementIds) {
     addPopover(bpmnElementId, bpmnVisualization);
@@ -141,6 +173,7 @@ function addInfoOnEnabledElements(bpmnElementIds: string[], bpmnVisualization: B
   }
 }
 
+// TODO used by both, should be split
 function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
   const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
   registerBpmnElement(bpmnElement);
@@ -188,6 +221,7 @@ function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization)
   tippyInstances.push(tippyInstance);
 }
 
+// TODO only used by main process
 function addOverlay(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
   bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
     position: 'top-right',
@@ -200,10 +234,12 @@ function addOverlay(bpmnElementId: string, bpmnVisualization: BpmnVisualization)
   });
 }
 
+// TODO use by tippy
 function registerBpmnElement(bpmnElement: BpmnElement) {
   registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
 }
 
+// TODO used by main
 function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
   let popoverContent = `
         <div class="popover-container">
@@ -236,6 +272,7 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
   return popoverContent;
 }
 
+// TODO used by subprocess
 function getWarningInfoAsHtml() {
 // Function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
   return `
@@ -279,6 +316,8 @@ function getWarningInfoAsHtml() {
     `;
 }
 
+
+// TODO trigger by main, but the logic should be only for subprocess
 function showResourceAllocationAction() {
   displayBpmnDiagram('secondary');
   showCaseMonitoringData('secondary', secondaryBpmnVisualization);
@@ -313,6 +352,7 @@ function showResourceAllocationAction() {
   }
 }
 
+// TODO trigger by main process
 function showContactClientAction() {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO implement
