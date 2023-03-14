@@ -47,6 +47,18 @@ abstract class AbstractCaseMonitoring {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.enabledShapes, 'state-enabled');
   }
 
+  protected addOverlay(bpmnElementId: string) {
+    this.bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
+      position: 'top-right',
+      label: '?',
+      style: {
+        font: {color: '#fff', size: 16},
+        fill: {color: '#4169E1'},
+        stroke: {color: '#4169E1', width: 2},
+      },
+    });
+  }
+
   private reduceVisibilityOfAlreadyExecutedElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
   }
@@ -77,8 +89,14 @@ abstract class AbstractCaseMonitoring {
 class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   protected highlightRunningElements(): void {
     super.highlightRunningElements();
-    // TODO integrate the called function here?
-    addInfoOnRunningElements(this.caseMonitoringData.runningActivities, this.bpmnVisualization);
+    this.addInfoOnRunningElements(this.caseMonitoringData.runningActivities);
+  }
+
+  private addInfoOnRunningElements(bpmnElementIds: string[]) {
+    for (const bpmnElementId of bpmnElementIds) {
+      addPopover(bpmnElementId, this.bpmnVisualization);
+      this.addOverlay(bpmnElementId);
+    }
   }
 }
 
@@ -88,8 +106,14 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
 class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
   protected highlightEnabledElements(): void {
     super.highlightEnabledElements();
-    // TODO integrate the called function here?
-    addInfoOnEnabledElements(this.caseMonitoringData.enabledShapes, this.bpmnVisualization);
+    this.addInfoOnEnabledElements(this.caseMonitoringData.enabledShapes);
+  }
+
+  private addInfoOnEnabledElements(bpmnElementIds: string[]) {
+    for (const bpmnElementId of bpmnElementIds) {
+      addPopover(bpmnElementId, this.bpmnVisualization);
+      this.addOverlay(bpmnElementId);
+    }
   }
 }
 
@@ -163,21 +187,21 @@ export function hideCaseMonitoringData(processId: string, bpmnVisualization: Bpm
 //   tippyInstances.length = 0;
 // }
 
-// TODO only used by the main case monitoring
-function addInfoOnRunningElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
-  for (const bpmnElementId of bpmnElementIds) {
-    addPopover(bpmnElementId, bpmnVisualization);
-    addOverlay(bpmnElementId, bpmnVisualization);
-  }
-}
+// only used by the main case monitoring
+// function addInfoOnRunningElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
+//   for (const bpmnElementId of bpmnElementIds) {
+//     addPopover(bpmnElementId, bpmnVisualization);
+//     addOverlay(bpmnElementId, bpmnVisualization);
+//   }
+// }
 
-// TODO only used by the subprocess case monitoring
-function addInfoOnEnabledElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
-  for (const bpmnElementId of bpmnElementIds) {
-    addPopover(bpmnElementId, bpmnVisualization);
-    addOverlay(bpmnElementId, bpmnVisualization);
-  }
-}
+// only used by the subprocess case monitoring
+// function addInfoOnEnabledElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
+//   for (const bpmnElementId of bpmnElementIds) {
+//     addPopover(bpmnElementId, bpmnVisualization);
+//     addOverlay(bpmnElementId, bpmnVisualization);
+//   }
+// }
 
 // TODO used by both, should be split
 function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
@@ -227,18 +251,18 @@ function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization)
   tippyInstances.push(tippyInstance);
 }
 
-// TODO only used by main process
-function addOverlay(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
-    position: 'top-right',
-    label: '?',
-    style: {
-      font: {color: '#fff', size: 16},
-      fill: {color: '#4169E1'},
-      stroke: {color: '#4169E1', width: 2},
-    },
-  });
-}
+// used by main process and subprocess
+// function addOverlay(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
+//   bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
+//     position: 'top-right',
+//     label: '?',
+//     style: {
+//       font: {color: '#fff', size: 16},
+//       fill: {color: '#4169E1'},
+//       stroke: {color: '#4169E1', width: 2},
+//     },
+//   });
+// }
 
 // TODO use by tippy
 function registerBpmnElement(bpmnElement: BpmnElement) {
