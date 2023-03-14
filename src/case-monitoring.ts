@@ -103,36 +103,32 @@ function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization)
     onShown(instance: Instance): void {
       if (currentView === 'main') {
         instance.setContent(getRecommendationInfoAsHtml(instance.reference));
+        // eslint-disable-next-line no-warning-comments -- cannot be managed now
+        // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+        const contactClientBtn = document.querySelector('#Contact-Client');
+        console.info('tippy on show: contactClientBtn', contactClientBtn);
+        if (contactClientBtn) {
+          console.info('tippy on show: registering event listener on click');
+          contactClientBtn.addEventListener('click', () => {
+            showContactClientAction();
+          });
+        }
+
+        const allocateResourceBtn = document.querySelector('#Allocate-Resource');
+        console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
+        if (allocateResourceBtn) {
+          console.info('tippy on show: registering event listener on click');
+          allocateResourceBtn.addEventListener('click', () => {
+            showResourceAllocationAction();
+          });
+        }
       } else {
         instance.setContent(getWarningInfoAsHtml());
-        // Instance.setContent(getWarningInfoAsHtml(instance.reference));
       }
     },
   } as Partial<Props>);
 
   tippyInstances.push(tippyInstance);
-
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO make it work
-  // get references to the buttons in the Tippy popover
-  if (currentView === 'main') {
-    tippyInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      const allocateResourceBtn = target.querySelector('#Allocate-Resource');
-      const contactClientBtn = target.querySelector('#Contact-Client');
-      if (allocateResourceBtn) {
-        allocateResourceBtn.addEventListener('click', () => {
-          showResourceAllocationAction();
-        });
-      }
-
-      if (contactClientBtn) {
-        contactClientBtn.addEventListener('click', () => {
-          showContactClientAction();
-        });
-      }
-    });
-  }
 }
 
 function addOverlay(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
@@ -262,5 +258,6 @@ function showResourceAllocationAction() {
 
 function showContactClientAction() {
   // TO BE IMPLEMENTED
+  window.alert('Clicked on showContactClientAction');
 }
 
