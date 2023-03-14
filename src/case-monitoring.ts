@@ -233,7 +233,9 @@ class AbstractTippySupport {
       interactive: true,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
       allowHTML: true,
-      trigger: 'mouseenter',
+      // TODO on click to easily inspect
+      // trigger: 'mouseenter',
+      trigger: 'click',
       // TODO this part is specific to the use case
       onShown(instance: Instance): void {
         if (currentView === 'main') {
