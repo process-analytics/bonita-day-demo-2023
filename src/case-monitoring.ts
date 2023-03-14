@@ -19,9 +19,11 @@ abstract class AbstractCaseMonitoring {
     console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
   // TODO initialization. Is it the right place?
     this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
-    this.tippySupport = new AbstractTippySupport(bpmnVisualization);
+    this.tippySupport = this.createTippySupportInstance(bpmnVisualization);
     console.info('DONE init CaseMonitoring, processId', processId)
   }
+
+  protected abstract createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport;
 
   showData(): void {
     console.info('start showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
@@ -99,6 +101,10 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
       this.addOverlay(bpmnElementId);
     }
   }
+
+  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
+    return new MainProcessTippySupport(bpmnVisualization);
+  }
 }
 
 /**
@@ -115,6 +121,10 @@ class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
       this.tippySupport.addPopover(bpmnElementId);
       this.addOverlay(bpmnElementId);
     }
+  }
+
+  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
+    return new SubProcessTippySupport(bpmnVisualization);
   }
 }
 
@@ -205,10 +215,9 @@ export function hideCaseMonitoringData(processId: string, bpmnVisualization: Bpm
 // }
 
 
-// TODO make abstract and extends
-class AbstractTippySupport {
+abstract class AbstractTippySupport {
 
-  private registeredBpmnElements = new Map<Element, BpmnSemantic>();
+  protected registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
   private tippyInstances: Instance[] = [];
 
@@ -236,10 +245,12 @@ class AbstractTippySupport {
       // TODO on click to easily inspect
       // trigger: 'mouseenter',
       trigger: 'click',
-      // TODO this part is specific to the use case
       onShown(instance: Instance): void {
+        instance.setContent(thisInstance.getContent(instance.reference));
+        // TODO this part is specific to the use case
         if (currentView === 'main') {
-          instance.setContent(thisInstance.getRecommendationInfoAsHtml(instance.reference));
+          console.info("Main view, registering event listener")
+          // instance.setContent(thisInstance.getRecommendationInfoAsHtml(instance.reference));
           // eslint-disable-next-line no-warning-comments -- cannot be managed now
           // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
           // eslint-disable-next-line no-warning-comments -- cannot be managed now
@@ -261,9 +272,10 @@ class AbstractTippySupport {
               showResourceAllocationAction();
             });
           }
-        } else {
-          instance.setContent(getWarningInfoAsHtml());
         }
+        // else {
+        //   instance.setContent(getWarningInfoAsHtml());
+        // }
       },
     } as Partial<Props>);
 
@@ -276,6 +288,50 @@ class AbstractTippySupport {
     }
 
     this.tippyInstances.length = 0;
+  }
+
+  protected abstract getContent(htmlElement: ReferenceElement): string;
+
+
+  // private getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
+  //   let popoverContent = `
+  //       <div class="popover-container">
+  //       <h4>Task running late</h4>
+  //       <p>Here are some suggestions:</p>
+  //       <table>
+  //         <tbody>`;
+  //
+  //   const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
+  //   const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
+  //   for (const recommendation of activityRecommendationData) {
+  //     // Replace space with hyphen (-) to be passed as the button id
+  //     const buttonId = recommendation.title.replace(/\s+/g, '-');
+  //     popoverContent += `
+  //           <tr class="popover-row">
+  //               <td class="popover-key">${recommendation.title}</td>
+  //               <td class="popover-value">${recommendation.description}</td>
+  //               <td class="popover-action">
+  //                   <button id="${buttonId}">Act</button>
+  //               </td>
+  //           </tr>
+  //       `;
+  //   }
+  //
+  //   popoverContent += `
+  //               </tbody>
+  //           </table>
+  //       </div>
+  //   `;
+  //   return popoverContent;
+  // }
+
+}
+
+class MainProcessTippySupport extends AbstractTippySupport {
+
+  protected getContent(htmlElement: ReferenceElement) {
+    console.info("getContent main process")
+    return this.getRecommendationInfoAsHtml(htmlElement);
   }
 
   private getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
@@ -312,7 +368,13 @@ class AbstractTippySupport {
 
 }
 
+class SubProcessTippySupport extends AbstractTippySupport {
 
+  protected getContent() {
+    return getWarningInfoAsHtml();
+  }
+
+}
 
 // used by both, should be split
 // function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
