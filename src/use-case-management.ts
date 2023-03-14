@@ -22,6 +22,7 @@ export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) 
     showCaseMonitoringData('main', bpmnVisualization);
   }, () => {
     hideCaseMonitoringData('main', bpmnVisualization);
+    // TODO move the logic into case-monitoring or ideally in the subprocess navigator which should manage the data hide
     if (secondaryBpmnDiagramIsAlreadyLoad) {
       hideCaseMonitoringData('secondary', secondaryBpmnVisualization);
     }

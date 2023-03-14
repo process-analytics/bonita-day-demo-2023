@@ -11,16 +11,52 @@ const registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
 let caseMonitoringData: CaseMonitoringData;
 
-
 abstract class AbstractCaseMonitoring {
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {
+  protected caseMonitoringData: CaseMonitoringData;
+
+  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
+  // TODO initialization. Is it the right place?
+    this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
   }
 
+  // LoadData(processId: string): void {
+  //   this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
+  // }
+
+  protected highlightRunningElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(caseMonitoringData.runningActivities, 'state-running-late');
+  }
+
+  protected highlightEnabledElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(caseMonitoringData.enabledShapes, 'state-enabled');
+  }
+
+  private reduceVisibilityOfAlreadyExecutedElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
+  }
 }
 
+class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
+  protected highlightRunningElements(): void {
+    super.highlightRunningElements();
+    // TODO integrate the called function here?
+    addInfoOnRunningElements(caseMonitoringData.runningActivities, this.bpmnVisualization);
+  }
+}
 
+/**
+ * Currently handle the SubProcess!!!
+ */
+class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
+  protected highlightEnabledElements(): void {
+    super.highlightEnabledElements();
+    // TODO integrate the called function here?
+    addInfoOnEnabledElements(caseMonitoringData.enabledShapes, this.bpmnVisualization);
+  }
+}
 
 export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
+  // TODO change the view/processId value. secondary is for the subprocess!!
   caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
 
   reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization);
@@ -58,7 +94,7 @@ function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
   }
 }
 
-export function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
+function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
   const elements = caseMonitoringData.enabledShapes;
   bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-enabled');
   if (currentView === 'secondary') {
