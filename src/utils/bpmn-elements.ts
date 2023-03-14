@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import {type BpmnVisualization, ShapeUtil} from 'bpmn-visualization';
+import {type BpmnSemantic, type BpmnVisualization, ShapeBpmnElementKind, ShapeUtil} from 'bpmn-visualization';
 
 /**
  * Provides workarounds for {@link https://github.com/process-analytics/bpmn-visualization-js/issues/2453}.
@@ -22,9 +22,24 @@ import {type BpmnVisualization, ShapeUtil} from 'bpmn-visualization';
 export class BpmnElementsSearcher {
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 
-  getElementByName(name: string): void {}
+  getElementIdByName(name: string): string | undefined {
+    return this.getElementByName(name)?.id;
+  }
 
-  getElementIdByName(name: string): string | undefined {}
+  // Only work for shape for now
+  // not optimize, do a full lookup at each call
+  private getElementByName(name: string): BpmnSemantic | undefined {
+    console.info('Search element for name', name);
+    const kinds = Object.values(ShapeBpmnElementKind);
+    // Split query by kind to avoid returning a big chunk of data
+    for (const kind of kinds) {
+      console.info('lookup kind', kind);
+      const elements = this.bpmnVisualization.bpmnElementsRegistry.getElementsByKinds(kind);
+      if (elements.length > 0 && elements[0].bpmnSemantic.name === 'name') {
+        return elements[0].bpmnSemantic;
+      }
+    }
+  }
 }
 
 export class BpmnElementsIdentifier {
