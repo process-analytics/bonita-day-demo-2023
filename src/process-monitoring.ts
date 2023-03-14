@@ -1,7 +1,7 @@
 // Initially taken from https://github.com/process-analytics/icpm-demo-2022/blob/v1.0.0/src/happy-path.js
 
 import {type BpmnVisualization} from 'bpmn-visualization';
-import {BpmnElementsIdentifier} from "./utils/bpmn-elements";
+import {BpmnElementsIdentifier} from './utils/bpmn-elements.js';
 
 /* Start event --> SRM subprocess
   --> vendor creates order item --> create purchase order item
