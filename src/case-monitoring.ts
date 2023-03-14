@@ -30,37 +30,37 @@ export function hideCaseMonitoringData(processId: string, bpmnVisualization: Bpm
 }
 
 function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges]), 'state-already-executed');
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
 }
 
 function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- question to answer by Nour
   // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(Array.from([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges]), 'state-already-executed');
+  bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO: rename CSS class
 function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
-  const runningActivities = Array.from(caseMonitoringData.runningActivities);
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(runningActivities, 'state-running-late');
+  const elements = caseMonitoringData.runningActivities;
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-running-late');
   if (currentView === 'main') {
-    addInfoOnRunningElements(runningActivities, bpmnVisualization);
+    addInfoOnRunningElements(elements, bpmnVisualization);
   }
 }
 
 export function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
-  const enabledActivities = Array.from(caseMonitoringData.enabledShapes);
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(enabledActivities, 'state-enabled');
+  const elements = caseMonitoringData.enabledShapes;
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-enabled');
   if (currentView === 'secondary') {
-    addInfoOnEnabledElements(enabledActivities, bpmnVisualization);
+    addInfoOnEnabledElements(elements, bpmnVisualization);
   }
 }
 
 function resetRunningElements(bpmnVisualization: BpmnVisualization) {
-  const runningActivities = Array.from(caseMonitoringData.runningActivities);
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(runningActivities, 'state-running-late');
-  for (const activityId of runningActivities) {
+  const elements = caseMonitoringData.runningActivities;
+  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
+  for (const activityId of elements) {
     bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
   }
 
@@ -72,25 +72,25 @@ function resetRunningElements(bpmnVisualization: BpmnVisualization) {
   tippyInstances.length = 0;
 }
 
-function addInfoOnRunningElements(runningActivities: string[], bpmnVisualization: BpmnVisualization) {
-  for (const activityId of runningActivities) {
-    addPopover(activityId, bpmnVisualization);
-    addOverlay(activityId, bpmnVisualization);
+function addInfoOnRunningElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
+  for (const bpmnElementId of bpmnElementIds) {
+    addPopover(bpmnElementId, bpmnVisualization);
+    addOverlay(bpmnElementId, bpmnVisualization);
   }
 }
 
-function addInfoOnEnabledElements(enabledActivities: string[], bpmnVisualization: BpmnVisualization) {
-  for (const activityId of enabledActivities) {
-    addPopover(activityId, bpmnVisualization);
-    addOverlay(activityId, bpmnVisualization);
+function addInfoOnEnabledElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
+  for (const bpmnElementId of bpmnElementIds) {
+    addPopover(bpmnElementId, bpmnVisualization);
+    addOverlay(bpmnElementId, bpmnVisualization);
   }
 }
 
-function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
-  const activity = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(activityId)[0];
-  registerBpmnElement(activity);
+function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
+  const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+  registerBpmnElement(bpmnElement);
 
-  const tippyInstance = tippy(activity.htmlElement, {
+  const tippyInstance = tippy(bpmnElement.htmlElement, {
     theme: 'light',
     placement: 'bottom',
     appendTo: bpmnVisualization.graph.container,
@@ -135,8 +135,8 @@ function addPopover(activityId: string, bpmnVisualization: BpmnVisualization) {
   }
 }
 
-function addOverlay(activityId: string, bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
+function addOverlay(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
+  bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
     position: 'top-right',
     label: '?',
     style: {
