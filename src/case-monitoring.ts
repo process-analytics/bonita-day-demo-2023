@@ -15,21 +15,27 @@ abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData;
 
   constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
+    console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
   // TODO initialization. Is it the right place?
     this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
     // TODO temp until all code is integrated in classes (needed at least by showResourceAllocationAction)
     caseMonitoringData = this.caseMonitoringData;
+    console.info('DONE init CaseMonitoring, processId', processId)
   }
 
   showData(): void {
+    console.info('start showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
     this.reduceVisibilityOfAlreadyExecutedElements();
     this.highlightRunningElements();
     this.highlightEnabledElements();
+    console.info('end showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
   }
 
   hideData(): void {
+    console.info('start hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
     this.restoreVisibilityOfAlreadyExecutedElements();
     this.resetRunningElements();
+    console.info('end hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
   }
 
 
