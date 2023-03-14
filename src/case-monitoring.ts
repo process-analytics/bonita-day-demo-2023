@@ -14,7 +14,7 @@ let caseMonitoringData: CaseMonitoringData;
 abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData;
 
-  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
+  constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
   // TODO initialization. Is it the right place?
     this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
   }
@@ -22,6 +22,12 @@ abstract class AbstractCaseMonitoring {
   // LoadData(processId: string): void {
   //   this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
   // }
+
+  showData(): void {
+    this.reduceVisibilityOfAlreadyExecutedElements();
+    this.highlightRunningElements();
+    this.highlightEnabledElements();
+  }
 
   protected highlightRunningElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(caseMonitoringData.runningActivities, 'state-running-late');
@@ -57,11 +63,15 @@ class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
 
 export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
   // TODO change the view/processId value. secondary is for the subprocess!!
-  caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
+  // TODO argument order compared to the function
+  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SecondaryProcessCaseMonitoring(bpmnVisualization, processId);
+  caseMonitoring.showData();
 
-  reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization);
-  highlightRunningElements(bpmnVisualization);
-  highlightEnabledElements(bpmnVisualization);
+  // caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
+  //
+  // reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization);
+  // highlightRunningElements(bpmnVisualization);
+  // highlightEnabledElements(bpmnVisualization);
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO what is it for?
@@ -74,9 +84,9 @@ export function hideCaseMonitoringData(processId: string, bpmnVisualization: Bpm
   resetRunningElements(bpmnVisualization);
 }
 
-function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
-}
+// function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
+//   bpmnVisualization.bpmnElementsRegistry.addCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
+// }
 
 function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- question to answer by Nour
@@ -84,23 +94,21 @@ function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisua
   bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
 }
 
-// eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO: rename CSS class
-function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
-  const elements = caseMonitoringData.runningActivities;
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-running-late');
-  if (currentView === 'main') {
-    addInfoOnRunningElements(elements, bpmnVisualization);
-  }
-}
+// function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
+//   const elements = caseMonitoringData.runningActivities;
+//   bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-running-late');
+//   if (currentView === 'main') {
+//     addInfoOnRunningElements(elements, bpmnVisualization);
+//   }
+// }
 
-function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
-  const elements = caseMonitoringData.enabledShapes;
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-enabled');
-  if (currentView === 'secondary') {
-    addInfoOnEnabledElements(elements, bpmnVisualization);
-  }
-}
+// function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
+//   const elements = caseMonitoringData.enabledShapes;
+//   bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-enabled');
+//   if (currentView === 'secondary') {
+//     addInfoOnEnabledElements(elements, bpmnVisualization);
+//   }
+// }
 
 function resetRunningElements(bpmnVisualization: BpmnVisualization) {
   const elements = caseMonitoringData.runningActivities;
