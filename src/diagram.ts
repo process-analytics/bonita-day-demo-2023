@@ -6,7 +6,11 @@ import {removeSectionInBreadcrumb, addSectionInBreadcrumb} from './breadcrumb.js
 const sharedFitOptions = {type: FitType.Center, margin: 20};
 
 export const sharedLoadOptions: LoadOptions = {fit: sharedFitOptions};
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO do not leak internal state
+// eslint-disable-next-line import/no-mutable-exports -- will be refactored later
 export let secondaryBpmnDiagramIsAlreadyLoad = false;
+// eslint-disable-next-line import/no-mutable-exports -- will be refactored later
 export let currentView = 'main';
 
 // Secondary BPMN Container

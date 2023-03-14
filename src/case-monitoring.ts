@@ -105,6 +105,7 @@ function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization)
         instance.setContent(getRecommendationInfoAsHtml(instance.reference));
         // eslint-disable-next-line no-warning-comments -- cannot be managed now
         // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+        // eslint-disable-next-line no-warning-comments -- cannot be managed now
         // TODO only register the event listener once, or destroy it onHide
         const contactClientBtn = document.querySelector('#Contact-Client');
         console.info('tippy on show: contactClientBtn', contactClientBtn);
@@ -258,7 +259,9 @@ function showResourceAllocationAction() {
 }
 
 function showContactClientAction() {
-  // TO BE IMPLEMENTED
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
+  // TODO implement
+  // eslint-disable-next-line no-alert -- will be remove with the final implementation
   window.alert('Clicked on showContactClientAction');
 }
 
