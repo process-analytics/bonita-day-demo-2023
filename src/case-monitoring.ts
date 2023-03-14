@@ -5,21 +5,21 @@ import {getActivityRecommendationData} from './recommendation-data.js';
 import {type CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
 import {currentView, displayBpmnDiagram, secondaryBpmnVisualization} from './diagram.js';
 
-const tippyInstances: Instance[] = [];
+// const tippyInstances: Instance[] = [];
 
-const registeredBpmnElements = new Map<Element, BpmnSemantic>();
+// const registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
-let caseMonitoringData: CaseMonitoringData;
+// let caseMonitoringData: CaseMonitoringData;
 
 abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData;
+  protected tippySupport: AbstractTippySupport;
 
   constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
     console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
   // TODO initialization. Is it the right place?
     this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
-    // TODO temp until all code is integrated in classes (needed at least by showResourceAllocationAction)
-    caseMonitoringData = this.caseMonitoringData;
+    this.tippySupport = new AbstractTippySupport(bpmnVisualization);
     console.info('DONE init CaseMonitoring, processId', processId)
   }
 
@@ -76,13 +76,14 @@ abstract class AbstractCaseMonitoring {
       this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(elementId);
     }
 
-    // TODO tippy instances should be managed in a dedicated class
+    this.tippySupport.removeAllPopovers();
+    // tippy instances should be managed in a dedicated class
     // Unregister tippy instances
-    for (const instance of tippyInstances) {
-      instance.destroy();
-    }
-
-    tippyInstances.length = 0;
+    // for (const instance of tippyInstances) {
+    //   instance.destroy();
+    // }
+    //
+    // tippyInstances.length = 0;
   }
 }
 
@@ -94,7 +95,7 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
 
   private addInfoOnRunningElements(bpmnElementIds: string[]) {
     for (const bpmnElementId of bpmnElementIds) {
-      addPopover(bpmnElementId, this.bpmnVisualization);
+      this.tippySupport.addPopover(bpmnElementId);
       this.addOverlay(bpmnElementId);
     }
   }
@@ -111,7 +112,7 @@ class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
 
   private addInfoOnEnabledElements(bpmnElementIds: string[]) {
     for (const bpmnElementId of bpmnElementIds) {
-      addPopover(bpmnElementId, this.bpmnVisualization);
+      this.tippySupport.addPopover(bpmnElementId);
       this.addOverlay(bpmnElementId);
     }
   }
@@ -203,53 +204,161 @@ export function hideCaseMonitoringData(processId: string, bpmnVisualization: Bpm
 //   }
 // }
 
-// TODO used by both, should be split
-function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
-  const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
-  registerBpmnElement(bpmnElement);
 
-  const tippyInstance = tippy(bpmnElement.htmlElement, {
-    theme: 'light',
-    placement: 'bottom',
-    appendTo: bpmnVisualization.graph.container,
-    content: 'Loading...',
-    arrow: true,
-    interactive: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
-    allowHTML: true,
-    trigger: 'mouseenter',
-    onShown(instance: Instance): void {
-      if (currentView === 'main') {
-        instance.setContent(getRecommendationInfoAsHtml(instance.reference));
-        // eslint-disable-next-line no-warning-comments -- cannot be managed now
-        // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
-        // eslint-disable-next-line no-warning-comments -- cannot be managed now
-        // TODO only register the event listener once, or destroy it onHide
-        const contactClientBtn = document.querySelector('#Contact-Client');
-        console.info('tippy on show: contactClientBtn', contactClientBtn);
-        if (contactClientBtn) {
-          console.info('tippy on show: registering event listener on click');
-          contactClientBtn.addEventListener('click', () => {
-            showContactClientAction();
-          });
+// TODO make abstract and extends
+class AbstractTippySupport {
+
+  private registeredBpmnElements = new Map<Element, BpmnSemantic>();
+
+  private tippyInstances: Instance[] = [];
+
+  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+
+  private registerBpmnElement(bpmnElement: BpmnElement) {
+    this.registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
+  }
+
+  addPopover(bpmnElementId: string) {
+    const bpmnElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+    this.registerBpmnElement(bpmnElement);
+
+    // TODO temp find a better way
+    const thisInstance = this;
+    const tippyInstance = tippy(bpmnElement.htmlElement, {
+      theme: 'light',
+      placement: 'bottom',
+      appendTo: this.bpmnVisualization.graph.container,
+      content: 'Loading...',
+      arrow: true,
+      interactive: true,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
+      allowHTML: true,
+      trigger: 'mouseenter',
+      // TODO this part is specific to the use case
+      onShown(instance: Instance): void {
+        if (currentView === 'main') {
+          instance.setContent(thisInstance.getRecommendationInfoAsHtml(instance.reference));
+          // eslint-disable-next-line no-warning-comments -- cannot be managed now
+          // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+          // eslint-disable-next-line no-warning-comments -- cannot be managed now
+          // TODO only register the event listener once, or destroy it onHide
+          const contactClientBtn = document.querySelector('#Contact-Client');
+          console.info('tippy on show: contactClientBtn', contactClientBtn);
+          if (contactClientBtn) {
+            console.info('tippy on show: registering event listener on click');
+            contactClientBtn.addEventListener('click', () => {
+              showContactClientAction();
+            });
+          }
+
+          const allocateResourceBtn = document.querySelector('#Allocate-Resource');
+          console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
+          if (allocateResourceBtn) {
+            console.info('tippy on show: registering event listener on click');
+            allocateResourceBtn.addEventListener('click', () => {
+              showResourceAllocationAction();
+            });
+          }
+        } else {
+          instance.setContent(getWarningInfoAsHtml());
         }
+      },
+    } as Partial<Props>);
 
-        const allocateResourceBtn = document.querySelector('#Allocate-Resource');
-        console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
-        if (allocateResourceBtn) {
-          console.info('tippy on show: registering event listener on click');
-          allocateResourceBtn.addEventListener('click', () => {
-            showResourceAllocationAction();
-          });
-        }
-      } else {
-        instance.setContent(getWarningInfoAsHtml());
-      }
-    },
-  } as Partial<Props>);
+    this.tippyInstances.push(tippyInstance);
+  }
 
-  tippyInstances.push(tippyInstance);
+  removeAllPopovers(): void {
+    for (const instance of this.tippyInstances) {
+      instance.destroy();
+    }
+
+    this.tippyInstances.length = 0;
+  }
+
+  private getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
+    let popoverContent = `
+        <div class="popover-container">
+        <h4>Task running late</h4>
+        <p>Here are some suggestions:</p>
+        <table>
+          <tbody>`;
+
+    const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
+    const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
+    for (const recommendation of activityRecommendationData) {
+      // Replace space with hyphen (-) to be passed as the button id
+      const buttonId = recommendation.title.replace(/\s+/g, '-');
+      popoverContent += `
+            <tr class="popover-row">
+                <td class="popover-key">${recommendation.title}</td>
+                <td class="popover-value">${recommendation.description}</td>
+                <td class="popover-action">
+                    <button id="${buttonId}">Act</button>
+                </td>
+            </tr>
+        `;
+    }
+
+    popoverContent += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    return popoverContent;
+  }
+
 }
+
+
+
+// used by both, should be split
+// function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
+//   const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+//   registerBpmnElement(bpmnElement);
+//
+//   const tippyInstance = tippy(bpmnElement.htmlElement, {
+//     theme: 'light',
+//     placement: 'bottom',
+//     appendTo: bpmnVisualization.graph.container,
+//     content: 'Loading...',
+//     arrow: true,
+//     interactive: true,
+//     // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
+//     allowHTML: true,
+//     trigger: 'mouseenter',
+//     onShown(instance: Instance): void {
+//       if (currentView === 'main') {
+//         instance.setContent(getRecommendationInfoAsHtml(instance.reference));
+//         // eslint-disable-next-line no-warning-comments -- cannot be managed now
+//         // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+//         // eslint-disable-next-line no-warning-comments -- cannot be managed now
+//         // TODO only register the event listener once, or destroy it onHide
+//         const contactClientBtn = document.querySelector('#Contact-Client');
+//         console.info('tippy on show: contactClientBtn', contactClientBtn);
+//         if (contactClientBtn) {
+//           console.info('tippy on show: registering event listener on click');
+//           contactClientBtn.addEventListener('click', () => {
+//             showContactClientAction();
+//           });
+//         }
+//
+//         const allocateResourceBtn = document.querySelector('#Allocate-Resource');
+//         console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
+//         if (allocateResourceBtn) {
+//           console.info('tippy on show: registering event listener on click');
+//           allocateResourceBtn.addEventListener('click', () => {
+//             showResourceAllocationAction();
+//           });
+//         }
+//       } else {
+//         instance.setContent(getWarningInfoAsHtml());
+//       }
+//     },
+//   } as Partial<Props>);
+//
+//   tippyInstances.push(tippyInstance);
+// }
 
 // used by main process and subprocess
 // function addOverlay(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
@@ -264,43 +373,43 @@ function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization)
 //   });
 // }
 
-// TODO use by tippy
-function registerBpmnElement(bpmnElement: BpmnElement) {
-  registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
-}
+// use by tippy
+// function registerBpmnElement(bpmnElement: BpmnElement) {
+//   registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
+// }
 
-// TODO used by main
-function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
-  let popoverContent = `
-        <div class="popover-container">
-        <h4>Task running late</h4>
-        <p>Here are some suggestions:</p>
-        <table>
-          <tbody>`;
-
-  const bpmnSemantic = registeredBpmnElements.get(htmlElement);
-  const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
-  for (const recommendation of activityRecommendationData) {
-    // Replace space with hyphen (-) to be passed as the button id
-    const buttonId = recommendation.title.replace(/\s+/g, '-');
-    popoverContent += `
-            <tr class="popover-row">
-                <td class="popover-key">${recommendation.title}</td>
-                <td class="popover-value">${recommendation.description}</td>
-                <td class="popover-action">
-                    <button id="${buttonId}">Act</button>
-                </td>
-            </tr>
-        `;
-  }
-
-  popoverContent += `
-                </tbody>
-            </table>
-        </div>
-    `;
-  return popoverContent;
-}
+// used by main
+// function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
+//   let popoverContent = `
+//         <div class="popover-container">
+//         <h4>Task running late</h4>
+//         <p>Here are some suggestions:</p>
+//         <table>
+//           <tbody>`;
+//
+//   const bpmnSemantic = registeredBpmnElements.get(htmlElement);
+//   const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
+//   for (const recommendation of activityRecommendationData) {
+//     // Replace space with hyphen (-) to be passed as the button id
+//     const buttonId = recommendation.title.replace(/\s+/g, '-');
+//     popoverContent += `
+//             <tr class="popover-row">
+//                 <td class="popover-key">${recommendation.title}</td>
+//                 <td class="popover-value">${recommendation.description}</td>
+//                 <td class="popover-action">
+//                     <button id="${buttonId}">Act</button>
+//                 </td>
+//             </tr>
+//         `;
+//   }
+//
+//   popoverContent += `
+//                 </tbody>
+//             </table>
+//         </div>
+//     `;
+//   return popoverContent;
+// }
 
 // TODO used by subprocess
 function getWarningInfoAsHtml() {
@@ -355,31 +464,31 @@ function showResourceAllocationAction() {
     TO FIX: currently the code assumes that there's only one enabled shape
   */
   // TO COMPLETE: add interaction on the popover: on hover, highlight some activities
-  const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
-  const enabledShape = secondaryBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
-  const popoverInstance = tippyInstances.find(instance => {
-    if (instance.reference === enabledShape?.htmlElement) {
-      return instance;
-    }
+  // const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
+  // const enabledShape = secondaryBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
+  // const popoverInstance = tippyInstances.find(instance => {
+  //   if (instance.reference === enabledShape?.htmlElement) {
+  //     return instance;
+  //   }
+  //
+  //   return null;
+  // });
 
-    return null;
-  });
-
-  if (popoverInstance) {
-    // Add additional actions to the existing mouseover event listener
-    /*
-      The listener is NOT WORKING
-    */
-    popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      console.info('listener mouseover, target', target);
-      // If (target.nodeName === 'TD') {
-      //   const selectedRow = target.parentElement as HTMLTableRowElement;
-      // }
-    });
-  } else {
-    console.log('instance not found');
-  }
+  // if (popoverInstance) {
+  //   // Add additional actions to the existing mouseover event listener
+  //   /*
+  //     The listener is NOT WORKING
+  //   */
+  //   popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
+  //     const target = event.target as HTMLElement;
+  //     console.info('listener mouseover, target', target);
+  //     // If (target.nodeName === 'TD') {
+  //     //   const selectedRow = target.parentElement as HTMLTableRowElement;
+  //     // }
+  //   });
+  // } else {
+  //   console.log('instance not found');
+  // }
 }
 
 // TODO trigger by main process
