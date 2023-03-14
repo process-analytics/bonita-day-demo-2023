@@ -34,6 +34,7 @@ function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisual
 }
 
 function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
+  // eslint-disable-next-line no-warning-comments -- question to answer by Nour
   // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
   bpmnVisualization.bpmnElementsRegistry.removeCssClasses(Array.from([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges]), 'state-already-executed');
 }
