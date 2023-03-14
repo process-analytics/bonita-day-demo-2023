@@ -66,28 +66,28 @@ export function isEvent(elementId: string, processId: string): boolean {
   return secondaryEvents.has(elementId);
 }
 
-export function getElementIdByName(elementName: string, processId: string): string | undefined {
-  let activities = new Map<string, string>();
-  let events = new Map<string, string>();
-  if (processId === 'main') {
-    activities = mainActivities;
-    events = mainEvents;
-  } else {
-    activities = secondaryActivities;
-    events = secondaryEvents;
-  }
-
-  for (const [key, value] of activities.entries()) {
-    if (value === elementName) {
-      return key;
-    }
-  }
-
-  for (const [key, value] of events.entries()) {
-    if (value === elementName) {
-      return key;
-    }
-  }
-
-  return undefined;
-}
+// Export function getElementIdByName(elementName: string, processId: string): string | undefined {
+//   let activities = new Map<string, string>();
+//   let events = new Map<string, string>();
+//   if (processId === 'main') {
+//     activities = mainActivities;
+//     events = mainEvents;
+//   } else {
+//     activities = secondaryActivities;
+//     events = secondaryEvents;
+//   }
+//
+//   for (const [key, value] of activities.entries()) {
+//     if (value === elementName) {
+//       return key;
+//     }
+//   }
+//
+//   for (const [key, value] of events.entries()) {
+//     if (value === elementName) {
+//       return key;
+//     }
+//   }
+//
+//   return undefined;
+// }

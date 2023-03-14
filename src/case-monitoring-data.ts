@@ -1,5 +1,5 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
-import {getElementIdByName} from './bpmn-elements.js';
+import {BpmnElementsSearcher} from './utils/bpmn-elements.js';
 import {PathResolver} from './utils/paths.js';
 
 export type CaseMonitoringData = {
@@ -14,11 +14,11 @@ export type CaseMonitoringData = {
  * Simulate fetching data from an execution system.
  */
 abstract class AbstractCaseMonitoringDataProvider {
+  protected readonly bpmnElementsSearcher: BpmnElementsSearcher;
   private readonly pathResolver: PathResolver;
 
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO remove the need for processId
-  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, protected readonly processId: string) {
+  protected constructor(protected readonly bpmnVisualization: BpmnVisualization) {
+    this.bpmnElementsSearcher = new BpmnElementsSearcher(bpmnVisualization);
     this.pathResolver = new PathResolver(bpmnVisualization);
   }
 
@@ -52,7 +52,7 @@ abstract class AbstractCaseMonitoringDataProvider {
 
 class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
   constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization, 'main');
+    super(bpmnVisualization);
   }
 
   getEnabledShapes(): string[] {
@@ -61,10 +61,10 @@ class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPr
 
   getExecutedShapes(): string[] {
     const shapes: string[] = [];
-    addNonNullElement(shapes, getElementIdByName('New POI Needed', this.processId)); // Start event
+    addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('New POI needed')); // Start event
     addNonNullElement(shapes, 'Gateway_0xh0plz'); // Parallel gateway after start event
-    addNonNullElement(shapes, getElementIdByName('Vendor Creates Invoice', this.processId));
-    addNonNullElement(shapes, getElementIdByName('Create Purchase Order Item', this.processId));
+    addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('Vendor creates invoice'));
+    addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('Create Purchase Order Item'));
     return shapes;
   }
 
@@ -76,27 +76,27 @@ class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPr
 
   getRunningActivities(): string[] {
     const activities: string[] = [];
-    addNonNullElement(activities, getElementIdByName('SRM subprocess', this.processId));
+    addNonNullElement(activities, this.bpmnElementsSearcher.getElementIdByName('SRM subprocess'));
     return activities;
   }
 }
 
 class SecondaryProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
   constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization, 'secondary');
+    super(bpmnVisualization);
   }
 
   getEnabledShapes(): string[] {
     const shapes: string[] = [];
-    addNonNullElement(shapes, getElementIdByName('SRM: Awaiting Approval', this.processId));
+    addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('SRM: Awaiting Approval'));
     return shapes;
   }
 
   getExecutedShapes(): string[] {
     const shapes: string[] = [];
-    addNonNullElement(shapes, getElementIdByName('New SRM entry', this.processId)); // Start event
-    addNonNullElement(shapes, getElementIdByName('SRM: Created', this.processId));
-    addNonNullElement(shapes, getElementIdByName('SRM: Complete', this.processId));
+    addNonNullElement(shapes, 'Event_1dnxra5'); // Start event
+    addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('SRM: Created'));
+    addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('SRM: Complete'));
     return shapes;
   }
 
