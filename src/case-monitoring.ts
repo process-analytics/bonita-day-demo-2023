@@ -236,7 +236,7 @@ function showResourceAllocationAction() {
   const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
   const enabledShape = secondaryBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
   const popoverInstance = tippyInstances.find(instance => {
-    if (instance.reference === enabledShape.htmlElement) {
+    if (instance.reference === enabledShape?.htmlElement) {
       return instance;
     }
 
