@@ -16,6 +16,11 @@ limitations under the License.
 
 import type {BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
 
+/**
+ * Experimental implementation for
+ * - {@link https://github.com/process-analytics/bpmn-visualization-js/issues/930}
+ * - {@link https://github.com/process-analytics/bpmn-visualization-js/issues/2402}
+ */
 export class PathResolver {
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 
