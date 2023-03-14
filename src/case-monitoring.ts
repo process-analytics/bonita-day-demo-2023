@@ -17,6 +17,8 @@ abstract class AbstractCaseMonitoring {
   constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
   // TODO initialization. Is it the right place?
     this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
+    // TODO temp until all code is integrated in classes (needed at least by showResourceAllocationAction)
+    caseMonitoringData = this.caseMonitoringData;
   }
 
   // LoadData(processId: string): void {
@@ -30,15 +32,15 @@ abstract class AbstractCaseMonitoring {
   }
 
   protected highlightRunningElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(caseMonitoringData.runningActivities, 'state-running-late');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.runningActivities, 'state-running-late');
   }
 
   protected highlightEnabledElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(caseMonitoringData.enabledShapes, 'state-enabled');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.enabledShapes, 'state-enabled');
   }
 
   private reduceVisibilityOfAlreadyExecutedElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
   }
 }
 
@@ -46,7 +48,7 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   protected highlightRunningElements(): void {
     super.highlightRunningElements();
     // TODO integrate the called function here?
-    addInfoOnRunningElements(caseMonitoringData.runningActivities, this.bpmnVisualization);
+    addInfoOnRunningElements(this.caseMonitoringData.runningActivities, this.bpmnVisualization);
   }
 }
 
@@ -57,7 +59,7 @@ class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
   protected highlightEnabledElements(): void {
     super.highlightEnabledElements();
     // TODO integrate the called function here?
-    addInfoOnEnabledElements(caseMonitoringData.enabledShapes, this.bpmnVisualization);
+    addInfoOnEnabledElements(this.caseMonitoringData.enabledShapes, this.bpmnVisualization);
   }
 }
 
