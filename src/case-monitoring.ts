@@ -247,32 +247,36 @@ abstract class AbstractTippySupport {
       trigger: 'click',
       onShown(instance: Instance): void {
         instance.setContent(thisInstance.getContent(instance.reference));
-        // TODO this part is specific to the use case
-        if (currentView === 'main') {
-          console.info("Main view, registering event listener")
-          // instance.setContent(thisInstance.getRecommendationInfoAsHtml(instance.reference));
-          // eslint-disable-next-line no-warning-comments -- cannot be managed now
-          // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
-          // eslint-disable-next-line no-warning-comments -- cannot be managed now
-          // TODO only register the event listener once, or destroy it onHide
-          const contactClientBtn = document.querySelector('#Contact-Client');
-          console.info('tippy on show: contactClientBtn', contactClientBtn);
-          if (contactClientBtn) {
-            console.info('tippy on show: registering event listener on click');
-            contactClientBtn.addEventListener('click', () => {
-              showContactClientAction();
-            });
-          }
+        // eslint-disable-next-line no-warning-comments -- cannot be managed now
+        // TODO only register the event listener once, or destroy it onHide
+        thisInstance.registerEventListeners();
 
-          const allocateResourceBtn = document.querySelector('#Allocate-Resource');
-          console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
-          if (allocateResourceBtn) {
-            console.info('tippy on show: registering event listener on click');
-            allocateResourceBtn.addEventListener('click', () => {
-              showResourceAllocationAction();
-            });
-          }
-        }
+
+        // if (currentView === 'main') {
+        //   console.info("Main view, registering event listener")
+        //   // instance.setContent(thisInstance.getRecommendationInfoAsHtml(instance.reference));
+        //   // eslint-disable-next-line no-warning-comments -- cannot be managed now
+        //   // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+        //   // eslint-disable-next-line no-warning-comments -- cannot be managed now
+        //   // TODO only register the event listener once, or destroy it onHide
+        //   const contactClientBtn = document.querySelector('#Contact-Client');
+        //   console.info('tippy on show: contactClientBtn', contactClientBtn);
+        //   if (contactClientBtn) {
+        //     console.info('tippy on show: registering event listener on click');
+        //     contactClientBtn.addEventListener('click', () => {
+        //       showContactClientAction();
+        //     });
+        //   }
+        //
+        //   const allocateResourceBtn = document.querySelector('#Allocate-Resource');
+        //   console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
+        //   if (allocateResourceBtn) {
+        //     console.info('tippy on show: registering event listener on click');
+        //     allocateResourceBtn.addEventListener('click', () => {
+        //       showResourceAllocationAction();
+        //     });
+        //   }
+        // }
         // else {
         //   instance.setContent(getWarningInfoAsHtml());
         // }
@@ -291,6 +295,9 @@ abstract class AbstractTippySupport {
   }
 
   protected abstract getContent(htmlElement: ReferenceElement): string;
+
+  protected abstract registerEventListeners(): void;
+
 
 
   // private getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
@@ -366,12 +373,40 @@ class MainProcessTippySupport extends AbstractTippySupport {
     return popoverContent;
   }
 
+  protected registerEventListeners(): void {
+    console.info("MainProcessTippySupport, registering event listener")
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+    const contactClientBtn = document.querySelector('#Contact-Client');
+    // console.info('tippy on show: contactClientBtn', contactClientBtn);
+    if (contactClientBtn) {
+      // console.info('tippy on show: registering event listener on click');
+      contactClientBtn.addEventListener('click', () => {
+        showContactClientAction();
+      });
+    }
+
+    const allocateResourceBtn = document.querySelector('#Allocate-Resource');
+    // console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
+    if (allocateResourceBtn) {
+      // console.info('tippy on show: registering event listener on click');
+      allocateResourceBtn.addEventListener('click', () => {
+        showResourceAllocationAction();
+      });
+    }
+    console.info("DONE MainProcessTippySupport, registering event listener")
+  }
+
 }
 
 class SubProcessTippySupport extends AbstractTippySupport {
 
   protected getContent() {
     return getWarningInfoAsHtml();
+  }
+
+  protected registerEventListeners(): void {
+    // do nothing for now
   }
 
 }
