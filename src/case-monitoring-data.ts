@@ -2,11 +2,11 @@ import {type BpmnVisualization, type EdgeBpmnSemantic, type ShapeBpmnSemantic} f
 import {getElementIdByName} from './bpmn-elements.js';
 
 export type CaseMonitoringData = {
-  executedShapes: Set<string>;
-  runningActivities: Set<string>;
-  enabledShapes: Set<string>;
-  pendingShapes: Set<string>;
-  visitedEdges: Set<string>;
+  executedShapes: string[];
+  runningActivities: string[];
+  enabledShapes: string[];
+  pendingShapes: string[];
+  visitedEdges: string[];
 };
 
 export function getCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization, caseId = '1'): CaseMonitoringData {
@@ -14,7 +14,8 @@ export function getCaseMonitoringData(processId: string, bpmnVisualization: Bpmn
   const runningActivities = getRunningActivities(processId, caseId);
   const enabledShapes = getEnabledShapes(processId, caseId);
   const pendingShapes = getPendingShapes(processId, caseId);
-  const visitedEdges = getVisitedEdges(new Set<string>([...executedShapes, ...runningActivities, ...enabledShapes, ...pendingShapes]), bpmnVisualization);
+
+  const visitedEdges = Array.from(getVisitedEdges(new Set<string>([...executedShapes, ...runningActivities, ...enabledShapes, ...pendingShapes]), bpmnVisualization));
   return {
     executedShapes,
     runningActivities,
@@ -27,10 +28,10 @@ export function getCaseMonitoringData(processId: string, bpmnVisualization: Bpmn
 // Already executed shapes: activities, gateways, events, ...
 function getExecutedShapes(processId: string, caseId: string) {
   if (caseId !== '1') {
-    throw new Error('Case IDs are not supported yet. Keept the default value 1');
+    throw new Error('Case IDs are not supported yet. caseID should be kept to default 1');
   }
 
-  const executedShapes = new Set<string>();
+  const executedShapes: string[] = [];
   if (processId === 'main') {
     addNonNullElement(executedShapes, getElementIdByName('New POI Needed', processId)); // Start event
     addNonNullElement(executedShapes, 'Gateway_0xh0plz'); // Parallel gateway after start event
@@ -50,7 +51,7 @@ function getRunningActivities(processId: string, caseId: string) {
     throw new Error('Different case IDs are not supported yet. caseID should be kept to default 1');
   }
 
-  const runningActivities = new Set<string>();
+  const runningActivities: string[] = [];
   if (processId === 'main') {
     addNonNullElement(runningActivities, getElementIdByName('SRM subprocess', processId));
   }
@@ -59,12 +60,12 @@ function getRunningActivities(processId: string, caseId: string) {
   return runningActivities;
 }
 
-function getEnabledShapes(processId: string, caseId: string): Set<string> {
+function getEnabledShapes(processId: string, caseId: string) {
   if (caseId !== '1') {
     throw new Error('Different case IDs are not supported yet. caseID should be kept to default 1');
   }
 
-  const enabledShapes = new Set<string>();
+  const enabledShapes: string[] = [];
   if (processId === 'secondary') {
     addNonNullElement(enabledShapes, getElementIdByName('SRM: Awaiting Approval', processId));
   }
@@ -72,14 +73,14 @@ function getEnabledShapes(processId: string, caseId: string): Set<string> {
   return enabledShapes;
 }
 
-function getPendingShapes(processId: string, caseId: string): Set<string> {
+function getPendingShapes(processId: string, caseId: string) {
   if (caseId !== '1') {
     throw new Error('Different case IDs are not supported yet. caseID should be kept to default 1');
   }
 
-  const pendingShapes = new Set<string>();
+  const pendingShapes: string[] = [];
   if (processId === 'main') {
-    pendingShapes.add('Gateway_0domayw');
+    pendingShapes.push('Gateway_0domayw');
   }
 
   return pendingShapes;
@@ -112,8 +113,8 @@ function getVisitedEdges(shapeIds: Set<string>, bpmnVisualization: BpmnVisualiza
   return edgeIds;
 }
 
-function addNonNullElement(elements: Set<string>, elt: string | undefined) {
+function addNonNullElement(elements: string[], elt: string | undefined) {
   if (elt) {
-    elements.add(elt);
+    elements.push(elt);
   }
 }

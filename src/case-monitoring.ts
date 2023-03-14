@@ -9,13 +9,7 @@ const tippyInstances: Instance[] = [];
 
 const registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
-let caseMonitoringData: CaseMonitoringData = {
-  executedShapes: new Set<string>(),
-  enabledShapes: new Set<string>(),
-  pendingShapes: new Set<string>(),
-  runningActivities: new Set<string>(),
-  visitedEdges: new Set<string>(),
-};
+let caseMonitoringData: CaseMonitoringData;
 
 export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
   caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
@@ -36,28 +30,26 @@ export function hideCaseMonitoringData(processId: string, bpmnVisualization: Bpm
 }
 
 function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  const executedElements = new Set<string>([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges]);
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(executedElements), 'state-already-executed');
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges]), 'state-already-executed');
 }
 
 function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  const executedElements = new Set<string>([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges]);
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(Array.from(executedElements), 'state-already-executed');
+  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(Array.from([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges]), 'state-already-executed');
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO: rename CSS class
 function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
-  const runningActivities = caseMonitoringData.runningActivities;
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(runningActivities), 'state-running-late');
+  const runningActivities = Array.from(caseMonitoringData.runningActivities);
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(runningActivities, 'state-running-late');
   if (currentView === 'main') {
     addInfoOnRunningElements(runningActivities, bpmnVisualization);
   }
 }
 
 export function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
-  const enabledActivities = caseMonitoringData.enabledShapes;
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(Array.from(enabledActivities), 'state-enabled');
+  const enabledActivities = Array.from(caseMonitoringData.enabledShapes);
+  bpmnVisualization.bpmnElementsRegistry.addCssClasses(enabledActivities, 'state-enabled');
   if (currentView === 'secondary') {
     addInfoOnEnabledElements(enabledActivities, bpmnVisualization);
   }
@@ -78,14 +70,14 @@ function resetRunningElements(bpmnVisualization: BpmnVisualization) {
   tippyInstances.length = 0;
 }
 
-function addInfoOnRunningElements(runningActivities: Set<string>, bpmnVisualization: BpmnVisualization) {
+function addInfoOnRunningElements(runningActivities: string[], bpmnVisualization: BpmnVisualization) {
   for (const activityId of runningActivities) {
     addPopover(activityId, bpmnVisualization);
     addOverlay(activityId, bpmnVisualization);
   }
 }
 
-function addInfoOnEnabledElements(enabledActivities: Set<string>, bpmnVisualization: BpmnVisualization) {
+function addInfoOnEnabledElements(enabledActivities: string[], bpmnVisualization: BpmnVisualization) {
   for (const activityId of enabledActivities) {
     addPopover(activityId, bpmnVisualization);
     addOverlay(activityId, bpmnVisualization);
