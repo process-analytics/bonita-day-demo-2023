@@ -22,6 +22,7 @@ export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) 
     showCaseMonitoringData('main', bpmnVisualization);
   }, () => {
     hideCaseMonitoringData('main', bpmnVisualization);
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO move the logic into case-monitoring or ideally in the subprocess navigator which should manage the data hide
     if (secondaryBpmnDiagramIsAlreadyLoad) {
       hideCaseMonitoringData('secondary', secondaryBpmnVisualization);

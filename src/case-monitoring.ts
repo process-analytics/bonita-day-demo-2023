@@ -5,25 +5,18 @@ import {getActivityRecommendationData} from './recommendation-data.js';
 import {type CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
 import {displayBpmnDiagram, secondaryBpmnVisualization} from './diagram.js';
 
-// const tippyInstances: Instance[] = [];
-
-// const registeredBpmnElements = new Map<Element, BpmnSemantic>();
-
-// let caseMonitoringData: CaseMonitoringData;
-
 abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData;
   protected tippySupport: AbstractTippySupport;
 
   constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
     console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
-  // TODO initialization. Is it the right place?
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO initialization. Is it the right place?
     this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
     this.tippySupport = this.createTippySupportInstance(bpmnVisualization);
-    console.info('DONE init CaseMonitoring, processId', processId)
+    console.info('DONE init CaseMonitoring, processId', processId);
   }
-
-  protected abstract createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport;
 
   showData(): void {
     console.info('start showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
@@ -39,7 +32,6 @@ abstract class AbstractCaseMonitoring {
     this.resetRunningElements();
     console.info('end hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
   }
-
 
   protected highlightRunningElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.runningActivities, 'state-running-late');
@@ -60,6 +52,8 @@ abstract class AbstractCaseMonitoring {
       },
     });
   }
+
+  protected abstract createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport;
 
   private reduceVisibilityOfAlreadyExecutedElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
@@ -88,15 +82,15 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
     this.addInfoOnRunningElements(this.caseMonitoringData.runningActivities);
   }
 
+  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
+    return new MainProcessTippySupport(bpmnVisualization);
+  }
+
   private addInfoOnRunningElements(bpmnElementIds: string[]) {
     for (const bpmnElementId of bpmnElementIds) {
       this.tippySupport.addPopover(bpmnElementId);
       this.addOverlay(bpmnElementId);
     }
-  }
-
-  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
-    return new MainProcessTippySupport(bpmnVisualization);
   }
 }
 
@@ -109,51 +103,46 @@ class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
     this.addInfoOnEnabledElements(this.caseMonitoringData.enabledShapes);
   }
 
+  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
+    return new SubProcessTippySupport(bpmnVisualization);
+  }
+
   private addInfoOnEnabledElements(bpmnElementIds: string[]) {
     for (const bpmnElementId of bpmnElementIds) {
       this.tippySupport.addPopover(bpmnElementId);
       this.addOverlay(bpmnElementId);
     }
   }
-
-  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
-    return new SubProcessTippySupport(bpmnVisualization);
-  }
 }
 
 export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO change the view/processId value. secondary is for the subprocess!!
-  // TODO argument order compared to the function
   const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SecondaryProcessCaseMonitoring(bpmnVisualization, processId);
   caseMonitoring.showData();
 }
 
-
 export function hideCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO should not instantiated again here, this prevent to correcly unregister/destroy tippy instances
   const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SecondaryProcessCaseMonitoring(bpmnVisualization, processId);
   caseMonitoring.hideData();
 }
 
-
-
 abstract class AbstractTippySupport {
-
   protected registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
   private tippyInstances: Instance[] = [];
 
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 
-  private registerBpmnElement(bpmnElement: BpmnElement) {
-    this.registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
-  }
-
   addPopover(bpmnElementId: string) {
     const bpmnElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
     this.registerBpmnElement(bpmnElement);
 
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO temp find a better way
+    // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment -- temp
     const thisInstance = this;
     const tippyInstance = tippy(bpmnElement.htmlElement, {
       theme: 'light',
@@ -164,16 +153,12 @@ abstract class AbstractTippySupport {
       interactive: true,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
       allowHTML: true,
-      // TODO on click to easily inspect
-      // trigger: 'mouseenter',
-      trigger: 'click',
+      trigger: 'mouseenter', // Use click  to easily inspect
       onShown(instance: Instance): void {
         instance.setContent(thisInstance.getContent(instance.reference));
         // eslint-disable-next-line no-warning-comments -- cannot be managed now
         // TODO only register the event listener once, or destroy it onHide
         thisInstance.registerEventListeners();
-
-
       },
     } as Partial<Props>);
 
@@ -192,13 +177,40 @@ abstract class AbstractTippySupport {
 
   protected abstract registerEventListeners(): void;
 
+  private registerBpmnElement(bpmnElement: BpmnElement) {
+    this.registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
+  }
 }
 
 class MainProcessTippySupport extends AbstractTippySupport {
-
   protected getContent(htmlElement: ReferenceElement) {
-    console.info("getContent main process")
+    console.info('getContent main process');
     return this.getRecommendationInfoAsHtml(htmlElement);
+  }
+
+  protected registerEventListeners(): void {
+    console.info('MainProcessTippySupport, registering event listener');
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+    const contactClientBtn = document.querySelector('#Contact-Client');
+    // Console.info('tippy on show: contactClientBtn', contactClientBtn);
+    if (contactClientBtn) {
+      // Console.info('tippy on show: registering event listener on click');
+      contactClientBtn.addEventListener('click', () => {
+        showContactClientAction();
+      });
+    }
+
+    const allocateResourceBtn = document.querySelector('#Allocate-Resource');
+    // Console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
+    if (allocateResourceBtn) {
+      // Console.info('tippy on show: registering event listener on click');
+      allocateResourceBtn.addEventListener('click', () => {
+        showResourceAllocationAction();
+      });
+    }
+
+    console.info('DONE MainProcessTippySupport, registering event listener');
   }
 
   private getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
@@ -232,46 +244,19 @@ class MainProcessTippySupport extends AbstractTippySupport {
     `;
     return popoverContent;
   }
-
-  protected registerEventListeners(): void {
-    console.info("MainProcessTippySupport, registering event listener")
-    // eslint-disable-next-line no-warning-comments -- cannot be managed now
-    // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
-    const contactClientBtn = document.querySelector('#Contact-Client');
-    // console.info('tippy on show: contactClientBtn', contactClientBtn);
-    if (contactClientBtn) {
-      // console.info('tippy on show: registering event listener on click');
-      contactClientBtn.addEventListener('click', () => {
-        showContactClientAction();
-      });
-    }
-
-    const allocateResourceBtn = document.querySelector('#Allocate-Resource');
-    // console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
-    if (allocateResourceBtn) {
-      // console.info('tippy on show: registering event listener on click');
-      allocateResourceBtn.addEventListener('click', () => {
-        showResourceAllocationAction();
-      });
-    }
-    console.info("DONE MainProcessTippySupport, registering event listener")
-  }
-
 }
 
 class SubProcessTippySupport extends AbstractTippySupport {
-
   protected getContent() {
     return getWarningInfoAsHtml();
   }
 
   protected registerEventListeners(): void {
-    // do nothing for now
+    // Do nothing for now
   }
-
 }
 
-
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO used by subprocess
 function getWarningInfoAsHtml() {
 // Function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
@@ -316,7 +301,7 @@ function getWarningInfoAsHtml() {
     `;
 }
 
-
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main, but the logic should be only for subprocess
 function showResourceAllocationAction() {
   displayBpmnDiagram('secondary');
@@ -352,6 +337,7 @@ function showResourceAllocationAction() {
   // }
 }
 
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main process
 function showContactClientAction() {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
