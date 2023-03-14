@@ -29,14 +29,19 @@ export class BpmnElementsSearcher {
   // Only work for shape for now
   // not optimize, do a full lookup at each call
   private getElementByName(name: string): BpmnSemantic | undefined {
-    console.info('Search element for name', name);
     const kinds = Object.values(ShapeBpmnElementKind);
     // Split query by kind to avoid returning a big chunk of data
     for (const kind of kinds) {
-      console.info('lookup kind', kind);
-      const elements = this.bpmnVisualization.bpmnElementsRegistry.getElementsByKinds(kind);
-      if (elements.length > 0 && elements[0].bpmnSemantic.name === name ) {
-        return elements[0].bpmnSemantic;
+      const bpmnSemantics = this.bpmnVisualization.bpmnElementsRegistry.getElementsByKinds(kind)
+        .map(elt => elt.bpmnSemantic)
+        .filter(Boolean);
+
+      // May have been implemented with: bpmnSemantics.filter(bpmnSemantic => bpmnSemantic.name === name)[0];
+      // Here, we stop the search right after we find a matching name
+      for (const bpmnSemantic of bpmnSemantics) {
+        if (bpmnSemantic.name === name) {
+          return bpmnSemantic;
+        }
       }
     }
 
