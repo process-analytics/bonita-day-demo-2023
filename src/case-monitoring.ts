@@ -11,6 +11,15 @@ const registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
 let caseMonitoringData: CaseMonitoringData;
 
+
+abstract class AbstractCaseMonitoring {
+  constructor(private readonly bpmnVisualization: BpmnVisualization) {
+  }
+
+}
+
+
+
 export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
   caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
 
