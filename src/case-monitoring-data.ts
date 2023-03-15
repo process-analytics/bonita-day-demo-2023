@@ -81,7 +81,7 @@ class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPr
   }
 }
 
-class SecondaryProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
+class SubProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
   constructor(protected readonly bpmnVisualization: BpmnVisualization) {
     super(bpmnVisualization);
   }
@@ -110,7 +110,7 @@ class SecondaryProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringD
 }
 
 export function getCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization): CaseMonitoringData {
-  const caseMonitoringDataProvider = processId === 'main' ? new MainProcessCaseMonitoringDataProvider(bpmnVisualization) : new SecondaryProcessCaseMonitoringDataProvider(bpmnVisualization);
+  const caseMonitoringDataProvider = processId === 'main' ? new MainProcessCaseMonitoringDataProvider(bpmnVisualization) : new SubProcessCaseMonitoringDataProvider(bpmnVisualization);
 
   const executedShapes = caseMonitoringDataProvider.getExecutedShapes();
   const runningActivities = caseMonitoringDataProvider.getRunningActivities();
