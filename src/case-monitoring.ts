@@ -253,14 +253,18 @@ class SubProcessTippySupport extends AbstractTippySupport {
     console.info('SubProcessTippySupport, registering event listener');
 
     // TODO extract data
+    // Activity_015g8ru doc completed
+    // Activity_0k8i7cb ordered
+    // Activity_0yyl6g2 in transfer
+    // Activity_16tcn1j changes transmitted
     const userData = [
       new Map<string, number>([['Activity_015g8ru', 12], ['Activity_0k8i7cb', 29]]),
       new Map<string, number>([['Activity_0k8i7cb', 41], ['Activity_0yyl6g2', 6]]),
-      new Map<string, number>([['Activity_0yyl6g2', 34]])
+      new Map<string, number>([['Activity_0k8i7cb', 3], ['Activity_0yyl6g2', 34], ['Activity_16tcn1j', 58]])
     ];
 
     //highlight activity
-    const hightlightElement = (data: Map<string, number>) => {
+    const highlightElement = (data: Map<string, number>) => {
       for (let [activityId, nbExec] of data) {
         this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
@@ -268,9 +272,8 @@ class SubProcessTippySupport extends AbstractTippySupport {
           label: `${nbExec}`,
           style: {
             font: {color: '#fff', size: 16},
-            // TODO use same color as in CSS
-            fill: {color: '#4169E1'},
-            stroke: {color: '#4169E1', width: 2},
+            fill: {color: 'blueviolet'},
+            stroke: {color: 'blueviolet', width: 2},
           },
         });
       }
@@ -295,7 +298,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
         const data = userData[i];
         if (data) {
           console.info('found data', data)
-          hightlightElement(data);
+          highlightElement(data);
         }
       });
       row.addEventListener("mouseleave", (_event) => {
