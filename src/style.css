@@ -53,6 +53,17 @@ header {
 /* ****************************************************************************************************************** */
 /* BPMN Container */
 /* ****************************************************************************************************************** */
+
+.project-advertising {
+  display: flex;
+  justify-content: center;
+  /*TODO duplicated with bpmn-container*/
+  height: calc(100vh - 8rem);
+}
+
+/* ****************************************************************************************************************** */
+/* BPMN Container */
+/* ****************************************************************************************************************** */
 .bpmn-container {
   /* use absolute values for height to ensure that the vertical diagram is not fully displayed when the page is opened. */
   /* width is relative to the window size */
