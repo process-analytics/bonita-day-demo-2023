@@ -121,7 +121,7 @@ const doSubProcessNavigation = () => {
 };
 
 export class SubProcessNavigator {
-  private subProcessHtmlElement: HTMLElement | undefined = undefined;
+  private subProcessHtmlElement: HTMLElement | undefined;
 
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 

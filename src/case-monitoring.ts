@@ -6,7 +6,7 @@ import {type CaseMonitoringData, fetchCaseMonitoringData} from './case-monitorin
 import {displayView, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
 
 abstract class AbstractCaseMonitoring {
-  protected caseMonitoringData: CaseMonitoringData | undefined = undefined;
+  protected caseMonitoringData: CaseMonitoringData | undefined;
   protected tippySupport: AbstractTippySupport;
 
   protected constructor(protected readonly bpmnVisualization: BpmnVisualization, private readonly processId: string) {
