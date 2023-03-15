@@ -281,9 +281,9 @@ class SubProcessTippySupport extends AbstractTippySupport {
     };
 
     const resetStyleOfBpmnElements = (bpmnElementIds: string[]) => {
-      for (let bpmnElementId of bpmnElementIds) {
-      this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementId, 'already-completed-by-user');
-      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
+      for (const bpmnElementId of bpmnElementIds) {
+        this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementId, 'already-completed-by-user');
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
       }
     };
 
