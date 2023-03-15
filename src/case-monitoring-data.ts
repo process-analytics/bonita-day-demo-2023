@@ -109,7 +109,7 @@ class SubProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPro
   }
 }
 
-export function getCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization): CaseMonitoringData {
+export function fetchCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization): CaseMonitoringData {
   const caseMonitoringDataProvider = processId === 'main' ? new MainProcessCaseMonitoringDataProvider(bpmnVisualization) : new SubProcessCaseMonitoringDataProvider(bpmnVisualization);
 
   const executedShapes = caseMonitoringDataProvider.getExecutedShapes();
