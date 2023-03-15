@@ -181,7 +181,6 @@ abstract class AbstractTippySupport {
 
 class MainProcessTippySupport extends AbstractTippySupport {
   protected getContent(htmlElement: ReferenceElement) {
-    console.info('getContent main process');
     return this.getRecommendationInfoAsHtml(htmlElement);
   }
 
@@ -289,24 +288,16 @@ class SubProcessTippySupport extends AbstractTippySupport {
 
     // Target instance.popper. Keep using document for now as it shows that we don't cleanly remove the popover from the DOM in the subprocess view
     const rows = document.querySelectorAll('#popover-resources-available > tbody > tr');
-    console.info('popover elements', rows);
-    console.info('popover elements length', rows.length);
     for (const [i, row] of rows.entries()) {
       row.addEventListener('mouseenter', () => {
-        // Row.onclick = (event) => {
-        console.log('mouseenter on', i);
         const data = userData[i];
         if (data) {
-          console.info('found data', data);
           highlightElement(data);
         }
       });
       row.addEventListener('mouseleave', () => {
-        // Row.onclick = (event) => {
-        console.log('mouseleave on', i);
         const data = userData[i];
         if (data) {
-          console.info('found data', data);
           resetStyleOfBpmnElements(Array.from(data.keys()));
         }
       });
