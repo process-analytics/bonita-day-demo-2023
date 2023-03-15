@@ -129,6 +129,7 @@ export function hideCaseMonitoringData(processId: string, bpmnVisualization: Bpm
   caseMonitoring.hideData();
 }
 
+// May change in the future to favor composition over inheritance.
 abstract class AbstractTippySupport {
   protected registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
