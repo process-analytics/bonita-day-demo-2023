@@ -3,17 +3,13 @@ import 'tippy.js/dist/tippy.css';
 import type {BpmnElement, BpmnSemantic, BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
 import {type CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
-import {displayBpmnDiagram, secondaryBpmnVisualization} from './diagram.js';
-
-// eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO change the view/processId value. secondary is for the subprocess!!
-const subProcessViewName = 'secondary';
+import {displayBpmnDiagram, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
 
 abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData;
   protected tippySupport: AbstractTippySupport;
 
-  constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
+  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
     console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO initialization. Is it the right place?
@@ -80,7 +76,11 @@ abstract class AbstractCaseMonitoring {
   }
 }
 
-class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
+export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
+  constructor(bpmnVisualization: BpmnVisualization) {
+    super(bpmnVisualization, 'main');
+  }
+
   protected highlightRunningElements(): void {
     super.highlightRunningElements();
     this.addInfoOnRunningElements(this.caseMonitoringData.runningActivities);
@@ -99,6 +99,10 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
 }
 
 class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
+  constructor(bpmnVisualization: BpmnVisualization) {
+    super(bpmnVisualization, subProcessViewName);
+  }
+
   protected highlightEnabledElements(): void {
     super.highlightEnabledElements();
     this.addInfoOnEnabledElements(this.caseMonitoringData.enabledShapes);
@@ -114,18 +118,6 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
       this.addOverlay(bpmnElementId);
     }
   }
-}
-
-export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
-  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SubProcessCaseMonitoring(bpmnVisualization, processId);
-  caseMonitoring.showData();
-}
-
-export function hideCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO should not instantiated again here, this prevent to correcly unregister/destroy tippy instances
-  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SubProcessCaseMonitoring(bpmnVisualization, processId);
-  caseMonitoring.hideData();
 }
 
 // May change in the future to favor composition over inheritance.
@@ -301,17 +293,30 @@ function getWarningInfoAsHtml() {
     `;
 }
 
+function showSubProcessMonitoringData(bpmnVisualization: BpmnVisualization) {
+  const caseMonitoring = new SubProcessCaseMonitoring(bpmnVisualization);
+  caseMonitoring.showData();
+}
+
+export function hideSubCaseMonitoringData(bpmnVisualization: BpmnVisualization) {
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
+  // TODO should not instantiated again here, this prevents to correctly unregister/destroy tippy instances
+  const caseMonitoring = new SubProcessCaseMonitoring(bpmnVisualization);
+  caseMonitoring.hideData();
+}
+
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main, but the logic should be only for subprocess
 function showResourceAllocationAction() {
+  // This should be managed by SubProcessNavigator
   displayBpmnDiagram(subProcessViewName);
-  showCaseMonitoringData(subProcessViewName, secondaryBpmnVisualization);
+  showSubProcessMonitoringData(subProcessBpmnVisualization);
   /*
     TO FIX: currently the code assumes that there's only one enabled shape
   */
   // TO COMPLETE: add interaction on the popover: on hover, highlight some activities
   // const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
-  // const enabledShape = secondaryBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
+  // const enabledShape = subProcessBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
   // const popoverInstance = tippyInstances.find(instance => {
   //   if (instance.reference === enabledShape?.htmlElement) {
   //     return instance;

@@ -9,12 +9,12 @@ export const sharedLoadOptions: LoadOptions = {fit: sharedFitOptions};
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO do not leak internal state
 // eslint-disable-next-line import/no-mutable-exports -- will be refactored later
-export let secondaryBpmnDiagramIsAlreadyLoad = false;
+export let subProcessBpmnDiagramIsAlreadyLoad = false;
 // eslint-disable-next-line import/no-mutable-exports -- will be refactored later
 export let currentView = 'main';
 
-// Secondary BPMN Container
-export const secondaryBpmnVisualization = new BpmnVisualization({container: 'secondary-bpmn-container'});
+// BPMN container of the sub-process
+export const subProcessBpmnVisualization = new BpmnVisualization({container: 'secondary-bpmn-container'});
 
 export function displayBpmnDiagram(tabIndex: string): void {
   if (currentView === tabIndex) {
@@ -22,18 +22,18 @@ export function displayBpmnDiagram(tabIndex: string): void {
   }
 
   const mainBpmnContainerElt = document.querySelector('#main-bpmn-container')!;
-  const secondaryBpmnContainerElt = document.querySelector('#secondary-bpmn-container')!;
+  const subProcessBpmnContainerElt = document.querySelector('#secondary-bpmn-container')!;
 
   switch (tabIndex) {
-    case 'secondary': {
+    case subProcessViewName: {
       addSectionInBreadcrumb();
       mainBpmnContainerElt.classList.add('d-hide');
-      secondaryBpmnContainerElt.classList.remove('d-hide');
+      subProcessBpmnContainerElt.classList.remove('d-hide');
 
-      if (!secondaryBpmnDiagramIsAlreadyLoad) {
+      if (!subProcessBpmnDiagramIsAlreadyLoad) {
         // Load secondary diagram. Need to have the container displayed
-        secondaryBpmnVisualization.load(subDiagram, sharedLoadOptions);
-        secondaryBpmnDiagramIsAlreadyLoad = true;
+        subProcessBpmnVisualization.load(subDiagram, sharedLoadOptions);
+        subProcessBpmnDiagramIsAlreadyLoad = true;
       }
 
       break;
@@ -42,7 +42,7 @@ export function displayBpmnDiagram(tabIndex: string): void {
     default: {
       removeSectionInBreadcrumb();
       mainBpmnContainerElt.classList.remove('d-hide');
-      secondaryBpmnContainerElt.classList.add('d-hide');
+      subProcessBpmnContainerElt.classList.add('d-hide');
       break;
     }
   }
@@ -50,7 +50,7 @@ export function displayBpmnDiagram(tabIndex: string): void {
   currentView = tabIndex;
 }
 
-const poolIdOfSubProcess = 'Participant_03ba50e';
+const poolIdOfSecondProcess = 'Participant_03ba50e';
 
 export class ProcessVisualizer {
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
@@ -70,7 +70,7 @@ export class ProcessVisualizer {
     // Fit the whole diagram again: make it visible, then fit, then hide
     if (hide && !fitDiagram) {
       this.bpmnVisualization.graph.batchUpdate(() => {
-        for (const cell of [poolIdOfSubProcess].map(id => model.getCell(id))) {
+        for (const cell of [poolIdOfSecondProcess].map(id => model.getCell(id))) {
           model.setVisible(cell, true);
         }
       });
@@ -78,7 +78,7 @@ export class ProcessVisualizer {
     }
 
     this.bpmnVisualization.graph.batchUpdate(() => {
-      for (const cell of [poolIdOfSubProcess].map(id => model.getCell(id))) {
+      for (const cell of [poolIdOfSecondProcess].map(id => model.getCell(id))) {
         model.setVisible(cell, !hide);
       }
     });
@@ -91,8 +91,12 @@ export class ProcessVisualizer {
 
 const subProcessId = 'Activity_0ec8azh';
 
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO change the view/processId value. secondary is for the subprocess!! This impacts HTML elements
+export const subProcessViewName = 'secondary';
+
 const doSubProcessNavigation = () => {
-  displayBpmnDiagram('secondary');
+  displayBpmnDiagram(subProcessViewName);
 };
 
 export class SubProcessNavigator {

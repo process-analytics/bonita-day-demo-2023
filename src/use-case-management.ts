@@ -1,11 +1,13 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
-import {hideCaseMonitoringData, showCaseMonitoringData} from './case-monitoring.js';
+import {hideSubCaseMonitoringData, MainProcessCaseMonitoring} from './case-monitoring.js';
 import {hideHappyPath, showHappyPath} from './process-monitoring.js';
-import {ProcessVisualizer, secondaryBpmnDiagramIsAlreadyLoad, secondaryBpmnVisualization, SubProcessNavigator} from './diagram.js';
+import {ProcessVisualizer, subProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisualization, SubProcessNavigator} from './diagram.js';
 
 export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   const subProcessNavigator = new SubProcessNavigator(bpmnVisualization);
+
+  const mainProcessCaseMonitoring = new MainProcessCaseMonitoring(bpmnVisualization);
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO try to having calling constructor for side effects
@@ -19,13 +21,13 @@ export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) 
   // eslint-disable-next-line no-new
   new UseCaseSelector('radio-case-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess();
-    showCaseMonitoringData('main', bpmnVisualization);
+    mainProcessCaseMonitoring.showData();
   }, () => {
-    hideCaseMonitoringData('main', bpmnVisualization);
+    mainProcessCaseMonitoring.hideData();
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO move the logic into case-monitoring or ideally in the subprocess navigator which should manage the data hide
-    if (secondaryBpmnDiagramIsAlreadyLoad) {
-      hideCaseMonitoringData('secondary', secondaryBpmnVisualization);
+    if (subProcessBpmnDiagramIsAlreadyLoad) {
+      hideSubCaseMonitoringData(subProcessBpmnVisualization);
     }
   });
 
