@@ -29,6 +29,7 @@ configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-c
 const logo = document.querySelector<HTMLImageElement>('#logo');
 logo.onclick = () =>
 {
+    // TODO when already open, new click close the advertise section?
     console.log('click img')
     const advertiseSection = document.querySelector<HTMLDivElement>('#section-project-advertising');
     advertiseSection.classList.remove('d-hide');
