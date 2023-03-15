@@ -9,7 +9,7 @@ const sharedFitOptions = {type: FitType.Center, margin: 20};
 
 export const sharedLoadOptions: LoadOptions = {fit: sharedFitOptions};
 
-let currentView: View | undefined = undefined;
+let currentView: View | undefined;
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO change the view/processId value. secondary is for the subprocess!! This impacts HTML elements
