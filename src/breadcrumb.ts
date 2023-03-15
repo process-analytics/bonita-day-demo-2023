@@ -1,8 +1,8 @@
-import {displayBpmnDiagram} from './diagram.js';
+import {displayView} from './diagram.js';
 
 export const configureBreadcrumb = (): void => {
   document.querySelector('#breadcrumb-main-diagram')!.addEventListener('click', () => {
-    displayBpmnDiagram('main');
+    displayView('main');
   });
 };
 

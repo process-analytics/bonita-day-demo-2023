@@ -2,18 +2,15 @@ import tippy, {type Instance, type Props, type ReferenceElement} from 'tippy.js'
 import 'tippy.js/dist/tippy.css';
 import type {BpmnElement, BpmnSemantic, BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
-import {type CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
-import {displayBpmnDiagram, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
+import {type CaseMonitoringData, fetchCaseMonitoringData} from './case-monitoring-data.js';
+import {displayView, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
 
 abstract class AbstractCaseMonitoring {
-  protected caseMonitoringData: CaseMonitoringData;
+  protected caseMonitoringData: CaseMonitoringData | undefined;
   protected tippySupport: AbstractTippySupport;
 
-  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
+  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, private readonly processId: string) {
     console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
-    // eslint-disable-next-line no-warning-comments -- cannot be managed now
-    // TODO initialization. Is it the right place?
-    this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
     this.tippySupport = this.createTippySupportInstance(bpmnVisualization);
     console.info('DONE init CaseMonitoring, processId', processId);
   }
@@ -33,12 +30,20 @@ abstract class AbstractCaseMonitoring {
     console.info('end hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
   }
 
+  protected getCaseMonitoringData() {
+    if (!this.caseMonitoringData) {
+      this.caseMonitoringData = fetchCaseMonitoringData(this.processId, this.bpmnVisualization);
+    }
+
+    return this.caseMonitoringData;
+  }
+
   protected highlightRunningElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.runningActivities, 'state-running-late');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningActivities, 'state-running-late');
   }
 
   protected highlightEnabledElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.enabledShapes, 'state-enabled');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().enabledShapes, 'state-enabled');
   }
 
   protected addOverlay(bpmnElementId: string) {
@@ -56,17 +61,17 @@ abstract class AbstractCaseMonitoring {
   protected abstract createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport;
 
   private reduceVisibilityOfAlreadyExecutedElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 
   private restoreVisibilityOfAlreadyExecutedElements() {
     // eslint-disable-next-line no-warning-comments -- question to answer by Nour
     // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.pendingShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().pendingShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 
   private resetRunningElements() {
-    const elements = this.caseMonitoringData.runningActivities;
+    const elements = this.getCaseMonitoringData().runningActivities;
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
     for (const elementId of elements) {
       this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(elementId);
@@ -83,7 +88,7 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
 
   protected highlightRunningElements(): void {
     super.highlightRunningElements();
-    this.addInfoOnRunningElements(this.caseMonitoringData.runningActivities);
+    this.addInfoOnRunningElements(this.getCaseMonitoringData().runningActivities);
   }
 
   protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
@@ -105,7 +110,7 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
 
   protected highlightEnabledElements(): void {
     super.highlightEnabledElements();
-    this.addInfoOnEnabledElements(this.caseMonitoringData.enabledShapes);
+    this.addInfoOnEnabledElements(this.getCaseMonitoringData().enabledShapes);
   }
 
   protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
@@ -309,7 +314,7 @@ export function hideSubCaseMonitoringData(bpmnVisualization: BpmnVisualization) 
 // TODO trigger by main, but the logic should be only for subprocess
 function showResourceAllocationAction() {
   // This should be managed by SubProcessNavigator
-  displayBpmnDiagram(subProcessViewName);
+  displayView(subProcessViewName);
   showSubProcessMonitoringData(subProcessBpmnVisualization);
   /*
     TO FIX: currently the code assumes that there's only one enabled shape

@@ -14,17 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import {BpmnVisualization} from 'bpmn-visualization';
-// eslint-disable-next-line n/file-extension-in-import -- Vite syntax
-import collapsedDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
 import {configureBreadcrumb} from './breadcrumb.js';
-import {sharedLoadOptions} from './diagram.js';
 import {configureUseCaseSelectors} from './use-case-management.js';
 
-const bpmnVisualization = new BpmnVisualization({
-  container: 'main-bpmn-container',
-});
-bpmnVisualization.load(collapsedDiagram, sharedLoadOptions);
-
 configureBreadcrumb();
-configureUseCaseSelectors(bpmnVisualization);
+configureUseCaseSelectors();

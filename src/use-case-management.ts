@@ -1,9 +1,19 @@
-import {type BpmnVisualization} from 'bpmn-visualization';
 import {hideSubCaseMonitoringData, MainProcessCaseMonitoring} from './case-monitoring.js';
+import {
+  mainBpmnVisualization as bpmnVisualization,
+  ProcessVisualizer,
+  isSubProcessBpmnDiagramIsAlreadyLoad,
+  subProcessBpmnVisualization,
+  SubProcessNavigator,
+  displayView,
+} from './diagram.js';
 import {hideHappyPath, showHappyPath} from './process-monitoring.js';
-import {ProcessVisualizer, subProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisualization, SubProcessNavigator} from './diagram.js';
 
-export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) {
+const displayMainView = () => {
+  displayView('main');
+};
+
+export function configureUseCaseSelectors() {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   const subProcessNavigator = new SubProcessNavigator(bpmnVisualization);
 
@@ -26,7 +36,7 @@ export function configureUseCaseSelectors(bpmnVisualization: BpmnVisualization) 
     mainProcessCaseMonitoring.hideData();
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO move the logic into case-monitoring or ideally in the subprocess navigator which should manage the data hide
-    if (subProcessBpmnDiagramIsAlreadyLoad) {
+    if (isSubProcessBpmnDiagramIsAlreadyLoad()) {
       hideSubCaseMonitoringData(subProcessBpmnVisualization);
     }
   });
@@ -46,6 +56,7 @@ class UseCaseSelector {
     document.querySelector(`#${id}`)?.addEventListener('click', () => {
       if (currentUseCase !== this) {
         currentUseCase?.unselect();
+        displayMainView();
         selectCallback();
         // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment -- need to store this in a variable
         currentUseCase = this;
