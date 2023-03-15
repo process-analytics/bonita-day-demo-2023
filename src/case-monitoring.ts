@@ -260,79 +260,62 @@ class SubProcessTippySupport extends AbstractTippySupport {
     user1Data.set('Activity_015g8ru', 12)
     user1Data.set('Activity_0k8i7cb', 29)
 
+    const userData = [user1Data];
+
     //highlight activity
-    for (let [activityId, nbExec] of user1Data) {
-      this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
-      this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
-        position: 'top-center',
-        label: `${nbExec}`,
-        style: {
-          font: {color: '#fff', size: 16},
-          // TODO use same color as in CSS
-          fill: {color: '#4169E1'},
-          stroke: {color: '#4169E1', width: 2},
-        },
-      });
+    const hightlightElement = (data: Map<string, number>) => {
+      for (let [activityId, nbExec] of data) {
+        this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
+          position: 'top-center',
+          label: `${nbExec}`,
+          style: {
+            font: {color: '#fff', size: 16},
+            // TODO use same color as in CSS
+            fill: {color: '#4169E1'},
+            stroke: {color: '#4169E1', width: 2},
+          },
+        });
+      }
     }
+
+    // for (let [activityId, nbExec] of user1Data) {
+    //   this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
+    //   this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
+    //     position: 'top-center',
+    //     label: `${nbExec}`,
+    //     style: {
+    //       font: {color: '#fff', size: 16},
+    //       // TODO use same color as in CSS
+    //       fill: {color: '#4169E1'},
+    //       stroke: {color: '#4169E1', width: 2},
+    //     },
+    //   });
+    // }
 
 
     const rows = document.querySelectorAll('#popover-resources-available > tbody > tr');
     console.info("popover elements", rows)
     console.info("popover elements length", rows.length)
-    // for (let i = 0; i < rows.length; i++) {
-    //   const row = rows[i];
-    //   console.info("row", row);
-    //   const firstTd = row.childNodes[0];
-    //   console.info("firstTd", firstTd);
-    //
-    //   // @ts-ignore
-    //   firstTd.onclick = (event) => {
-    //     console.info('Enter row', i);
-    //   };
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      // .addEventListener("mouseenter",
+      row.addEventListener("click", (_event) => {
+      // row.onclick = (event) => {
+          console.log(i);
+          const data = userData[i];
+        if (data) {
+          console.info('found data', data)
+        hightlightElement(data);
+        }
 
-      // firstTd.addEventListener("mouseenter", (event) => {
-      //   console.info('Enter row', i);
-      // });
-      // firstTd.addEventListener("mouseenter", (event) => {
-      //   console.info('Enter row', i);
-      // });
-    // }
 
-    const createClickHandler = (row: HTMLTableRowElement) => {
-      return () => {
-        // const [cell] = row.getElementsByTagName("td");
-        const cell = row.cells[0];
-        const id = cell.innerHTML;
-        console.log(id);
-      };
-    };
-
-    const table = document.querySelector("#popover-resources-available");
-    if (table) {
-      // @ts-ignore
-      for (const currentRow of (table as HTMLTableElement).rows) {
-        console.info("currentRow", currentRow);
-        currentRow.onclick = createClickHandler(currentRow);
-      }
+      });
     }
 
 
 
   // TODO manage unregister
-
-
-    // instance.popper.addEventListener("mouseover", (event) => {
-    //   // console.info('evt listener, mouseover. Target', event?.target)
-    //   // @ts-ignore
-    //   if (event?.target?.nodeName === "TD") {
-    //   console.info('evt listener TD, mouseover. Target', event?.target)
-    //   } else { // @ts-ignore
-    //     if (event?.target?.nodeName === "TR") {
-    //             console.info('evt listener TD, mouseover. Target', event?.target)
-    //           }
-    //   }
-    //
-    // });
 
       console.info('DONE SubProcessTippySupport, registering event listener');
 
