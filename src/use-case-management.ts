@@ -19,15 +19,14 @@ export function configureUseCaseSelectors(selectedUseCase: string) {
 
   const mainProcessCaseMonitoring = new MainProcessCaseMonitoring(bpmnVisualization);
 
-
   const useCases = new Map<string, UseCaseSelector>();
-  useCases.set('process-monitoring',   new UseCaseSelector('radio-process-monitoring', () => {
+  useCases.set('process-monitoring', new UseCaseSelector('radio-process-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess(true);
     showHappyPath(bpmnVisualization);
   }, () => {
     hideHappyPath(bpmnVisualization);
   }));
-  useCases.set('case-monitoring',   new UseCaseSelector('radio-case-monitoring', () => {
+  useCases.set('case-monitoring', new UseCaseSelector('radio-case-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess();
     mainProcessCaseMonitoring.showData();
   }, () => {

@@ -248,10 +248,10 @@ class SubProcessTippySupport extends AbstractTippySupport {
     return getWarningInfoAsHtml();
   }
 
-  // TODO remove the instance parameter
   protected registerEventListeners(_instance: Instance): void {
     console.info('SubProcessTippySupport, registering event listener');
 
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO extract data in a dedicated "fetch simulation" class
     // Activity_1p3opxc awaiting approval (the task currently blocked)
     // Activity_015g8ru doc completed
@@ -261,13 +261,13 @@ class SubProcessTippySupport extends AbstractTippySupport {
     const userData = [
       new Map<string, number>([['Activity_015g8ru', 12], ['Activity_0k8i7cb', 29]]),
       new Map<string, number>([['Activity_0k8i7cb', 41], ['Activity_0yyl6g2', 6]]),
-      new Map<string, number>([['Activity_1p3opxc', 3], ['Activity_0k8i7cb', 5], ['Activity_0yyl6g2', 34], ['Activity_16tcn1j', 58]])
+      new Map<string, number>([['Activity_1p3opxc', 3], ['Activity_0k8i7cb', 5], ['Activity_0yyl6g2', 34], ['Activity_16tcn1j', 58]]),
     ];
 
-    //highlight activity
+    // Highlight activity
     const highlightElement = (data: Map<string, number>) => {
-      for (let [activityId, nbExec] of data) {
-        this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
+      for (const [activityId, nbExec] of data) {
+        this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, 'already-completed-by-user');
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
           position: 'top-center',
           label: `${nbExec}`,
@@ -278,48 +278,45 @@ class SubProcessTippySupport extends AbstractTippySupport {
           },
         });
       }
-    }
+    };
+
     // TODO pass the list of bpmn element ids to clean
     const resetElement = (data: Map<string, number>) => {
-      for (let [activityId, ] of data) {
-        this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(activityId, "already-completed-by-user");
+      for (const [activityId] of data) {
+        this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(activityId, 'already-completed-by-user');
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
       }
-    }
+    };
 
-    // target instance.popper. Keep using document for now as it shows that we don't cleanly remove the popover from the DOM in the subprocess view
+    // Target instance.popper. Keep using document for now as it shows that we don't cleanly remove the popover from the DOM in the subprocess view
     const rows = document.querySelectorAll('#popover-resources-available > tbody > tr');
-    console.info("popover elements", rows)
-    console.info("popover elements length", rows.length)
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      // .addEventListener("mouseenter",
-      row.addEventListener("mouseenter", (_event) => {
-        // row.onclick = (event) => {
+    console.info('popover elements', rows);
+    console.info('popover elements length', rows.length);
+    for (const [i, row] of rows.entries()) {
+      row.addEventListener('mouseenter', _event => {
+        // Row.onclick = (event) => {
         console.log('mouseenter on', i);
         const data = userData[i];
         if (data) {
-          console.info('found data', data)
+          console.info('found data', data);
           highlightElement(data);
         }
       });
-      row.addEventListener("mouseleave", (_event) => {
-        // row.onclick = (event) => {
+      row.addEventListener('mouseleave', _event => {
+        // Row.onclick = (event) => {
         console.log('mouseleave on', i);
         const data = userData[i];
         if (data) {
-          console.info('found data', data)
+          console.info('found data', data);
           resetElement(data);
         }
       });
     }
 
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO manage unregister
 
-
-  // TODO manage unregister
-
-      console.info('DONE SubProcessTippySupport, registering event listener');
-
+    console.info('DONE SubProcessTippySupport, registering event listener');
   }
 }
 
