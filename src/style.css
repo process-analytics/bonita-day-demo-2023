@@ -33,9 +33,21 @@ header {
   white-space: inherit;
 }
 
+/* Override Spectre CSS. To be declare after Spectre CSS to override it*/
 .divider {
-  /* Override class of Spectre CSS. To be declare after Spectre CSS to override it*/
   border-color: #d3d5d6;
+}
+
+.navbar {
+  align-items: center;
+  justify-content: flex-start;
+}
+/* END OF "Override Spectre CSS" */
+
+.logo {
+  height: 2rem;
+  width: 2rem;
+  margin-left: 1rem;
 }
 
 /* ****************************************************************************************************************** */
