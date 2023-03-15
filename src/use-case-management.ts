@@ -13,6 +13,8 @@ const displayMainView = () => {
   displayView('main');
 };
 
+export const defaultUseCase = 'reset-all';
+
 export function configureUseCaseSelectors(selectedUseCase: string) {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   const subProcessNavigator = new SubProcessNavigator(bpmnVisualization);
@@ -44,8 +46,7 @@ export function configureUseCaseSelectors(selectedUseCase: string) {
     subProcessNavigator.disable();
   }));
 
-  // TODO manage unknown use case
-  useCases.get(selectedUseCase)?.select();
+  (useCases.get(selectedUseCase) ?? useCases.get(defaultUseCase))?.select();
 }
 
 let currentUseCase: UseCaseSelector | undefined;
