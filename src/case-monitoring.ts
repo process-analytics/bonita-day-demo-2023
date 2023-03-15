@@ -249,7 +249,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
   }
 
   // TODO remove the instance parameter
-  protected registerEventListeners(instance: Instance): void {
+  protected registerEventListeners(_instance: Instance): void {
     console.info('SubProcessTippySupport, registering event listener');
 
     // TODO extract data
@@ -257,6 +257,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
     // Activity_0k8i7cb ordered
     // Activity_0yyl6g2 in transfer
     // Activity_16tcn1j changes transmitted
+    // TODO also show experience on current task
     const userData = [
       new Map<string, number>([['Activity_015g8ru', 12], ['Activity_0k8i7cb', 29]]),
       new Map<string, number>([['Activity_0k8i7cb', 41], ['Activity_0yyl6g2', 6]]),
