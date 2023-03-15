@@ -252,16 +252,16 @@ class SubProcessTippySupport extends AbstractTippySupport {
   protected registerEventListeners(_instance: Instance): void {
     console.info('SubProcessTippySupport, registering event listener');
 
-    // TODO extract data
+    // TODO extract data in a dedicated "fetch simulation" class
+    // Activity_1p3opxc awaiting approval (the task currently blocked)
     // Activity_015g8ru doc completed
     // Activity_0k8i7cb ordered
     // Activity_0yyl6g2 in transfer
     // Activity_16tcn1j changes transmitted
-    // TODO also show experience on current task
     const userData = [
       new Map<string, number>([['Activity_015g8ru', 12], ['Activity_0k8i7cb', 29]]),
       new Map<string, number>([['Activity_0k8i7cb', 41], ['Activity_0yyl6g2', 6]]),
-      new Map<string, number>([['Activity_0k8i7cb', 3], ['Activity_0yyl6g2', 34], ['Activity_16tcn1j', 58]])
+      new Map<string, number>([['Activity_1p3opxc', 3], ['Activity_0k8i7cb', 5], ['Activity_0yyl6g2', 34], ['Activity_16tcn1j', 58]])
     ];
 
     //highlight activity
