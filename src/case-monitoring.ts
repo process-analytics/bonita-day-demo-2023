@@ -3,166 +3,230 @@ import 'tippy.js/dist/tippy.css';
 import type {BpmnElement, BpmnSemantic, BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
 import {type CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
-import {currentView, displayBpmnDiagram, secondaryBpmnVisualization} from './diagram.js';
+import {displayBpmnDiagram, secondaryBpmnVisualization} from './diagram.js';
 
-const tippyInstances: Instance[] = [];
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO change the view/processId value. secondary is for the subprocess!!
+const subProcessViewName = 'secondary';
 
-const registeredBpmnElements = new Map<Element, BpmnSemantic>();
+abstract class AbstractCaseMonitoring {
+  protected caseMonitoringData: CaseMonitoringData;
+  protected tippySupport: AbstractTippySupport;
 
-let caseMonitoringData: CaseMonitoringData;
+  constructor(protected readonly bpmnVisualization: BpmnVisualization, processId: string) {
+    console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO initialization. Is it the right place?
+    this.caseMonitoringData = getCaseMonitoringData(processId, this.bpmnVisualization);
+    this.tippySupport = this.createTippySupportInstance(bpmnVisualization);
+    console.info('DONE init CaseMonitoring, processId', processId);
+  }
+
+  showData(): void {
+    console.info('start showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
+    this.reduceVisibilityOfAlreadyExecutedElements();
+    this.highlightRunningElements();
+    this.highlightEnabledElements();
+    console.info('end showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
+  }
+
+  hideData(): void {
+    console.info('start hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
+    this.restoreVisibilityOfAlreadyExecutedElements();
+    this.resetRunningElements();
+    console.info('end hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
+  }
+
+  protected highlightRunningElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.runningActivities, 'state-running-late');
+  }
+
+  protected highlightEnabledElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.caseMonitoringData.enabledShapes, 'state-enabled');
+  }
+
+  protected addOverlay(bpmnElementId: string) {
+    this.bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
+      position: 'top-right',
+      label: '?',
+      style: {
+        font: {color: '#fff', size: 16},
+        fill: {color: '#4169E1'},
+        stroke: {color: '#4169E1', width: 2},
+      },
+    });
+  }
+
+  protected abstract createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport;
+
+  private reduceVisibilityOfAlreadyExecutedElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
+  }
+
+  private restoreVisibilityOfAlreadyExecutedElements() {
+    // eslint-disable-next-line no-warning-comments -- question to answer by Nour
+    // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.caseMonitoringData.executedShapes, ...this.caseMonitoringData.pendingShapes, ...this.caseMonitoringData.visitedEdges], 'state-already-executed');
+  }
+
+  private resetRunningElements() {
+    const elements = this.caseMonitoringData.runningActivities;
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
+    for (const elementId of elements) {
+      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(elementId);
+    }
+
+    this.tippySupport.removeAllPopovers();
+  }
+}
+
+class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
+  protected highlightRunningElements(): void {
+    super.highlightRunningElements();
+    this.addInfoOnRunningElements(this.caseMonitoringData.runningActivities);
+  }
+
+  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
+    return new MainProcessTippySupport(bpmnVisualization);
+  }
+
+  private addInfoOnRunningElements(bpmnElementIds: string[]) {
+    for (const bpmnElementId of bpmnElementIds) {
+      this.tippySupport.addPopover(bpmnElementId);
+      this.addOverlay(bpmnElementId);
+    }
+  }
+}
+
+class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
+  protected highlightEnabledElements(): void {
+    super.highlightEnabledElements();
+    this.addInfoOnEnabledElements(this.caseMonitoringData.enabledShapes);
+  }
+
+  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
+    return new SubProcessTippySupport(bpmnVisualization);
+  }
+
+  private addInfoOnEnabledElements(bpmnElementIds: string[]) {
+    for (const bpmnElementId of bpmnElementIds) {
+      this.tippySupport.addPopover(bpmnElementId);
+      this.addOverlay(bpmnElementId);
+    }
+  }
+}
 
 export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
-  caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
-
-  reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization);
-  highlightRunningElements(bpmnVisualization);
-  highlightEnabledElements(bpmnVisualization);
-
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO what is it for?
-  // registerInteractions(bpmnVisualization);
+  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SubProcessCaseMonitoring(bpmnVisualization, processId);
+  caseMonitoring.showData();
 }
 
 export function hideCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
-  caseMonitoringData = getCaseMonitoringData(processId, bpmnVisualization);
-  restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization);
-  resetRunningElements(bpmnVisualization);
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
+  // TODO should not instantiated again here, this prevent to correcly unregister/destroy tippy instances
+  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SubProcessCaseMonitoring(bpmnVisualization, processId);
+  caseMonitoring.hideData();
 }
 
-function reduceVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
-}
+// May change in the future to favor composition over inheritance.
+abstract class AbstractTippySupport {
+  protected registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
-function restoreVisibilityOfAlreadyExecutedElements(bpmnVisualization: BpmnVisualization) {
-  // eslint-disable-next-line no-warning-comments -- question to answer by Nour
-  // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...caseMonitoringData.executedShapes, ...caseMonitoringData.pendingShapes, ...caseMonitoringData.visitedEdges], 'state-already-executed');
-}
+  private tippyInstances: Instance[] = [];
 
-// eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO: rename CSS class
-function highlightRunningElements(bpmnVisualization: BpmnVisualization) {
-  const elements = caseMonitoringData.runningActivities;
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-running-late');
-  if (currentView === 'main') {
-    addInfoOnRunningElements(elements, bpmnVisualization);
-  }
-}
+  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 
-export function highlightEnabledElements(bpmnVisualization: BpmnVisualization) {
-  const elements = caseMonitoringData.enabledShapes;
-  bpmnVisualization.bpmnElementsRegistry.addCssClasses(elements, 'state-enabled');
-  if (currentView === 'secondary') {
-    addInfoOnEnabledElements(elements, bpmnVisualization);
-  }
-}
+  addPopover(bpmnElementId: string) {
+    const bpmnElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+    this.registerBpmnElement(bpmnElement);
 
-function resetRunningElements(bpmnVisualization: BpmnVisualization) {
-  const elements = caseMonitoringData.runningActivities;
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
-  for (const activityId of elements) {
-    bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
-  }
-
-  // Unregister tippy instances
-  for (const instance of tippyInstances) {
-    instance.destroy();
-  }
-
-  tippyInstances.length = 0;
-}
-
-function addInfoOnRunningElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
-  for (const bpmnElementId of bpmnElementIds) {
-    addPopover(bpmnElementId, bpmnVisualization);
-    addOverlay(bpmnElementId, bpmnVisualization);
-  }
-}
-
-function addInfoOnEnabledElements(bpmnElementIds: string[], bpmnVisualization: BpmnVisualization) {
-  for (const bpmnElementId of bpmnElementIds) {
-    addPopover(bpmnElementId, bpmnVisualization);
-    addOverlay(bpmnElementId, bpmnVisualization);
-  }
-}
-
-function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
-  const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
-  registerBpmnElement(bpmnElement);
-
-  const tippyInstance = tippy(bpmnElement.htmlElement, {
-    theme: 'light',
-    placement: 'bottom',
-    appendTo: bpmnVisualization.graph.container,
-    content: 'Loading...',
-    arrow: true,
-    interactive: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
-    allowHTML: true,
-    trigger: 'mouseenter',
-    onShown(instance: Instance): void {
-      if (currentView === 'main') {
-        instance.setContent(getRecommendationInfoAsHtml(instance.reference));
-        // eslint-disable-next-line no-warning-comments -- cannot be managed now
-        // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO temp find a better way
+    // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment -- temp
+    const thisInstance = this;
+    const tippyInstance = tippy(bpmnElement.htmlElement, {
+      theme: 'light',
+      placement: 'bottom',
+      appendTo: this.bpmnVisualization.graph.container,
+      content: 'Loading...',
+      arrow: true,
+      interactive: true,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
+      allowHTML: true,
+      trigger: 'mouseenter', // Use click  to easily inspect
+      onShown(instance: Instance): void {
+        instance.setContent(thisInstance.getContent(instance.reference));
         // eslint-disable-next-line no-warning-comments -- cannot be managed now
         // TODO only register the event listener once, or destroy it onHide
-        const contactClientBtn = document.querySelector('#Contact-Client');
-        console.info('tippy on show: contactClientBtn', contactClientBtn);
-        if (contactClientBtn) {
-          console.info('tippy on show: registering event listener on click');
-          contactClientBtn.addEventListener('click', () => {
-            showContactClientAction();
-          });
-        }
+        thisInstance.registerEventListeners();
+      },
+    } as Partial<Props>);
 
-        const allocateResourceBtn = document.querySelector('#Allocate-Resource');
-        console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
-        if (allocateResourceBtn) {
-          console.info('tippy on show: registering event listener on click');
-          allocateResourceBtn.addEventListener('click', () => {
-            showResourceAllocationAction();
-          });
-        }
-      } else {
-        instance.setContent(getWarningInfoAsHtml());
-      }
-    },
-  } as Partial<Props>);
+    this.tippyInstances.push(tippyInstance);
+  }
 
-  tippyInstances.push(tippyInstance);
+  removeAllPopovers(): void {
+    for (const instance of this.tippyInstances) {
+      instance.destroy();
+    }
+
+    this.tippyInstances.length = 0;
+  }
+
+  protected abstract getContent(htmlElement: ReferenceElement): string;
+
+  protected abstract registerEventListeners(): void;
+
+  private registerBpmnElement(bpmnElement: BpmnElement) {
+    this.registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
+  }
 }
 
-function addOverlay(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
-    position: 'top-right',
-    label: '?',
-    style: {
-      font: {color: '#fff', size: 16},
-      fill: {color: '#4169E1'},
-      stroke: {color: '#4169E1', width: 2},
-    },
-  });
-}
+class MainProcessTippySupport extends AbstractTippySupport {
+  protected getContent(htmlElement: ReferenceElement) {
+    console.info('getContent main process');
+    return this.getRecommendationInfoAsHtml(htmlElement);
+  }
 
-function registerBpmnElement(bpmnElement: BpmnElement) {
-  registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
-}
+  protected registerEventListeners(): void {
+    console.info('MainProcessTippySupport, registering event listener');
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+    const contactClientBtn = document.querySelector('#Contact-Client');
+    // Console.info('tippy on show: contactClientBtn', contactClientBtn);
+    if (contactClientBtn) {
+      // Console.info('tippy on show: registering event listener on click');
+      contactClientBtn.addEventListener('click', () => {
+        showContactClientAction();
+      });
+    }
 
-function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
-  let popoverContent = `
+    const allocateResourceBtn = document.querySelector('#Allocate-Resource');
+    // Console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
+    if (allocateResourceBtn) {
+      // Console.info('tippy on show: registering event listener on click');
+      allocateResourceBtn.addEventListener('click', () => {
+        showResourceAllocationAction();
+      });
+    }
+
+    console.info('DONE MainProcessTippySupport, registering event listener');
+  }
+
+  private getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
+    let popoverContent = `
         <div class="popover-container">
         <h4>Task running late</h4>
         <p>Here are some suggestions:</p>
         <table>
           <tbody>`;
 
-  const bpmnSemantic = registeredBpmnElements.get(htmlElement);
-  const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
-  for (const recommendation of activityRecommendationData) {
-    // Replace space with hyphen (-) to be passed as the button id
-    const buttonId = recommendation.title.replace(/\s+/g, '-');
-    popoverContent += `
+    const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
+    const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
+    for (const recommendation of activityRecommendationData) {
+      // Replace space with hyphen (-) to be passed as the button id
+      const buttonId = recommendation.title.replace(/\s+/g, '-');
+      popoverContent += `
             <tr class="popover-row">
                 <td class="popover-key">${recommendation.title}</td>
                 <td class="popover-value">${recommendation.description}</td>
@@ -171,16 +235,29 @@ function getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
                 </td>
             </tr>
         `;
-  }
+    }
 
-  popoverContent += `
+    popoverContent += `
                 </tbody>
             </table>
         </div>
     `;
-  return popoverContent;
+    return popoverContent;
+  }
 }
 
+class SubProcessTippySupport extends AbstractTippySupport {
+  protected getContent() {
+    return getWarningInfoAsHtml();
+  }
+
+  protected registerEventListeners(): void {
+    // Do nothing for now
+  }
+}
+
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO used by subprocess
 function getWarningInfoAsHtml() {
 // Function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
   return `
@@ -224,40 +301,44 @@ function getWarningInfoAsHtml() {
     `;
 }
 
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO trigger by main, but the logic should be only for subprocess
 function showResourceAllocationAction() {
-  displayBpmnDiagram('secondary');
-  showCaseMonitoringData('secondary', secondaryBpmnVisualization);
+  displayBpmnDiagram(subProcessViewName);
+  showCaseMonitoringData(subProcessViewName, secondaryBpmnVisualization);
   /*
     TO FIX: currently the code assumes that there's only one enabled shape
   */
   // TO COMPLETE: add interaction on the popover: on hover, highlight some activities
-  const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
-  const enabledShape = secondaryBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
-  const popoverInstance = tippyInstances.find(instance => {
-    if (instance.reference === enabledShape?.htmlElement) {
-      return instance;
-    }
+  // const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
+  // const enabledShape = secondaryBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
+  // const popoverInstance = tippyInstances.find(instance => {
+  //   if (instance.reference === enabledShape?.htmlElement) {
+  //     return instance;
+  //   }
+  //
+  //   return null;
+  // });
 
-    return null;
-  });
-
-  if (popoverInstance) {
-    // Add additional actions to the existing mouseover event listener
-    /*
-      The listener is NOT WORKING
-    */
-    popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      console.info('listener mouseover, target', target);
-      // If (target.nodeName === 'TD') {
-      //   const selectedRow = target.parentElement as HTMLTableRowElement;
-      // }
-    });
-  } else {
-    console.log('instance not found');
-  }
+  // if (popoverInstance) {
+  //   // Add additional actions to the existing mouseover event listener
+  //   /*
+  //     The listener is NOT WORKING
+  //   */
+  //   popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
+  //     const target = event.target as HTMLElement;
+  //     console.info('listener mouseover, target', target);
+  //     // If (target.nodeName === 'TD') {
+  //     //   const selectedRow = target.parentElement as HTMLTableRowElement;
+  //     // }
+  //   });
+  // } else {
+  //   console.log('instance not found');
+  // }
 }
 
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO trigger by main process
 function showContactClientAction() {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO implement
