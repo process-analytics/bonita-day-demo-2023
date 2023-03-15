@@ -150,7 +150,7 @@ abstract class AbstractTippySupport {
       interactive: true,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
       allowHTML: true,
-      trigger: 'click', // Use click  to easily inspect
+      trigger: 'mouseenter', // Use click to easily inspect
       onShown(instance: Instance): void {
         instance.setContent(thisInstance.getContent(instance.reference));
         // eslint-disable-next-line no-warning-comments -- cannot be managed now
@@ -286,6 +286,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
       }
     }
 
+    // target instance.popper. Keep using document for now as it shows that we don't cleanly remove the popover from the DOM in the subprocess view
     const rows = document.querySelectorAll('#popover-resources-available > tbody > tr');
     console.info("popover elements", rows)
     console.info("popover elements length", rows.length)
