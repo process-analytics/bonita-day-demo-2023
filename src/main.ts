@@ -19,4 +19,5 @@ import {configureUseCaseSelectors} from './use-case-management.js';
 
 configureBreadcrumb();
 const parameters = new URLSearchParams(window.location.search);
-configureUseCaseSelectors(parameters.get('use-case') ?? 'case-monitoring');
+// TODO manage default in configureUseCaseSelectors
+configureUseCaseSelectors(parameters.get('use-case') ?? 'reset-all');
