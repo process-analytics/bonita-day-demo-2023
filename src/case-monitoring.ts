@@ -131,7 +131,7 @@ abstract class AbstractTippySupport {
 
   private tippyInstances: Instance[] = [];
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+  constructor(protected readonly bpmnVisualization: BpmnVisualization) {}
 
   addPopover(bpmnElementId: string) {
     const bpmnElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
@@ -249,7 +249,48 @@ class SubProcessTippySupport extends AbstractTippySupport {
   }
 
   protected registerEventListeners(): void {
-    // Do nothing for now
+    console.info('SubProcessTippySupport, registering event listener');
+
+    // extract data
+// Activity_015g8ru doc completed
+    // Activity_0k8i7cb ordered
+    // Activity_0yyl6g2 in transfer
+    const activityId = 'Activity_015g8ru'
+
+    //highlight activity
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
+
+    console.info('DONE SubProcessTippySupport, registering event listener');
+
+    /*
+  TO FIX: currently the code assumes that there's only one enabled shape
+*/
+    // TO COMPLETE: add interaction on the popover: on hover, highlight some activities
+    // const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
+    // const enabledShape = subProcessBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
+    // const popoverInstance = tippyInstances.find(instance => {
+    //   if (instance.reference === enabledShape?.htmlElement) {
+    //     return instance;
+    //   }
+    //
+    //   return null;
+    // });
+
+    // if (popoverInstance) {
+    //   // Add additional actions to the existing mouseover event listener
+    //   /*
+    //     The listener is NOT WORKING
+    //   */
+    //   popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
+    //     const target = event.target as HTMLElement;
+    //     console.info('listener mouseover, target', target);
+    //     // If (target.nodeName === 'TD') {
+    //     //   const selectedRow = target.parentElement as HTMLTableRowElement;
+    //     // }
+    //   });
+    // } else {
+    //   console.log('instance not found');
+    // }
   }
 }
 
@@ -316,35 +357,6 @@ function showResourceAllocationAction() {
   // This should be managed by SubProcessNavigator
   displayView(subProcessViewName);
   showSubProcessMonitoringData(subProcessBpmnVisualization);
-  /*
-    TO FIX: currently the code assumes that there's only one enabled shape
-  */
-  // TO COMPLETE: add interaction on the popover: on hover, highlight some activities
-  // const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
-  // const enabledShape = subProcessBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
-  // const popoverInstance = tippyInstances.find(instance => {
-  //   if (instance.reference === enabledShape?.htmlElement) {
-  //     return instance;
-  //   }
-  //
-  //   return null;
-  // });
-
-  // if (popoverInstance) {
-  //   // Add additional actions to the existing mouseover event listener
-  //   /*
-  //     The listener is NOT WORKING
-  //   */
-  //   popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
-  //     const target = event.target as HTMLElement;
-  //     console.info('listener mouseover, target', target);
-  //     // If (target.nodeName === 'TD') {
-  //     //   const selectedRow = target.parentElement as HTMLTableRowElement;
-  //     // }
-  //   });
-  // } else {
-  //   console.log('instance not found');
-  // }
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now

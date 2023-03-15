@@ -287,3 +287,11 @@ button {
 button:hover {
   background-color: #3e8e41;
 }
+
+/* sup-rocess case monitoring */
+/* highlight activity already managed by user */
+.bpmn-type-activity.already-completed-by-user > rect {
+/*TODO use constant for highlight color */
+  stroke: blueviolet;
+  filter: drop-shadow(0 0 0.75rem blueviolet);
+}
