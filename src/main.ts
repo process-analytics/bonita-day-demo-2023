@@ -18,4 +18,5 @@ import {configureBreadcrumb} from './breadcrumb.js';
 import {configureUseCaseSelectors} from './use-case-management.js';
 
 configureBreadcrumb();
-configureUseCaseSelectors();
+const parameters = new URLSearchParams(window.location.search);
+configureUseCaseSelectors(parameters.get('use-case') ?? 'case-monitoring');
