@@ -131,7 +131,7 @@ abstract class AbstractTippySupport {
 
   private tippyInstances: Instance[] = [];
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+  constructor(protected readonly bpmnVisualization: BpmnVisualization) {}
 
   addPopover(bpmnElementId: string) {
     const bpmnElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
@@ -150,12 +150,12 @@ abstract class AbstractTippySupport {
       interactive: true,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
       allowHTML: true,
-      trigger: 'mouseenter', // Use click  to easily inspect
+      trigger: 'mouseenter', // Use click to easily inspect
       onShown(instance: Instance): void {
         instance.setContent(thisInstance.getContent(instance.reference));
         // eslint-disable-next-line no-warning-comments -- cannot be managed now
         // TODO only register the event listener once, or destroy it onHide
-        thisInstance.registerEventListeners();
+        thisInstance.registerEventListeners(instance);
       },
     } as Partial<Props>);
 
@@ -172,7 +172,7 @@ abstract class AbstractTippySupport {
 
   protected abstract getContent(htmlElement: ReferenceElement): string;
 
-  protected abstract registerEventListeners(): void;
+  protected abstract registerEventListeners(instance: Instance): void;
 
   private registerBpmnElement(bpmnElement: BpmnElement) {
     this.registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
@@ -181,11 +181,10 @@ abstract class AbstractTippySupport {
 
 class MainProcessTippySupport extends AbstractTippySupport {
   protected getContent(htmlElement: ReferenceElement) {
-    console.info('getContent main process');
     return this.getRecommendationInfoAsHtml(htmlElement);
   }
 
-  protected registerEventListeners(): void {
+  protected registerEventListeners(_instance: Instance): void {
     console.info('MainProcessTippySupport, registering event listener');
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
@@ -248,8 +247,66 @@ class SubProcessTippySupport extends AbstractTippySupport {
     return getWarningInfoAsHtml();
   }
 
-  protected registerEventListeners(): void {
-    // Do nothing for now
+  protected registerEventListeners(_instance: Instance): void {
+    console.info('SubProcessTippySupport, registering event listener');
+
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO extract data in a dedicated "fetch simulation" class
+    // Activity_1p3opxc awaiting approval (the task currently blocked)
+    // Activity_015g8ru doc completed
+    // Activity_0k8i7cb ordered
+    // Activity_0yyl6g2 in transfer
+    // Activity_16tcn1j changes transmitted
+    const userData = [
+      new Map<string, number>([['Activity_015g8ru', 12], ['Activity_0k8i7cb', 29]]),
+      new Map<string, number>([['Activity_0k8i7cb', 41], ['Activity_0yyl6g2', 6]]),
+      new Map<string, number>([['Activity_1p3opxc', 3], ['Activity_0k8i7cb', 5], ['Activity_0yyl6g2', 34], ['Activity_16tcn1j', 58]]),
+    ];
+
+    // Highlight activity
+    const highlightElement = (data: Map<string, number>) => {
+      for (const [activityId, nbExec] of data) {
+        this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, 'already-completed-by-user');
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
+          position: 'top-center',
+          label: `${nbExec}`,
+          style: {
+            font: {color: '#fff', size: 16},
+            fill: {color: 'blueviolet'},
+            stroke: {color: 'blueviolet', width: 2},
+          },
+        });
+      }
+    };
+
+    const resetStyleOfBpmnElements = (bpmnElementIds: string[]) => {
+      for (const bpmnElementId of bpmnElementIds) {
+        this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementId, 'already-completed-by-user');
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
+      }
+    };
+
+    // Target instance.popper. Keep using document for now as it shows that we don't cleanly remove the popover from the DOM in the subprocess view
+    const rows = document.querySelectorAll('#popover-resources-available > tbody > tr');
+    for (const [i, row] of rows.entries()) {
+      row.addEventListener('mouseenter', () => {
+        const data = userData[i];
+        if (data) {
+          highlightElement(data);
+        }
+      });
+      row.addEventListener('mouseleave', () => {
+        const data = userData[i];
+        if (data) {
+          resetStyleOfBpmnElements(Array.from(data.keys()));
+        }
+      });
+    }
+
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO manage unregister
+
+    console.info('DONE SubProcessTippySupport, registering event listener');
   }
 }
 
@@ -262,7 +319,7 @@ function getWarningInfoAsHtml() {
           <h4>Resource not available</h4>
           <p>The resource "pierre" is not available to execute this task.</p>
           <p>Here are some other suggestions:</p>
-          <table>
+          <table id="popover-resources-available">
             <thead>
               <tr>
                 <th>Resource Name</th>
@@ -316,35 +373,6 @@ function showResourceAllocationAction() {
   // This should be managed by SubProcessNavigator
   displayView(subProcessViewName);
   showSubProcessMonitoringData(subProcessBpmnVisualization);
-  /*
-    TO FIX: currently the code assumes that there's only one enabled shape
-  */
-  // TO COMPLETE: add interaction on the popover: on hover, highlight some activities
-  // const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
-  // const enabledShape = subProcessBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
-  // const popoverInstance = tippyInstances.find(instance => {
-  //   if (instance.reference === enabledShape?.htmlElement) {
-  //     return instance;
-  //   }
-  //
-  //   return null;
-  // });
-
-  // if (popoverInstance) {
-  //   // Add additional actions to the existing mouseover event listener
-  //   /*
-  //     The listener is NOT WORKING
-  //   */
-  //   popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
-  //     const target = event.target as HTMLElement;
-  //     console.info('listener mouseover, target', target);
-  //     // If (target.nodeName === 'TD') {
-  //     //   const selectedRow = target.parentElement as HTMLTableRowElement;
-  //     // }
-  //   });
-  // } else {
-  //   console.log('instance not found');
-  // }
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now

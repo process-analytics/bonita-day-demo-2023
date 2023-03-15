@@ -13,23 +13,22 @@ const displayMainView = () => {
   displayView('main');
 };
 
-export function configureUseCaseSelectors() {
+export const defaultUseCase = 'reset-all';
+
+export function configureUseCaseSelectors(selectedUseCase: string) {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   const subProcessNavigator = new SubProcessNavigator(bpmnVisualization);
 
   const mainProcessCaseMonitoring = new MainProcessCaseMonitoring(bpmnVisualization);
 
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO try to having calling constructor for side effects
-  // eslint-disable-next-line no-new
-  new UseCaseSelector('radio-process-monitoring', () => {
+  const useCases = new Map<string, UseCaseSelector>();
+  useCases.set('process-monitoring', new UseCaseSelector('radio-process-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess(true);
     showHappyPath(bpmnVisualization);
   }, () => {
     hideHappyPath(bpmnVisualization);
-  });
-  // eslint-disable-next-line no-new
-  new UseCaseSelector('radio-case-monitoring', () => {
+  }));
+  useCases.set('case-monitoring', new UseCaseSelector('radio-case-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess();
     mainProcessCaseMonitoring.showData();
   }, () => {
@@ -39,15 +38,15 @@ export function configureUseCaseSelectors() {
     if (isSubProcessBpmnDiagramIsAlreadyLoad()) {
       hideSubCaseMonitoringData(subProcessBpmnVisualization);
     }
-  });
-
-  const initialUseCase = new UseCaseSelector('radio-reset-all', () => {
+  }));
+  useCases.set('reset-all', new UseCaseSelector('radio-reset-all', () => {
     processVisualizer.showManuallyTriggeredProcess();
     subProcessNavigator.enable();
   }, () => {
     subProcessNavigator.disable();
-  });
-  initialUseCase.select();
+  }));
+
+  (useCases.get(selectedUseCase) ?? useCases.get(defaultUseCase))?.select();
 }
 
 let currentUseCase: UseCaseSelector | undefined;

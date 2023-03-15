@@ -15,7 +15,8 @@ limitations under the License.
 */
 
 import {configureBreadcrumb} from './breadcrumb.js';
-import {configureUseCaseSelectors} from './use-case-management.js';
+import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.js';
 
 configureBreadcrumb();
-configureUseCaseSelectors();
+const parameters = new URLSearchParams(window.location.search);
+configureUseCaseSelectors(parameters.get('use-case') ?? defaultUseCase);
