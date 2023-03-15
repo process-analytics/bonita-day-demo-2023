@@ -17,5 +17,10 @@ limitations under the License.
 import {configureBreadcrumb} from './breadcrumb.js';
 import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.js';
 
+// The documentation of Spectre CSS: https://github.com/picturepan2/spectre
+//     <link rel="stylesheet" href="node_modules/spectre.css/dist/spectre.min.css">
+// import 'spectre.css/dist/spectre.css'
+// import 'spectre.css/dist/spectre.min.css'
+
 configureBreadcrumb();
 configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-case') ?? defaultUseCase);
