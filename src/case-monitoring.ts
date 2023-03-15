@@ -150,7 +150,7 @@ abstract class AbstractTippySupport {
       interactive: true,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
       allowHTML: true,
-      trigger: 'mouseenter', // Use click  to easily inspect
+      trigger: 'click', // Use click  to easily inspect
       onShown(instance: Instance): void {
         instance.setContent(thisInstance.getContent(instance.reference));
         // eslint-disable-next-line no-warning-comments -- cannot be managed now
@@ -248,73 +248,94 @@ class SubProcessTippySupport extends AbstractTippySupport {
     return getWarningInfoAsHtml();
   }
 
+  // TODO remove the instance parameter
   protected registerEventListeners(instance: Instance): void {
     console.info('SubProcessTippySupport, registering event listener');
 
     // extract data
-// Activity_015g8ru doc completed
+    // Activity_015g8ru doc completed
     // Activity_0k8i7cb ordered
     // Activity_0yyl6g2 in transfer
-    const activityId = 'Activity_015g8ru'
+    const user1Data = new Map<string, number>();
+    user1Data.set('Activity_015g8ru', 12)
+    user1Data.set('Activity_0k8i7cb', 29)
 
     //highlight activity
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
-    this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
-      position: 'top-center',
-      label: '12',
-      style: {
-        font: {color: '#fff', size: 16},
-        // TODO use same color as in CSS
-        fill: {color: '#4169E1'},
-        stroke: {color: '#4169E1', width: 2},
-      },
-    });
+    for (let [activityId, nbExec] of user1Data) {
+      this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
+      this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
+        position: 'top-center',
+        label: `${nbExec}`,
+        style: {
+          font: {color: '#fff', size: 16},
+          // TODO use same color as in CSS
+          fill: {color: '#4169E1'},
+          stroke: {color: '#4169E1', width: 2},
+        },
+      });
+    }
 
 
-    instance.popper.addEventListener("mouseover", (event) => {
-      // console.info('evt listener, mouseover. Target', event?.target)
+    const rows = document.querySelectorAll('#popover-resources-available > tbody > tr');
+    console.info("popover elements", rows)
+    console.info("popover elements length", rows.length)
+    // for (let i = 0; i < rows.length; i++) {
+    //   const row = rows[i];
+    //   console.info("row", row);
+    //   const firstTd = row.childNodes[0];
+    //   console.info("firstTd", firstTd);
+    //
+    //   // @ts-ignore
+    //   firstTd.onclick = (event) => {
+    //     console.info('Enter row', i);
+    //   };
+
+      // firstTd.addEventListener("mouseenter", (event) => {
+      //   console.info('Enter row', i);
+      // });
+      // firstTd.addEventListener("mouseenter", (event) => {
+      //   console.info('Enter row', i);
+      // });
+    // }
+
+    const createClickHandler = (row: HTMLTableRowElement) => {
+      return () => {
+        // const [cell] = row.getElementsByTagName("td");
+        const cell = row.cells[0];
+        const id = cell.innerHTML;
+        console.log(id);
+      };
+    };
+
+    const table = document.querySelector("#popover-resources-available");
+    if (table) {
       // @ts-ignore
-      if (event?.target?.nodeName === "TD") {
-      console.info('evt listener TD, mouseover. Target', event?.target)
-      } else { // @ts-ignore
-        if (event?.target?.nodeName === "TR") {
-                console.info('evt listener TD, mouseover. Target', event?.target)
-              }
+      for (const currentRow of (table as HTMLTableElement).rows) {
+        console.info("currentRow", currentRow);
+        currentRow.onclick = createClickHandler(currentRow);
       }
+    }
 
-    });
+
+
+  // TODO manage unregister
+
+
+    // instance.popper.addEventListener("mouseover", (event) => {
+    //   // console.info('evt listener, mouseover. Target', event?.target)
+    //   // @ts-ignore
+    //   if (event?.target?.nodeName === "TD") {
+    //   console.info('evt listener TD, mouseover. Target', event?.target)
+    //   } else { // @ts-ignore
+    //     if (event?.target?.nodeName === "TR") {
+    //             console.info('evt listener TD, mouseover. Target', event?.target)
+    //           }
+    //   }
+    //
+    // });
 
       console.info('DONE SubProcessTippySupport, registering event listener');
 
-      /*
-    TO FIX: currently the code assumes that there's only one enabled shape
-  */
-      // TO COMPLETE: add interaction on the popover: on hover, highlight some activities
-      // const enabledShapeId = caseMonitoringData.enabledShapes.values().next().value as string;
-      // const enabledShape = subProcessBpmnVisualization.bpmnElementsRegistry.getElementsByIds(enabledShapeId)[0];
-      // const popoverInstance = tippyInstances.find(instance => {
-      //   if (instance.reference === enabledShape?.htmlElement) {
-      //     return instance;
-      //   }
-      //
-      //   return null;
-      // });
-
-      // if (popoverInstance) {
-      //   // Add additional actions to the existing mouseover event listener
-      //   /*
-      //     The listener is NOT WORKING
-      //   */
-      //   popoverInstance.popper.addEventListener('mouseover', (event: MouseEvent) => {
-      //     const target = event.target as HTMLElement;
-      //     console.info('listener mouseover, target', target);
-      //     // If (target.nodeName === 'TD') {
-      //     //   const selectedRow = target.parentElement as HTMLTableRowElement;
-      //     // }
-      //   });
-      // } else {
-      //   console.log('instance not found');
-      // }
   }
 }
 
@@ -327,7 +348,7 @@ function getWarningInfoAsHtml() {
           <h4>Resource not available</h4>
           <p>The resource "pierre" is not available to execute this task.</p>
           <p>Here are some other suggestions:</p>
-          <table>
+          <table id="popover-resources-available">
             <thead>
               <tr>
                 <th>Resource Name</th>
