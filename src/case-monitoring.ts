@@ -280,11 +280,10 @@ class SubProcessTippySupport extends AbstractTippySupport {
       }
     };
 
-    // TODO pass the list of bpmn element ids to clean
-    const resetElement = (data: Map<string, number>) => {
-      for (const [activityId] of data) {
-        this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(activityId, 'already-completed-by-user');
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
+    const resetStyleOfBpmnElements = (bpmnElementIds: string[]) => {
+      for (let bpmnElementId of bpmnElementIds) {
+      this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementId, 'already-completed-by-user');
+      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
       }
     };
 
@@ -308,7 +307,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
         const data = userData[i];
         if (data) {
           console.info('found data', data);
-          resetElement(data);
+          resetStyleOfBpmnElements(Array.from(data.keys()));
         }
       });
     }
