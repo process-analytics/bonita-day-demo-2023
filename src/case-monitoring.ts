@@ -252,15 +252,12 @@ class SubProcessTippySupport extends AbstractTippySupport {
   protected registerEventListeners(instance: Instance): void {
     console.info('SubProcessTippySupport, registering event listener');
 
-    // extract data
-    // Activity_015g8ru doc completed
-    // Activity_0k8i7cb ordered
-    // Activity_0yyl6g2 in transfer
-    const user1Data = new Map<string, number>();
-    user1Data.set('Activity_015g8ru', 12)
-    user1Data.set('Activity_0k8i7cb', 29)
-
-    const userData = [user1Data];
+    // TODO extract data
+    const userData = [
+      new Map<string, number>([['Activity_015g8ru', 12], ['Activity_0k8i7cb', 29]]),
+      new Map<string, number>([['Activity_0k8i7cb', 41], ['Activity_0yyl6g2', 6]]),
+      new Map<string, number>([['Activity_0yyl6g2', 34]])
+    ];
 
     //highlight activity
     const hightlightElement = (data: Map<string, number>) => {
@@ -278,21 +275,13 @@ class SubProcessTippySupport extends AbstractTippySupport {
         });
       }
     }
-
-    // for (let [activityId, nbExec] of user1Data) {
-    //   this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, "already-completed-by-user")
-    //   this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
-    //     position: 'top-center',
-    //     label: `${nbExec}`,
-    //     style: {
-    //       font: {color: '#fff', size: 16},
-    //       // TODO use same color as in CSS
-    //       fill: {color: '#4169E1'},
-    //       stroke: {color: '#4169E1', width: 2},
-    //     },
-    //   });
-    // }
-
+    // TODO pass the list of bpmn element ids to clean
+    const resetElement = (data: Map<string, number>) => {
+      for (let [activityId, ] of data) {
+        this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(activityId, "already-completed-by-user");
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(activityId);
+      }
+    }
 
     const rows = document.querySelectorAll('#popover-resources-available > tbody > tr');
     console.info("popover elements", rows)
@@ -300,16 +289,23 @@ class SubProcessTippySupport extends AbstractTippySupport {
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
       // .addEventListener("mouseenter",
-      row.addEventListener("click", (_event) => {
-      // row.onclick = (event) => {
-          console.log(i);
-          const data = userData[i];
+      row.addEventListener("mouseenter", (_event) => {
+        // row.onclick = (event) => {
+        console.log('mouseenter on', i);
+        const data = userData[i];
         if (data) {
           console.info('found data', data)
-        hightlightElement(data);
+          hightlightElement(data);
         }
-
-
+      });
+      row.addEventListener("mouseleave", (_event) => {
+        // row.onclick = (event) => {
+        console.log('mouseleave on', i);
+        const data = userData[i];
+        if (data) {
+          console.info('found data', data)
+          resetElement(data);
+        }
       });
     }
 
