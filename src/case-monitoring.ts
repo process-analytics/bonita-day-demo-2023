@@ -5,6 +5,10 @@ import {getActivityRecommendationData} from './recommendation-data.js';
 import {type CaseMonitoringData, getCaseMonitoringData} from './case-monitoring-data.js';
 import {displayBpmnDiagram, secondaryBpmnVisualization} from './diagram.js';
 
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO change the view/processId value. secondary is for the subprocess!!
+const subProcessViewName = 'secondary';
+
 abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData;
   protected tippySupport: AbstractTippySupport;
@@ -94,10 +98,7 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   }
 }
 
-/**
- * Currently handle the SubProcess!!!
- */
-class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
+class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
   protected highlightEnabledElements(): void {
     super.highlightEnabledElements();
     this.addInfoOnEnabledElements(this.caseMonitoringData.enabledShapes);
@@ -116,16 +117,14 @@ class SecondaryProcessCaseMonitoring extends AbstractCaseMonitoring {
 }
 
 export function showCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO change the view/processId value. secondary is for the subprocess!!
-  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SecondaryProcessCaseMonitoring(bpmnVisualization, processId);
+  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SubProcessCaseMonitoring(bpmnVisualization, processId);
   caseMonitoring.showData();
 }
 
 export function hideCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO should not instantiated again here, this prevent to correcly unregister/destroy tippy instances
-  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SecondaryProcessCaseMonitoring(bpmnVisualization, processId);
+  const caseMonitoring = processId === 'main' ? new MainProcessCaseMonitoring(bpmnVisualization, processId) : new SubProcessCaseMonitoring(bpmnVisualization, processId);
   caseMonitoring.hideData();
 }
 
@@ -305,8 +304,8 @@ function getWarningInfoAsHtml() {
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main, but the logic should be only for subprocess
 function showResourceAllocationAction() {
-  displayBpmnDiagram('secondary');
-  showCaseMonitoringData('secondary', secondaryBpmnVisualization);
+  displayBpmnDiagram(subProcessViewName);
+  showCaseMonitoringData(subProcessViewName, secondaryBpmnVisualization);
   /*
     TO FIX: currently the code assumes that there's only one enabled shape
   */
