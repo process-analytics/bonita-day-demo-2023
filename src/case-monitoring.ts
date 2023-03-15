@@ -292,7 +292,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
     console.info('popover elements', rows);
     console.info('popover elements length', rows.length);
     for (const [i, row] of rows.entries()) {
-      row.addEventListener('mouseenter', _event => {
+      row.addEventListener('mouseenter', () => {
         // Row.onclick = (event) => {
         console.log('mouseenter on', i);
         const data = userData[i];
@@ -301,7 +301,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
           highlightElement(data);
         }
       });
-      row.addEventListener('mouseleave', _event => {
+      row.addEventListener('mouseleave', () => {
         // Row.onclick = (event) => {
         console.log('mouseleave on', i);
         const data = userData[i];
