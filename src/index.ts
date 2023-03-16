@@ -22,22 +22,24 @@ import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.j
 // import 'spectre.css/dist/spectre.css'
 // import 'spectre.css/dist/spectre.min.css'
 
-configureBreadcrumb();
-configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-case') ?? defaultUseCase);
-configureToggleAdvertiseSection();
-
-function configureToggleAdvertiseSection() {
-  function toggleDisplay(element: HTMLElement): void {
+const configureToggleAdvertiseSection = () => {
+  const toggleDisplay = (element: HTMLElement): void => {
     element.classList.toggle('d-hide');
-  }
+  };
 
-  function registerToggleDisplayOnClick(selector: string): void {
+  const registerToggleDisplayOnClick = (selector: string): void => {
     (document.querySelector<HTMLImageElement>(selector))!.addEventListener('click', () => {
       toggleDisplay((document.querySelector<HTMLDivElement>('#section-project-advertising'))!);
       toggleDisplay((document.querySelector<HTMLDivElement>('#section-main'))!);
     });
-  }
+  };
 
   registerToggleDisplayOnClick('#logo');
   registerToggleDisplayOnClick('.project-advertising button');
-}
+};
+
+
+configureBreadcrumb();
+configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-case') ?? defaultUseCase);
+configureToggleAdvertiseSection();
+
