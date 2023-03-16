@@ -17,5 +17,23 @@ limitations under the License.
 import {configureBreadcrumb} from './breadcrumb.js';
 import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.js';
 
+const configureToggleAdvertiseSection = () => {
+  const toggleDisplay = (element: HTMLElement): void => {
+    element.classList.toggle('d-hide');
+  };
+
+  const registerToggleDisplayOnClick = (selector: string): void => {
+    (document.querySelector<HTMLImageElement>(selector))!.addEventListener('click', () => {
+      toggleDisplay((document.querySelector<HTMLDivElement>('#section-project-advertising'))!);
+      toggleDisplay((document.querySelector<HTMLDivElement>('#section-main'))!);
+    });
+  };
+
+  registerToggleDisplayOnClick('#logo');
+  registerToggleDisplayOnClick('.project-advertising button');
+};
+
 configureBreadcrumb();
 configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-case') ?? defaultUseCase);
+configureToggleAdvertiseSection();
+

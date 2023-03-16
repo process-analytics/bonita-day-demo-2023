@@ -11,6 +11,7 @@
 </head>
 <body>
 <header class="navbar">
+    <img src="/logo.svg" id="logo" alt="The Process Analytics project logo" class="logo" title="Click to learn more about the Process Analytics project">
     <ul class="breadcrumb ml-2 pl-2 text-large">
         <li class="breadcrumb-item">
             <a id="breadcrumb-main-diagram" href="#">Purchase orders</a>
@@ -18,7 +19,7 @@
     </ul>
 </header>
 <div class="divider m-0"></div>
-<section class="container">
+<section id="section-main" class="container">
     <div class="columns col-11 col-mx-auto mt-2">
         <div class="col-12 my-2">
             <div id="main-bpmn-container" class="bpmn-container"></div>
@@ -44,6 +45,20 @@
                         <i class="form-icon"></i> Case Monitoring
                     </label>
                 </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="section-project-advertising" class="container d-hide">
+    <div class="columns col-mx-auto mt-2">
+        <div class="col-12 my-2">
+            <div class="project-advertising-container">
+                <div class="project-advertising">
+                    <img src="/logo.svg" alt="The Process Analytics project logo">
+                    <button class="text-bold color-subtitle">X</button>
+                </div>
+                <!-- TODO add gtag -->
+                <div class="project-advertising-outline">For more information, visit the <a href="https://process-analytics.dev/" target="_blank">Process Analytics website</a>.</div>
             </div>
         </div>
     </div>

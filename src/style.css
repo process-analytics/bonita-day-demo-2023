@@ -14,6 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+:root {
+  --color-divider: #d3d5d6;
+  --color-background-navbar: #f1f3f5;
+  --bpmn-container-height: calc(100vh - 8rem);
+}
+
 html {
   font-family: sans-serif;
 }
@@ -23,7 +29,7 @@ body {
 }
 
 header {
-  background-color: #f1f3f5;
+  background-color: var(--color-background-navbar);
 }
 
 .btn {
@@ -33,9 +39,57 @@ header {
   white-space: inherit;
 }
 
+/* Override Spectre CSS. To be declare after Spectre CSS to override it*/
 .divider {
-  /* Override class of Spectre CSS. To be declare after Spectre CSS to override it*/
-  border-color: #d3d5d6;
+  border-color: var(--color-divider);
+}
+
+.navbar {
+  align-items: center;
+  justify-content: flex-start;
+}
+/* END OF "Override Spectre CSS" */
+
+.logo {
+  height: 2rem;
+  width: 2rem;
+  margin-left: 1rem;
+  cursor: pointer;
+}
+
+/* ****************************************************************************************************************** */
+/* Project Advertising section */
+/* ****************************************************************************************************************** */
+
+.project-advertising-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.project-advertising {
+  display: flex;
+  justify-content: center;
+  height: var(--bpmn-container-height);
+}
+.project-advertising button {
+  align-self: flex-start;
+  background: var(--color-background-navbar);
+  border-color: var(--color-divider);
+  border-style: solid;
+  border-width: .1rem;
+  color: var(--color-divider);
+}
+
+.project-advertising button:hover {
+  background: var(--color-divider);
+  color: white;
+}
+
+.project-advertising-outline {
+  align-self: center;
+  margin-top: 2rem;
+  /*TODO duplicated with font size of the radio-form Use the same layout*/
+  font-size: .9rem;
 }
 
 /* ****************************************************************************************************************** */
@@ -44,7 +98,7 @@ header {
 .bpmn-container {
   /* use absolute values for height to ensure that the vertical diagram is not fully displayed when the page is opened. */
   /* width is relative to the window size */
-  height: calc(100vh - 8rem);
+  height: var(--bpmn-container-height);
   border-radius: .3rem;
   /* This ensures that the parts of the diagram outside of the container are not displayed. */
   overflow: hidden;
