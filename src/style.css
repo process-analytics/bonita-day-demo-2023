@@ -16,7 +16,8 @@ limitations under the License.
 
 :root {
   --color-divider: #d3d5d6;
-  --color-background-navbar: #f1f3f5
+  --color-background-navbar: #f1f3f5;
+  --bpmn-container-height: calc(100vh - 8rem);
 }
 
 html {
@@ -63,15 +64,12 @@ header {
 .project-advertising-container {
   display: flex;
   flex-direction: column;
-  /*TODO duplicated with bpmn-container*/
-  /*height: calc(100vh - 8rem);*/
 }
 
 .project-advertising {
   display: flex;
   justify-content: center;
-  /*TODO duplicated with bpmn-container*/
-  height: calc(100vh - 8rem);
+  height: var(--bpmn-container-height);
 }
 .project-advertising button {
   align-self: flex-start;
@@ -98,7 +96,7 @@ header {
 .bpmn-container {
   /* use absolute values for height to ensure that the vertical diagram is not fully displayed when the page is opened. */
   /* width is relative to the window size */
-  height: calc(100vh - 8rem);
+  height: var(--bpmn-container-height);
   border-radius: .3rem;
   /* This ensures that the parts of the diagram outside of the container are not displayed. */
   overflow: hidden;
