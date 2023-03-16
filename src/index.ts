@@ -36,11 +36,18 @@ function configureToggleAdvertiseSection() {
     toggleDisplay((document.querySelector<HTMLDivElement>('#section-main'))!);
   }
 
-  (document.querySelector<HTMLImageElement>('#logo'))!.addEventListener('click', () => {
-    toggleOfAllSections();
-  });
+  function registerToggleDisplayOnClick(selector: string): void {
+    (document.querySelector<HTMLImageElement>(selector))!.addEventListener('click', () => {
+      toggleOfAllSections();
+    });
+  }
 
-  (document.querySelector<HTMLButtonElement>('.project-advertising button'))!.addEventListener('click', () => {
-    toggleOfAllSections();
-  });
+  registerToggleDisplayOnClick('#logo');
+  // (document.querySelector<HTMLImageElement>('#logo'))!.addEventListener('click', () => {
+  //   toggleOfAllSections();
+  // });
+  registerToggleDisplayOnClick('.project-advertising button');
+  // (document.querySelector<HTMLButtonElement>('.project-advertising button'))!.addEventListener('click', () => {
+  //   toggleOfAllSections();
+  // });
 }
