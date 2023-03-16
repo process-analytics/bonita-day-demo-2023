@@ -191,7 +191,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
     const contactClientBtn = document.querySelector('#Contact-Client');
     // Console.info('tippy on show: contactClientBtn', contactClientBtn);
     if (contactClientBtn) {
-      // Console.info('tippy on show: registering event listener on click');
+      console.info('tippy on show: registering event listener on click');
       contactClientBtn.addEventListener('click', () => {
         showContactClientAction(this.bpmnVisualization).then(() => {
           console.log('Contact client action complete!');
