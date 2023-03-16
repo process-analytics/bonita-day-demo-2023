@@ -24,32 +24,38 @@ import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.j
 
 configureBreadcrumb();
 configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-case') ?? defaultUseCase);
+configureToggleAdvertiseSection();
 
-// Manage the advertising section
-const logo = document.querySelector<HTMLImageElement>('#logo');
-logo.onclick = () =>
-{
-    // TODO when already open, new click close the advertise section?
-    console.log('click img')
-    const advertiseSection = document.querySelector<HTMLDivElement>('#section-project-advertising');
-    advertiseSection.classList.remove('d-hide');
-    console.log('advertise section displayed')
-    const mainSection = document.querySelector<HTMLDivElement>('#section-main');
-    mainSection.classList.add('d-hide');
-    console.log('main section hidden')
-}
 
-const closeBtn = document.querySelector<HTMLButtonElement>('.project-advertising button');
-if (closeBtn) {
-    console.info('btn exists')
-    closeBtn.onclick = () => {
-        console.log('click btn')
-        // TODO manage duplication with open
+
+function configureToggleAdvertiseSection() {
+
+    const logo = document.querySelector<HTMLImageElement>('#logo');
+    logo.onclick = () =>
+    {
+        // TODO when already open, new click close the advertise section?
+        console.log('click img')
         const advertiseSection = document.querySelector<HTMLDivElement>('#section-project-advertising');
-        advertiseSection.classList.add('d-hide');
-        console.log('advertise section hidden')
+        advertiseSection.classList.remove('d-hide');
+        console.log('advertise section displayed')
         const mainSection = document.querySelector<HTMLDivElement>('#section-main');
-        mainSection.classList.remove('d-hide');
-        console.log('main section displayed')
-    };
+        mainSection.classList.add('d-hide');
+        console.log('main section hidden')
+    }
+
+    const closeBtn = document.querySelector<HTMLButtonElement>('.project-advertising button');
+    if (closeBtn) {
+        console.info('btn exists')
+        closeBtn.onclick = () => {
+            console.log('click btn')
+            // TODO manage duplication with open, use classList.toggle instead?
+            const advertiseSection = document.querySelector<HTMLDivElement>('#section-project-advertising');
+            advertiseSection.classList.add('d-hide');
+            console.log('advertise section hidden')
+            const mainSection = document.querySelector<HTMLDivElement>('#section-main');
+            mainSection.classList.remove('d-hide');
+            console.log('main section displayed')
+        };
+    }
+
 }
