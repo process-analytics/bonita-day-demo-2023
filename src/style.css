@@ -68,6 +68,21 @@ header {
   /*TODO duplicated with bpmn-container*/
   height: calc(100vh - 8rem);
 }
+.project-advertising button {
+  align-self: flex-start;
+  /*background: from navbar*/
+  background: #f1f3f5;
+  /*border: from divider*/
+  border-color: #d3d5d6;
+  border-style: solid;
+  border-width: .1rem;
+  color: #d3d5d6;
+}
+
+.project-advertising button:hover {
+  background: #d3d5d6;
+  color: white;
+}
 
 .project-advertising-outline {
   align-self: center;
