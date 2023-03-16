@@ -24,3 +24,18 @@ import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.j
 
 configureBreadcrumb();
 configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-case') ?? defaultUseCase);
+
+// Manage the advertising section
+const closeBtn = document.querySelector<HTMLButtonElement>('.project-advertising button');
+if (closeBtn) {
+    console.info('btn exists')
+    closeBtn.onclick = () => {
+        console.log('click btn')
+        const advertiseSection = document.querySelector<HTMLDivElement>('#section-project-advertising');
+        advertiseSection.classList.add('d-hide');
+        console.log('advertise section hidden')
+        const mainSection = document.querySelector<HTMLDivElement>('#section-main');
+        mainSection.classList.remove('d-hide');
+        console.log('main section displayed')
+    };
+}
