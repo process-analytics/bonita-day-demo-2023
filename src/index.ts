@@ -31,42 +31,16 @@ function configureToggleAdvertiseSection() {
     element.classList.toggle('d-hide');
   }
 
-  function toggleAllDisplays(): void {
+  function toggleOfAllSections(): void {
     toggleDisplay((document.querySelector<HTMLDivElement>('#section-project-advertising'))!);
-    // advertiseSection.classList.remove('d-hide');
-    console.log('advertise section toggled');
     toggleDisplay((document.querySelector<HTMLDivElement>('#section-main'))!);
-    // mainSection.classList.add('d-hide');
-    console.log('main section toggled');
   }
 
   (document.querySelector<HTMLImageElement>('#logo'))!.addEventListener('click', () => {
-    // TODO when already open, new click close the advertise section?
-    console.log('click img');
-    toggleAllDisplays();
-    // toggleDisplay((document.querySelector<HTMLDivElement>('#section-project-advertising'))!);
-    // // advertiseSection.classList.remove('d-hide');
-    // console.log('advertise section toggled');
-    // toggleDisplay((document.querySelector<HTMLDivElement>('#section-main'))!);
-    // // mainSection.classList.add('d-hide');
-    // console.log('main section toggled');
+    toggleOfAllSections();
   });
 
   (document.querySelector<HTMLButtonElement>('.project-advertising button'))!.addEventListener('click', () => {
-    console.log('click btn');
-    toggleAllDisplays();
+    toggleOfAllSections();
   });
-  // if (closeBtn) {
-  //   console.info('btn exists');
-  //   closeBtn.addEventListener('click', () => {
-  //     console.log('click btn');
-  //     // TODO manage duplication with open, use classList.toggle instead?
-  //     const advertiseSection = document.querySelector<HTMLDivElement>('#section-project-advertising');
-  //     advertiseSection.classList.add('d-hide');
-  //     console.log('advertise section hidden');
-  //     const mainSection = document.querySelector<HTMLDivElement>('#section-main');
-  //     mainSection.classList.remove('d-hide');
-  //     console.log('main section displayed');
-  //   });
-  // }
 }
