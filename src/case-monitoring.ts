@@ -3,7 +3,7 @@ import 'tippy.js/dist/tippy.css';
 import type {BpmnElement, BpmnSemantic, BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
 import {type CaseMonitoringData, fetchCaseMonitoringData} from './case-monitoring-data.js';
-import {displayView, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
+import {displayView, ProcessVisualizer, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
 
 abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData | undefined;
@@ -193,7 +193,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
     if (contactClientBtn) {
       // Console.info('tippy on show: registering event listener on click');
       contactClientBtn.addEventListener('click', () => {
-        showContactClientAction();
+        showContactClientAction(this.bpmnVisualization);
       });
     }
 
@@ -377,10 +377,19 @@ function showResourceAllocationAction() {
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main process
-function showContactClientAction() {
+async function showContactClientAction(bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO implement
   // eslint-disable-next-line no-alert -- will be remove with the final implementation
-  window.alert('Clicked on showContactClientAction');
+  //display contact client pool
+  const processVisualizer = new ProcessVisualizer(bpmnVisualization);
+  processVisualizer.showManuallyTriggeredProcess();
+
+  //hide pool when the process execution terminates
+  // Wait for 5 seconds for simulation
+  await new Promise(resolve => setTimeout(resolve, 5000));
+
+  processVisualizer.hideManuallyTriggeredProcess();
+
 }
 
