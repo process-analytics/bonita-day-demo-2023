@@ -18,5 +18,4 @@ import {configureBreadcrumb} from './breadcrumb.js';
 import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.js';
 
 configureBreadcrumb();
-const parameters = new URLSearchParams(window.location.search);
-configureUseCaseSelectors(parameters.get('use-case') ?? defaultUseCase);
+configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-case') ?? defaultUseCase);
