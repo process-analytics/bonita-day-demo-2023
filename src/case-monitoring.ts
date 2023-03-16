@@ -193,7 +193,12 @@ class MainProcessTippySupport extends AbstractTippySupport {
     if (contactClientBtn) {
       // Console.info('tippy on show: registering event listener on click');
       contactClientBtn.addEventListener('click', () => {
-        showContactClientAction(this.bpmnVisualization);
+        showContactClientAction(this.bpmnVisualization).then(() => {
+          console.log('Contact client action complete!');
+        })
+          .catch(error => {
+            console.error('Error in contact client action:', error);
+          });
       });
     }
 
@@ -380,16 +385,19 @@ function showResourceAllocationAction() {
 async function showContactClientAction(bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO implement
-  // eslint-disable-next-line no-alert -- will be remove with the final implementation
-  //display contact client pool
+
+  // display contact client pool
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   processVisualizer.showManuallyTriggeredProcess();
 
-  //hide pool when the process execution terminates
+  // Hide pool when the process execution terminates
   // Wait for 5 seconds for simulation
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  await new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, 5000);
+  });
 
   processVisualizer.hideManuallyTriggeredProcess();
-
 }
 
