@@ -33,7 +33,6 @@ const configureToggleAdvertiseSection = () => {
   registerToggleDisplayOnClick('.project-advertising button');
 };
 
-
 configureBreadcrumb();
 configureUseCaseSelectors(new URLSearchParams(window.location.search).get('use-case') ?? defaultUseCase);
 configureToggleAdvertiseSection();
