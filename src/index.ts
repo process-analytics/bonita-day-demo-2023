@@ -31,23 +31,13 @@ function configureToggleAdvertiseSection() {
     element.classList.toggle('d-hide');
   }
 
-  function toggleOfAllSections(): void {
-    toggleDisplay((document.querySelector<HTMLDivElement>('#section-project-advertising'))!);
-    toggleDisplay((document.querySelector<HTMLDivElement>('#section-main'))!);
-  }
-
   function registerToggleDisplayOnClick(selector: string): void {
     (document.querySelector<HTMLImageElement>(selector))!.addEventListener('click', () => {
-      toggleOfAllSections();
+      toggleDisplay((document.querySelector<HTMLDivElement>('#section-project-advertising'))!);
+      toggleDisplay((document.querySelector<HTMLDivElement>('#section-main'))!);
     });
   }
 
   registerToggleDisplayOnClick('#logo');
-  // (document.querySelector<HTMLImageElement>('#logo'))!.addEventListener('click', () => {
-  //   toggleOfAllSections();
-  // });
   registerToggleDisplayOnClick('.project-advertising button');
-  // (document.querySelector<HTMLButtonElement>('.project-advertising button'))!.addEventListener('click', () => {
-  //   toggleOfAllSections();
-  // });
 }
