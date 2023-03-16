@@ -88,6 +88,8 @@ header {
 .project-advertising-outline {
   align-self: center;
   margin-top: 2rem;
+  /*TODO duplicated with font size of the radio-form Use the same layout*/
+  font-size: .9rem;
 }
 
 /* ****************************************************************************************************************** */
