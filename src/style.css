@@ -52,14 +52,26 @@ header {
 }
 
 /* ****************************************************************************************************************** */
-/* BPMN Container */
+/* Project Advertising section */
 /* ****************************************************************************************************************** */
+
+.project-advertising-container {
+  display: flex;
+  flex-direction: column;
+  /*TODO duplicated with bpmn-container*/
+  /*height: calc(100vh - 8rem);*/
+}
 
 .project-advertising {
   display: flex;
   justify-content: center;
   /*TODO duplicated with bpmn-container*/
   height: calc(100vh - 8rem);
+}
+
+.project-advertising-outline {
+  align-self: center;
+  margin-top: 2rem;
 }
 
 /* ****************************************************************************************************************** */
