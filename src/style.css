@@ -338,8 +338,20 @@ button {
   cursor: pointer;
 }
 
+button.red {
+  background-color: red;
+}
+
 button:hover {
   background-color: #3e8e41;
+}
+
+button.red:hover {
+  background-color: darkred;
+}
+
+.text-center {
+  text-align: center;
 }
 
 /* sup-rocess case monitoring */
