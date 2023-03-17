@@ -1,86 +1,10 @@
-import tippy, {type Instance, type Props, type ReferenceElement} from 'tippy.js';
+import tippy, {type Instance, type ReferenceElement} from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-import type {BpmnElement, BpmnSemantic, BpmnVisualization} from 'bpmn-visualization';
+import type {BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
-import {type CaseMonitoringData, fetchCaseMonitoringData} from './case-monitoring-data.js';
-import {displayView, ProcessVisualizer, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
-import {BpmnElementsSearcher} from './utils/bpmn-elements.js';
-
-abstract class AbstractCaseMonitoring {
-  protected caseMonitoringData: CaseMonitoringData | undefined;
-  protected tippySupport: AbstractTippySupport;
-
-  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, private readonly processId: string) {
-    console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
-    this.tippySupport = this.createTippySupportInstance(bpmnVisualization);
-    console.info('DONE init CaseMonitoring, processId', processId);
-  }
-
-  showData(): void {
-    console.info('start showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
-    this.reduceVisibilityOfAlreadyExecutedElements();
-    this.highlightRunningElements();
-    this.highlightEnabledElements();
-    console.info('end showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
-  }
-
-  hideData(): void {
-    console.info('start hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
-    this.restoreVisibilityOfAlreadyExecutedElements();
-    this.resetRunningElements();
-    console.info('end hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
-  }
-
-  protected getCaseMonitoringData() {
-    if (!this.caseMonitoringData) {
-      this.caseMonitoringData = fetchCaseMonitoringData(this.processId, this.bpmnVisualization);
-    }
-
-    return this.caseMonitoringData;
-  }
-
-  protected highlightRunningElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningActivities, 'state-running-late');
-  }
-
-  protected highlightEnabledElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().enabledShapes, 'state-enabled');
-  }
-
-  protected addOverlay(bpmnElementId: string) {
-    this.bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
-      position: 'top-right',
-      label: '?',
-      style: {
-        font: {color: '#fff', size: 16},
-        fill: {color: '#4169E1'},
-        stroke: {color: '#4169E1', width: 2},
-      },
-    });
-  }
-
-  protected abstract createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport;
-
-  private reduceVisibilityOfAlreadyExecutedElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
-  }
-
-  private restoreVisibilityOfAlreadyExecutedElements() {
-    // eslint-disable-next-line no-warning-comments -- question to answer by Nour
-    // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().pendingShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
-  }
-
-  private resetRunningElements() {
-    const elements = this.getCaseMonitoringData().runningActivities;
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
-    for (const elementId of elements) {
-      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(elementId);
-    }
-
-    this.tippySupport.removeAllPopovers();
-  }
-}
+import {displayView, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
+import {AbstractCaseMonitoring, AbstractTippySupport} from './case-monitoring-abstract.js';
+import {showContactClientAction} from './case-monitoring-supplier.js';
 
 export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization) {
@@ -123,80 +47,6 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
       this.tippySupport.addPopover(bpmnElementId);
       this.addOverlay(bpmnElementId);
     }
-  }
-}
-
-class MainProcessSupplierPoolCaseMonitoring extends AbstractCaseMonitoring {
-  constructor(bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization, 'main');
-  }
-
-  getTippySupportInstance() {
-    return this.tippySupport;
-  }
-
-  addInfoOnChatGptActivity(bpmnElementId: string) {
-    const tippyInstance = this.tippySupport.addPopover(bpmnElementId);
-    return tippyInstance;
-  }
-
-  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
-    return new MainProcessSupplierPoolTippySupport(bpmnVisualization);
-  }
-}
-
-// May change in the future to favor composition over inheritance.
-abstract class AbstractTippySupport {
-  protected registeredBpmnElements = new Map<Element, BpmnSemantic>();
-
-  private tippyInstances: Instance[] = [];
-
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {}
-
-  addPopover(bpmnElementId: string) {
-    const bpmnElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
-    this.registerBpmnElement(bpmnElement);
-
-    // eslint-disable-next-line no-warning-comments -- cannot be managed now
-    // TODO temp find a better way
-    // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment -- temp
-    const thisInstance = this;
-    const tippyInstance = tippy(bpmnElement.htmlElement, {
-      theme: 'light',
-      placement: 'bottom',
-      appendTo: this.bpmnVisualization.graph.container,
-      content: 'Loading...',
-      arrow: true,
-      interactive: true,
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
-      allowHTML: true,
-      trigger: 'mouseenter', // Use click to easily inspect
-      onShown(instance: Instance): void {
-        instance.setContent(thisInstance.getContent(instance.reference));
-        // eslint-disable-next-line no-warning-comments -- cannot be managed now
-        // TODO only register the event listener once, or destroy it onHide
-        thisInstance.registerEventListeners(instance);
-      },
-    } as Partial<Props>);
-
-    this.tippyInstances.push(tippyInstance);
-    return tippyInstance;
-  }
-
-  removeAllPopovers(): void {
-    for (const instance of this.tippyInstances) {
-      instance.destroy();
-    }
-
-    this.tippyInstances.length = 0;
-  }
-
-  protected abstract getContent(htmlElement: ReferenceElement): string;
-
-  protected abstract registerEventListeners(instance: Instance): void;
-
-  private registerBpmnElement(bpmnElement: BpmnElement) {
-    this.registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
   }
 }
 
@@ -336,57 +186,6 @@ class SubProcessTippySupport extends AbstractTippySupport {
   }
 }
 
-class MainProcessSupplierPoolTippySupport extends AbstractTippySupport {
-  protected userQuestion: string | undefined = 'Write a short email to ask the supplier about the delay';
-  protected chatGptAnswer: string | undefined = 'Generating email template';
-
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization);
-  }
-
-  setUserQuestion(userQuestion: string) {
-    this.userQuestion = userQuestion;
-  }
-
-  setChatGptAnswer(chatGptAnswer: string) {
-    this.chatGptAnswer = chatGptAnswer;
-  }
-
-  protected getContent(htmlElement: ReferenceElement) {
-    return this.getEmailTemplateContent(htmlElement);
-  }
-
-  protected registerEventListeners(instance: Instance): void {
-    // TODO: Implement this method
-  }
-
-  private getEmailTemplateContent(htmlElement: ReferenceElement) {
-    const popoverContent = `
-        <div class="popover-container">
-          <h5>Retrieving an email template</h5>
-          <table>
-            <tbody>
-              <tr class="popover-row">
-                <td class="popover-key">You</td>
-                <td class="popover-value"><textarea>${this.userQuestion!}</textarea>
-              </tr>
-              <tr class="popover-row">
-                <td class="popover-key">Chat GPT</td>
-                <td class="popover-key"><textarea>${this.chatGptAnswer!}</textarea>
-              </tr>
-            </tbody>
-          </table>
-        </div>`;
-
-    const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
-    if (bpmnSemantic?.name === 'Review and adapt email') {
-      // Add validate and abort buttons to the popover
-    }
-
-    return popoverContent;
-  }
-}
-
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO used by subprocess
 function getWarningInfoAsHtml() {
@@ -451,43 +250,3 @@ function showResourceAllocationAction() {
   displayView(subProcessViewName);
   showSubProcessMonitoringData(subProcessBpmnVisualization);
 }
-
-// eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO trigger by main process
-async function showContactClientAction(bpmnVisualization: BpmnVisualization) {
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO implement
-
-  // display contact client pool
-  const processVisualizer = new ProcessVisualizer(bpmnVisualization);
-  processVisualizer.showManuallyTriggeredProcess();
-
-  const supplierMonitoring = new MainProcessSupplierPoolCaseMonitoring(bpmnVisualization);
-  const tippySupportInstance = supplierMonitoring.getTippySupportInstance() as MainProcessSupplierPoolTippySupport;
-  // Add popover to "retrieve email suggestion"
-  const retrieveEmailActivityId = new BpmnElementsSearcher(bpmnVisualization).getElementIdByName('Retrieve email suggestion');
-  if (retrieveEmailActivityId !== undefined) {
-    if (tippySupportInstance !== undefined) {
-      tippySupportInstance.setUserQuestion('Write a short email to ask the supplier xyz about the delay in the approval and the expected new arrival date');
-      tippySupportInstance.setChatGptAnswer('Generating an email template...');
-    }
-
-    const tippyInstance = supplierMonitoring.addInfoOnChatGptActivity(retrieveEmailActivityId);
-    tippyInstance.setProps({
-      trigger: 'manual',
-      arrow: false,
-    });
-    tippyInstance.show();
-  }
-
-  // Hide pool when the process execution terminates
-  // Wait for 5 seconds for simulation
-  /* await new Promise<void>(resolve => {
-    setTimeout(() => {
-      resolve();
-    }, 5000);
-  });
-
-  processVisualizer.hideManuallyTriggeredProcess(); */
-}
-
