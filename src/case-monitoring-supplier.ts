@@ -74,43 +74,44 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
   }
 }
 
+class SupplierContact {
+  constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
+  async startInstance(): Promise<void> {
+    // Add popover to "retrieve email suggestion"
+    const retrieveEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Retrieve email suggestion');
+    if (retrieveEmailActivityId !== undefined) {
+      this.showInfo(retrieveEmailActivityId, this.supplierMonitoring);
+    }
+  }
 
-// eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO trigger by main process
-export async function showContactSupplierAction(bpmnVisualization: BpmnVisualization) {
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO implement
-
-  // display contact client pool
-  const processVisualizer = new ProcessVisualizer(bpmnVisualization);
-  processVisualizer.showManuallyTriggeredProcess();
-
-  const supplierMonitoring = new SupplierProcessCaseMonitoring(bpmnVisualization);
-  const tippySupportInstance = supplierMonitoring.getTippySupportInstance() as SupplierProcessTippySupport;
-  // Add popover to "retrieve email suggestion"
-  const retrieveEmailActivityId = new BpmnElementsSearcher(bpmnVisualization).getElementIdByName('Retrieve email suggestion');
-  if (retrieveEmailActivityId !== undefined) {
+  protected showInfo(activityId: string, supplierMonitoring: SupplierProcessCaseMonitoring): void {
+    const tippySupportInstance = supplierMonitoring.getTippySupportInstance() as SupplierProcessTippySupport;
     if (tippySupportInstance !== undefined) {
-      tippySupportInstance.setUserQuestion('Write a short email to ask the supplier xyz about the delay in the approval and the expected new arrival date');
+      tippySupportInstance.setUserQuestion('Draft an email to ask the supplier xyz about the delay in the approval and the expected new arrival date');
       tippySupportInstance.setChatGptAnswer('Generating an email template...');
     }
 
-    const tippyInstance = supplierMonitoring.addInfoOnChatGptActivity(retrieveEmailActivityId);
+    const tippyInstance = supplierMonitoring.addInfoOnChatGptActivity(activityId);
     tippyInstance.setProps({
       trigger: 'manual',
       arrow: false,
     });
     tippyInstance.show();
   }
+}
 
-  // Hide pool when the process execution terminates
-  // Wait for 5 seconds for simulation
-  /* await new Promise<void>(resolve => {
-    setTimeout(() => {
-      resolve();
-    }, 5000);
-  });
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO trigger by main process
+export async function showContactSupplierAction(bpmnVisualization: BpmnVisualization): Promise<void> {
+  // eslint-disable-next-line no-warning-comments -- cannot be managed now
+  // TODO implement
 
-  processVisualizer.hideManuallyTriggeredProcess(); */
+  // display contact supplier pool
+  const processVisualizer = new ProcessVisualizer(bpmnVisualization);
+  processVisualizer.showManuallyTriggeredProcess();
+
+  const supplierMonitoring = new SupplierProcessCaseMonitoring(bpmnVisualization);
+  const supplierContact = new SupplierContact(bpmnVisualization, supplierMonitoring);
+  await supplierContact.startInstance();
 }
