@@ -39,15 +39,15 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     this.chatGptAnswer = chatGptAnswer;
   }
 
-  protected getContent(htmlElement: ReferenceElement) {
-    return this.getEmailTemplateContent(htmlElement);
+  protected getContent(_htmlElement: ReferenceElement) {
+    return this.getEmailTemplateContent();
   }
 
   protected registerEventListeners(_instance: Instance): void {
     // TODO: Implement this method
   }
 
-  private getEmailTemplateContent(htmlElement: ReferenceElement) {
+  private getEmailTemplateContent() {
     let popoverContent = `
         <div class="popover-container">
           <table>
