@@ -17,6 +17,32 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
     return this.tippySupport.addPopover(bpmnElementId);
   }
 
+  highlightFirstElementsOnStart(): void {
+    // Event_1t5st9j start event
+    // Flow_0i8gykc
+    // Gateway_19radi6
+    // Flow_06y94ol
+    // Activity_04d6t36 chatGPT activity
+    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Event_1t5st9j', 'Gateway_19radi6', 'Activity_04d6t36'], {
+      stroke: {color: 'blue', width: 4},
+      fill: {color: 'blue', opacity: 10}
+    })
+    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Flow_0i8gykc', 'Flow_06y94ol'], {
+      stroke: {color: 'blue', width: 4},
+    })
+  }
+
+  highlightReviewEmail(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Activity_1oxewnq'], {
+      stroke: {color: 'blue', width: 3},
+      fill: {color: 'blue', opacity: 10}
+    })
+    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Flow_092it75'], {
+      stroke: {color: 'blue', width: 4},
+    })
+  }
+
+
   protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
     return new SupplierProcessTippySupport(bpmnVisualization);
   }
@@ -85,11 +111,14 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 class SupplierContact {
   constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
+  // TODO this could should really be async!!!
   async startInstance(): Promise<void> {
     let prompt = '';
     let answer = '';
     let emailRetrievalTippyInstance;
     let emailReviewTippyInstance;
+
+    this.supplierMonitoring.highlightFirstElementsOnStart();
 
     // Add and show popover to "retrieve email suggestion"
     const retrieveEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Retrieve email suggestion');
@@ -117,6 +146,8 @@ class SupplierContact {
       emailReviewTippyInstance = this.addInfo(reviewEmailActivityId, prompt, answer);
       emailReviewTippyInstance.show();
     }
+    this.supplierMonitoring.highlightReviewEmail();
+
   }
 
   protected addInfo(activityId: string, prompt: string, answer: string) {
@@ -134,6 +165,8 @@ class SupplierContact {
     });
     return tippyInstance;
   }
+
+
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
