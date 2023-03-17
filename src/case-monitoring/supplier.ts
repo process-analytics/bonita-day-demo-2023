@@ -96,6 +96,7 @@ class SupplierContact {
     tippyInstance.setProps({
       trigger: 'manual',
       arrow: false,
+      hideOnClick: false,
     });
     tippyInstance.show();
   }
