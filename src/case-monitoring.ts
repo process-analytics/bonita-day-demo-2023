@@ -102,8 +102,8 @@ class MainProcessTippySupport extends AbstractTippySupport {
             <tr class="popover-row">
                 <td class="popover-key">${recommendation.title}</td>
                 <td class="popover-value">${recommendation.description}</td>
-                <td class="popover-action">
-                    <button id="${buttonId}">Act</button>
+                <td class="popover-action text-right">
+                    <button id="${buttonId}" class="btn btn-sm btn-success">Act</button>
                 </td>
             </tr>
         `;
@@ -208,21 +208,21 @@ function getWarningInfoAsHtml() {
                 <td>Resource 1</td>
                 <td>Yes</td>
                 <td class="popover-action">
-                    <button>Assign</button>
+                    <button class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
               <tr class="popover-row">
                 <td>Resource 2</td>
                 <td>Yes</td>
                 <td class="popover-action">
-                    <button>Assign</button>
+                    <button class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
               <tr class="popover-row">
                 <td>Resource 3</td>
                 <td>Yes</td>
                 <td class="popover-action">
-                    <button>Assign</button>
+                    <button class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
             </tbody>

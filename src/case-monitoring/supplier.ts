@@ -39,37 +39,50 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     this.chatGptAnswer = chatGptAnswer;
   }
 
-  protected getContent(htmlElement: ReferenceElement) {
-    return this.getEmailTemplateContent(htmlElement);
+  protected getContent(_htmlElement: ReferenceElement) {
+    return this.getEmailTemplateContent();
   }
 
   protected registerEventListeners(_instance: Instance): void {
     // TODO: Implement this method
   }
 
-  private getEmailTemplateContent(htmlElement: ReferenceElement) {
-    const popoverContent = `
+  private getEmailTemplateContent() {
+    let popoverContent = `
         <div class="popover-container">
-          <h5>Retrieving an email template</h5>
           <table>
-            <tbody>
-              <tr class="popover-row">
-                <td class="popover-key">You</td>
-                <td class="popover-value"><textarea>${this.userQuestion!}</textarea>
-              </tr>
-              <tr class="popover-row">
-                <td class="popover-key">Chat GPT</td>
-                <td class="popover-key"><textarea>${this.chatGptAnswer!}</textarea>
+            <tbody>`;
+    if (this.chatGptAnswer === '') {
+      popoverContent += `
+              <tr>
+                <td colspan="2" class="text-center">Generating answer...</td>
               </tr>
             </tbody>
-          </table>
-        </div>`;
+          </table>`;
+    } else {
+      popoverContent += `
+              <tr>
+                <td>Prompt: </td>
+                <td><textarea cols="30" rows="3">${this.userQuestion!}</textarea>
+              </tr>       
+              <tr>
+                <td>ChatGPT:</td>
+                <td><textarea cols="30" rows="3">${this.chatGptAnswer!}</textarea>
+              </tr>
+            </tbody>
+          </table>`;
 
-    const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
-    if (bpmnSemantic?.name === 'Review and adapt email') {
-      // Add validate and abort buttons to the popover
+      // Add buttons
+      popoverContent += `
+        <div class="mt-2 columns">
+          <div class="column col-4 text-left"><button id="abort" class="btn btn-sm btn-error">Abort</button></div>
+          <div class="column col-4 text-center"><button id="genarate" class="btn btn-sm btn-success">Generate</button></div>
+          <div class="column col-4 text-right"><button id="validate" class="btn btn-sm btn-success">Validate</button></div>
+        </div>
+      `;
     }
 
+    popoverContent += '</div>';
     return popoverContent;
   }
 }
@@ -78,26 +91,53 @@ class SupplierContact {
   constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
   async startInstance(): Promise<void> {
-    // Add popover to "retrieve email suggestion"
+    let prompt = '';
+    let answer = '';
+    let emailRetrievalTippyInstance;
+    let emailReviewTippyInstance;
+
+    // Add and show popover to "retrieve email suggestion"
     const retrieveEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Retrieve email suggestion');
     if (retrieveEmailActivityId !== undefined) {
-      this.showInfo(retrieveEmailActivityId);
+      prompt = 'Draft an email to ask about the supplier about the delay';
+      emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, prompt, answer);
+      emailRetrievalTippyInstance.show();
+    }
+
+    // Call chatgptAPI
+    answer = 'chatgpt answer';
+    await new Promise<void>(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
+
+    // Add and show popover to "Review and adapt email"
+    if (emailRetrievalTippyInstance) {
+      emailRetrievalTippyInstance.hide();
+    }
+
+    const reviewEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Review and adapt email');
+    if (reviewEmailActivityId !== undefined) {
+      emailReviewTippyInstance = this.addInfo(reviewEmailActivityId, prompt, answer);
+      emailReviewTippyInstance.show();
     }
   }
 
-  protected showInfo(activityId: string): void {
+  protected addInfo(activityId: string, prompt: string, answer: string) {
     const tippySupportInstance = this.supplierMonitoring.getTippySupportInstance() as SupplierProcessTippySupport;
     if (tippySupportInstance !== undefined) {
-      tippySupportInstance.setUserQuestion('Draft an email to ask the supplier xyz about the delay in the approval and the expected new arrival date');
-      tippySupportInstance.setChatGptAnswer('Generating an email template...');
+      tippySupportInstance.setUserQuestion(prompt);
+      tippySupportInstance.setChatGptAnswer(answer);
     }
 
     const tippyInstance = this.supplierMonitoring.addInfoOnChatGptActivity(activityId);
     tippyInstance.setProps({
       trigger: 'manual',
       arrow: false,
+      hideOnClick: false,
     });
-    tippyInstance.show();
+    return tippyInstance;
   }
 }
 
