@@ -16,7 +16,6 @@ export abstract class AbstractCaseMonitoring {
     console.info('start showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
     this.reduceVisibilityOfAlreadyExecutedElements();
     this.highlightRunningElements();
-    this.highlightEnabledElements();
     console.info('end showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
   }
 
@@ -36,11 +35,7 @@ export abstract class AbstractCaseMonitoring {
   }
 
   protected highlightRunningElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningActivities, 'state-running-late');
-  }
-
-  protected highlightEnabledElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().enabledShapes, 'state-enabled');
+    // Do nothing by default
   }
 
   protected addOverlay(bpmnElementId: string) {
@@ -68,10 +63,10 @@ export abstract class AbstractCaseMonitoring {
   }
 
   private resetRunningElements() {
-    const elements = this.getCaseMonitoringData().runningActivities;
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(elements, 'state-running-late');
-    for (const elementId of elements) {
-      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(elementId);
+    const bpmnElementIds = this.getCaseMonitoringData().runningShapes;
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementIds, ['state-running-late', 'state-enabled']);
+    for (const bpmnElementId of bpmnElementIds) {
+      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
     }
 
     this.tippySupport.removeAllPopovers();
@@ -106,9 +101,10 @@ export abstract class AbstractTippySupport {
       trigger: 'mouseenter', // Use click to easily inspect
       onShown(instance: Instance): void {
         instance.setContent(thisInstance.getContent(instance.reference));
-        // eslint-disable-next-line no-warning-comments -- cannot be managed now
-        // TODO only register the event listener once, or destroy it onHide
         thisInstance.registerEventListeners(instance);
+      },
+      onHide(instance: Instance): void | false {
+        thisInstance.unregisterEventListeners(instance);
       },
     } as Partial<Props>);
 
@@ -124,9 +120,15 @@ export abstract class AbstractTippySupport {
     this.tippyInstances.length = 0;
   }
 
-  protected abstract getContent(htmlElement: ReferenceElement): string;
+  protected registerEventListeners(_instance: Instance): void {
+    console.info('###registerEventListeners');
+  }
 
-  protected abstract registerEventListeners(instance: Instance): void;
+  protected unregisterEventListeners(_instance: Instance): void {
+    console.info('###unregisterEventListeners');
+  }
+
+  protected abstract getContent(htmlElement: ReferenceElement): string;
 
   private registerBpmnElement(bpmnElement: BpmnElement) {
     this.registeredBpmnElements.set(bpmnElement.htmlElement, bpmnElement.bpmnSemantic);
