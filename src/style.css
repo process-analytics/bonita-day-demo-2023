@@ -325,35 +325,6 @@ td.popover-action {
   width: 20%;
 }
 
-button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 5px 10px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 14px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button.red {
-  background-color: red;
-}
-
-button:hover {
-  background-color: #3e8e41;
-}
-
-button.red:hover {
-  background-color: darkred;
-}
-
-.text-center {
-  text-align: center;
-}
-
 /* sup-rocess case monitoring */
 /* highlight activity already managed by user */
 .bpmn-type-activity.already-completed-by-user > rect {

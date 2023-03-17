@@ -74,12 +74,12 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 
       // Add buttons
       popoverContent += `
-      <table>
-        <tbody>
-          <tr>
-            <td><button id="abort" class="red">Abort</button></td>
-            <td style="padding: 0 10px;"><button id="regenarate">Re-generate</button></td>
-            <td><button id="validate">Validate</button></td>`;
+        <div class="mt-2 columns">
+          <div class="column col-4 text-left"><button id="abort" class="btn btn-sm btn-error">Abort</button></div>
+          <div class="column col-4 text-center"><button id="genarate" class="btn btn-sm btn-success">Generate</button></div>
+          <div class="column col-4 text-right"><button id="validate" class="btn btn-sm btn-success">Validate</button></div>
+        </div>
+      `;
     }
 
     popoverContent += '</div>';
