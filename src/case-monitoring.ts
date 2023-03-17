@@ -4,7 +4,7 @@ import type {BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
 import {displayView, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './case-monitoring-abstract.js';
-import {showContactClientAction} from './case-monitoring-supplier.js';
+import {showContactSupplierAction} from './case-monitoring-supplier.js';
 
 export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization) {
@@ -64,7 +64,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
     if (contactClientBtn) {
       console.info('tippy on show: registering event listener on click');
       contactClientBtn.addEventListener('click', () => {
-        showContactClientAction(this.bpmnVisualization).then(() => {
+        showContactSupplierAction(this.bpmnVisualization).then(() => {
           console.log('Contact client action complete!');
         })
           .catch(error => {

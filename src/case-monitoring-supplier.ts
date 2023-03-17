@@ -74,9 +74,11 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
   }
 }
 
+
+
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main process
-export async function showContactClientAction(bpmnVisualization: BpmnVisualization) {
+export async function showContactSupplierAction(bpmnVisualization: BpmnVisualization) {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO implement
 
