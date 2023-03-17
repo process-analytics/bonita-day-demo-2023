@@ -2,11 +2,7 @@ import {type Instance, type ReferenceElement} from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import type {BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
-import {
-  displayView, isSubProcessBpmnDiagramIsAlreadyLoad,
-  subProcessBpmnVisualization,
-  subProcessViewName,
-} from './diagram.js';
+import {displayView, isSubProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './case-monitoring/abstract.js';
 import {showContactSupplierAction} from './case-monitoring/supplier.js';
 
