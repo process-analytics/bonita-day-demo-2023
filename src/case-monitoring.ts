@@ -3,8 +3,8 @@ import 'tippy.js/dist/tippy.css';
 import type {BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
 import {displayView, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
-import {AbstractCaseMonitoring, AbstractTippySupport} from './case-monitoring-abstract.js';
-import {showContactSupplierAction} from './case-monitoring-supplier.js';
+import {AbstractCaseMonitoring, AbstractTippySupport} from './case-monitoring/abstract.js';
+import {showContactSupplierAction} from './case-monitoring/supplier.js';
 
 export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization) {

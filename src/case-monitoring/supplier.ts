@@ -1,8 +1,8 @@
 import {type BpmnVisualization} from 'bpmn-visualization/*';
 import {type Instance, type ReferenceElement} from 'tippy.js';
-import {AbstractCaseMonitoring, AbstractTippySupport} from './case-monitoring-abstract.js';
-import {ProcessVisualizer} from './diagram.js';
-import {BpmnElementsSearcher} from './utils/bpmn-elements.js';
+import {ProcessVisualizer} from '../diagram.js';
+import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
+import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
 class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization) {
@@ -43,7 +43,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     return this.getEmailTemplateContent(htmlElement);
   }
 
-  protected registerEventListeners(instance: Instance): void {
+  protected registerEventListeners(_instance: Instance): void {
     // TODO: Implement this method
   }
 
@@ -81,18 +81,18 @@ class SupplierContact {
     // Add popover to "retrieve email suggestion"
     const retrieveEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Retrieve email suggestion');
     if (retrieveEmailActivityId !== undefined) {
-      this.showInfo(retrieveEmailActivityId, this.supplierMonitoring);
+      this.showInfo(retrieveEmailActivityId);
     }
   }
 
-  protected showInfo(activityId: string, supplierMonitoring: SupplierProcessCaseMonitoring): void {
-    const tippySupportInstance = supplierMonitoring.getTippySupportInstance() as SupplierProcessTippySupport;
+  protected showInfo(activityId: string): void {
+    const tippySupportInstance = this.supplierMonitoring.getTippySupportInstance() as SupplierProcessTippySupport;
     if (tippySupportInstance !== undefined) {
       tippySupportInstance.setUserQuestion('Draft an email to ask the supplier xyz about the delay in the approval and the expected new arrival date');
       tippySupportInstance.setChatGptAnswer('Generating an email template...');
     }
 
-    const tippyInstance = supplierMonitoring.addInfoOnChatGptActivity(activityId);
+    const tippyInstance = this.supplierMonitoring.addInfoOnChatGptActivity(activityId);
     tippyInstance.setProps({
       trigger: 'manual',
       arrow: false,
