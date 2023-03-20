@@ -20,6 +20,13 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
   protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
     return new SupplierProcessTippySupport(bpmnVisualization);
   }
+
+  hideData(): void {
+    console.info('start hideData / contact supplier pool');
+    //Only popovers for now
+    this.tippySupport.removeAllPopovers();
+    console.info('end hideData / contact supplier pool');
+  }
 }
 
 class SupplierProcessTippySupport extends AbstractTippySupport {
@@ -213,6 +220,6 @@ export function hideSupplierContactData() {
   if (SupplierContact.supplierContactInstances.length > 0) {
     SupplierContact.stopAllCases();
   }
-
+  
   supplierMonitoring.hideData();
 }
