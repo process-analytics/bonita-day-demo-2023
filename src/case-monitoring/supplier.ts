@@ -90,24 +90,11 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
-  // Store all created instances, so that they can be aborted from outside the class
-  static instances: SupplierContact[] = [];
-
-  // Stope all cases
-  static stopAllCases(): void {
-    for (const supplierInstance of SupplierContact.instances) {
-      supplierInstance.stopCase();
-    }
-
-    SupplierContact.instances.splice(0);
-  }
-
   // Create an AbortController
   // required to stope the execution of the async function startInstance
   private readonly abortController: AbortController = new AbortController();
 
   constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
-    SupplierContact.instances.push(this);
   }
 
   async startCase(): Promise<void> {
@@ -160,21 +147,16 @@ class SupplierContact {
 
     // Completed, remove instance from supplierContactInstances
     // hide data and hide pool
-    this.endCase();
+    this.onEndCase();
   }
 
   // Cancel the execution of the async startCase
   stopCase(): void {
     this.abortController.abort();
+    this.onEndCase();
   }
 
-  endCase(): void {
-    // Remove current instance from the list
-    const index = SupplierContact.instances.indexOf(this);
-    if (index > -1) {
-      SupplierContact.instances.splice(index, 1);
-    }
-
+  onEndCase(): void {
     // Hide data
     this.supplierMonitoring.hideData();
     // Hide pool
@@ -198,7 +180,7 @@ class SupplierContact {
   }
 }
 
-const supplierMonitoring = new SupplierProcessCaseMonitoring(bpmnVisualization);
+const supplierContact = new SupplierContact(bpmnVisualization, new SupplierProcessCaseMonitoring(bpmnVisualization));
 const processVisualizer = new ProcessVisualizer(bpmnVisualization);
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
@@ -210,10 +192,6 @@ export async function showContactSupplierAction(): Promise<void> {
   // display contact supplier pool
   processVisualizer.showManuallyTriggeredProcess();
 
-  // In case the contact button is selected multiple times, abort current execution, clean and then start a new case
-  hideSupplierContactData();
-
-  const supplierContact = new SupplierContact(bpmnVisualization, supplierMonitoring);
   supplierContact.startCase()
     .then(() => {
       console.log('Supplier instance completed successfully');
@@ -224,9 +202,5 @@ export async function showContactSupplierAction(): Promise<void> {
 }
 
 export function hideSupplierContactData() {
-  if (SupplierContact.instances.length > 0) {
-    SupplierContact.stopAllCases();
-  }
-
-  supplierMonitoring.hideData();
+  supplierContact.stopCase();
 }
