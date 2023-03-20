@@ -1,6 +1,6 @@
 import {type BpmnVisualization} from 'bpmn-visualization/*';
 import {type ReferenceElement} from 'tippy.js';
-import {mainBpmnVisualization, ProcessVisualizer} from '../diagram.js';
+import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
@@ -175,11 +175,11 @@ class SupplierContact {
   }
 }
 
-const supplierMonitoring = new SupplierProcessCaseMonitoring(mainBpmnVisualization);
+const supplierMonitoring = new SupplierProcessCaseMonitoring(bpmnVisualization);
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main process
-export async function showContactSupplierAction(bpmnVisualization: BpmnVisualization): Promise<void> {
+export async function showContactSupplierAction(): Promise<void> {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO implement
 
