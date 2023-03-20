@@ -83,18 +83,28 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
-  // Create an AbortController
-  //required to stope the execution of the async function startInstance
-  private abortController: AbortController = new AbortController();
-  //store all created instances, so that they can be aborted from outside the class
+  // Store all created instances, so that they can be aborted from outside the class
   static supplierContactInstances: SupplierContact[] = [];
+
+  // Stope all cases
+  static stopAllCases(): void {
+    for (const supplierInstance of SupplierContact.supplierContactInstances) {
+      supplierInstance.stopCase();
+    }
+
+    SupplierContact.supplierContactInstances.splice(0);
+  }
+
+  // Create an AbortController
+  // required to stope the execution of the async function startInstance
+  private readonly abortController: AbortController = new AbortController();
 
   constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
     SupplierContact.supplierContactInstances.push(this);
   }
 
   async startCase(): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let prompt = '';
       let answer = '';
       let emailRetrievalTippyInstance;
@@ -110,13 +120,12 @@ class SupplierContact {
 
       // Call chatgptAPI
       answer = 'chatgpt answer';
-      await new Promise<void>(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, 5000);
-      });
 
-      //check if cancellation is requested
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+
+      // Check if cancellation is requested
       if (this.abortController.signal.aborted) {
         console.log('cancelation requested 1');
         reject(new Error('Supplier instance canceled'));
@@ -134,29 +143,21 @@ class SupplierContact {
         emailReviewTippyInstance.show();
       }
 
-      //check if cancellation is requested
+      // Check if cancellation is requested
       if (this.abortController.signal.aborted) {
         console.log('cancelation requested 2');
         reject(new Error('Supplier instance canceled'));
         return;
       }
-
+      
       resolve();
     });
   }
 
-  //cancel the execution of the async startCase
-  stopCase(): void{
+  // Cancel the execution of the async startCase
+  stopCase(): void {
     this.abortController.abort();
   }
-  //stope all cases
-  static stopAllCases() {
-    for (const supplierInstance of SupplierContact.supplierContactInstances) {
-      supplierInstance.stopCase();
-    }
-    SupplierContact.supplierContactInstances.splice(0);
-  }
-
 
   protected addInfo(activityId: string, prompt: string, answer: string) {
     const tippySupportInstance = this.supplierMonitoring.getTippySupportInstance() as SupplierProcessTippySupport;
@@ -187,19 +188,23 @@ export async function showContactSupplierAction(): Promise<void> {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   processVisualizer.showManuallyTriggeredProcess();
 
-  //in case the contact button is selected multiple times, abort current execution, clean and then start a new case
+  // In case the contact button is selected multiple times, abort current execution, clean and then start a new case
   hideSupplierContactData();
 
   const supplierContact = new SupplierContact(bpmnVisualization, supplierMonitoring);
   supplierContact.startCase()
-                  .then(() => console.log('Supplier instance completed successfully'))
-                  .catch((err) => console.log(`Supplier instance failed with error: ${err.message}`));
-
+    .then(() => {
+      console.log('Supplier instance completed successfully');
+    })
+    .catch((error: Error) => {
+      console.log(`Supplier instance failed with error: ${error.message}`);
+    });
 }
 
-export function hideSupplierContactData(){
-  if(SupplierContact.supplierContactInstances.length > 0){
+export function hideSupplierContactData() {
+  if (SupplierContact.supplierContactInstances.length > 0) {
     SupplierContact.stopAllCases();
   }
+
   supplierMonitoring.hideData();
 }
