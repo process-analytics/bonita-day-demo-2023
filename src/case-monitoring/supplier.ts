@@ -136,8 +136,7 @@ class SupplierContact {
   // required to stope the execution of the async function startInstance
   private readonly abortController: AbortController = new AbortController();
 
-  constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
-  }
+  constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO this could should really be async!!!
