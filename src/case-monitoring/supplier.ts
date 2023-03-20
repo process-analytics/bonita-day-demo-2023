@@ -1,6 +1,6 @@
 import {type BpmnVisualization} from 'bpmn-visualization/*';
-import {type ReferenceElement} from 'tippy.js';
-import {ProcessVisualizer} from '../diagram.js';
+import {type Instance, type ReferenceElement} from 'tippy.js';
+import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
@@ -15,6 +15,13 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
 
   addInfoOnChatGptActivity(bpmnElementId: string) {
     return this.tippySupport.addPopover(bpmnElementId);
+  }
+
+  hideData(): void {
+    console.info('start hideData / contact supplier pool');
+    // Only popovers for now
+    this.tippySupport.removeAllPopovers();
+    console.info('end hideData / contact supplier pool');
   }
 
   highlightFirstElementsOnStart(): void {
@@ -125,15 +132,19 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
+  // Create an AbortController
+  // required to stope the execution of the async function startInstance
+  private readonly abortController: AbortController = new AbortController();
+
   constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO this could should really be async!!!
-  async startInstance(): Promise<void> {
+  async startCase(): Promise<void> {
     let prompt = '';
     let answer = '';
-    let emailRetrievalTippyInstance;
-    let emailReviewTippyInstance;
+    let emailRetrievalTippyInstance: Instance | undefined;
+    let emailReviewTippyInstance: Instance | undefined;
 
     this.supplierMonitoring.highlightFirstElementsOnStart();
 
@@ -147,16 +158,26 @@ class SupplierContact {
 
     // Call chatgptAPI
     answer = 'chatgpt answer';
+
+    // Wait for 5 seconds before resolving the Promise
     await new Promise<void>(resolve => {
       setTimeout(() => {
         resolve();
       }, 5000);
     });
 
+    // Check if cancellation is requested
+    if (this.abortController.signal.aborted) {
+      console.log('cancelation requested 1');
+      throw new Error('Supplier instance canceled');
+    }
+
     // Add and show popover to "Review and adapt email"
-    if (emailRetrievalTippyInstance) {
+    if (emailRetrievalTippyInstance !== undefined) {
       emailRetrievalTippyInstance.hide();
     }
+
+    this.supplierMonitoring.highlightReviewEmail();
 
     const reviewEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Review and adapt email');
     if (reviewEmailActivityId !== undefined) {
@@ -164,7 +185,29 @@ class SupplierContact {
       emailReviewTippyInstance.show();
     }
 
-    this.supplierMonitoring.highlightReviewEmail();
+    // Wait for 5 seconds before resolving the Promise
+    await new Promise<void>(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
+
+    // Completed, remove instance from supplierContactInstances
+    // hide data and hide pool
+    this.onEndCase();
+  }
+
+  // Cancel the execution of the async startCase
+  stopCase(): void {
+    this.abortController.abort();
+    this.onEndCase();
+  }
+
+  onEndCase(): void {
+    // Hide data
+    this.supplierMonitoring.hideData();
+    // Hide pool
+    processVisualizer.hideManuallyTriggeredProcess();
   }
 
   protected addInfo(activityId: string, prompt: string, answer: string) {
@@ -184,17 +227,27 @@ class SupplierContact {
   }
 }
 
+const supplierContact = new SupplierContact(bpmnVisualization, new SupplierProcessCaseMonitoring(bpmnVisualization));
+const processVisualizer = new ProcessVisualizer(bpmnVisualization);
+
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main process
-export async function showContactSupplierAction(bpmnVisualization: BpmnVisualization): Promise<void> {
+export async function showContactSupplierAction(): Promise<void> {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO implement
 
   // display contact supplier pool
-  const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   processVisualizer.showManuallyTriggeredProcess();
 
-  const supplierMonitoring = new SupplierProcessCaseMonitoring(bpmnVisualization);
-  const supplierContact = new SupplierContact(bpmnVisualization, supplierMonitoring);
-  await supplierContact.startInstance();
+  supplierContact.startCase()
+    .then(() => {
+      console.log('Supplier instance completed successfully');
+    })
+    .catch((error: Error) => {
+      console.log(`Supplier instance failed with error: ${error.message}`, error);
+    });
+}
+
+export function hideSupplierContactData() {
+  supplierContact.stopCase();
 }
