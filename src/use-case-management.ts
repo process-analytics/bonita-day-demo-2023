@@ -1,4 +1,4 @@
-import {MainProcessCaseMonitoring} from './case-monitoring.js';
+import {MainProcessCaseMonitoring} from './case-monitoring/main-process.js';
 import {
   mainBpmnVisualization as bpmnVisualization,
   ProcessVisualizer,
