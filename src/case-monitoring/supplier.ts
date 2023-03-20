@@ -1,5 +1,5 @@
 import {type BpmnVisualization} from 'bpmn-visualization/*';
-import {type Instance, type ReferenceElement} from 'tippy.js';
+import {type ReferenceElement} from 'tippy.js';
 import {ProcessVisualizer} from '../diagram.js';
 import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
@@ -14,8 +14,7 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
   }
 
   addInfoOnChatGptActivity(bpmnElementId: string) {
-    const tippyInstance = this.tippySupport.addPopover(bpmnElementId);
-    return tippyInstance;
+    return this.tippySupport.addPopover(bpmnElementId);
   }
 
   protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
@@ -41,10 +40,6 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 
   protected getContent(_htmlElement: ReferenceElement) {
     return this.getEmailTemplateContent();
-  }
-
-  protected registerEventListeners(_instance: Instance): void {
-    // TODO: Implement this method
   }
 
   private getEmailTemplateContent() {

@@ -1,9 +1,7 @@
-import {hideSubCaseMonitoringData, MainProcessCaseMonitoring} from './case-monitoring.js';
+import {MainProcessCaseMonitoring} from './case-monitoring.js';
 import {
   mainBpmnVisualization as bpmnVisualization,
   ProcessVisualizer,
-  isSubProcessBpmnDiagramIsAlreadyLoad,
-  subProcessBpmnVisualization,
   SubProcessNavigator,
   displayView,
 } from './diagram.js';
@@ -33,11 +31,6 @@ export function configureUseCaseSelectors(selectedUseCase: string) {
     mainProcessCaseMonitoring.showData();
   }, () => {
     mainProcessCaseMonitoring.hideData();
-    // eslint-disable-next-line no-warning-comments -- cannot be managed now
-    // TODO move the logic into case-monitoring or ideally in the subprocess navigator which should manage the data hide
-    if (isSubProcessBpmnDiagramIsAlreadyLoad()) {
-      hideSubCaseMonitoringData(subProcessBpmnVisualization);
-    }
   }));
   useCases.set('reset-all', new UseCaseSelector('radio-reset-all', () => {
     processVisualizer.showManuallyTriggeredProcess();

@@ -2,7 +2,7 @@ import {type Instance, type ReferenceElement} from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import type {BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from './recommendation-data.js';
-import {displayView, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
+import {displayView, isSubProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisualization, subProcessViewName} from './diagram.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './case-monitoring/abstract.js';
 import {showContactSupplierAction} from './case-monitoring/supplier.js';
 
@@ -11,15 +11,23 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
     super(bpmnVisualization, 'main');
   }
 
+  hideData(): void {
+    super.hideData();
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO move the logic out of this class. Ideally in the subprocess navigator which should manage the data hide
+    hideSubCaseMonitoringData();
+  }
+
   protected highlightRunningElements(): void {
-    super.highlightRunningElements();
-    this.addInfoOnRunningElements(this.getCaseMonitoringData().runningActivities);
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
+    this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
   }
 
   protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
     return new MainProcessTippySupport(bpmnVisualization);
   }
 
+  // Duplicated with SubProcessCaseMonitoring.addInfoOnRunningElements
   private addInfoOnRunningElements(bpmnElementIds: string[]) {
     for (const bpmnElementId of bpmnElementIds) {
       this.tippySupport.addPopover(bpmnElementId);
@@ -33,16 +41,17 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
     super(bpmnVisualization, subProcessViewName);
   }
 
-  protected highlightEnabledElements(): void {
-    super.highlightEnabledElements();
-    this.addInfoOnEnabledElements(this.getCaseMonitoringData().enabledShapes);
+  protected highlightRunningElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+    this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
   }
 
   protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
     return new SubProcessTippySupport(bpmnVisualization);
   }
 
-  private addInfoOnEnabledElements(bpmnElementIds: string[]) {
+  // Duplicated with MainProcessCaseMonitoring.addInfoOnRunningElements
+  private addInfoOnRunningElements(bpmnElementIds: string[]) {
     for (const bpmnElementId of bpmnElementIds) {
       this.tippySupport.addPopover(bpmnElementId);
       this.addOverlay(bpmnElementId);
@@ -51,38 +60,51 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
 }
 
 class MainProcessTippySupport extends AbstractTippySupport {
+  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
+    super(bpmnVisualization);
+  }
+
   protected getContent(htmlElement: ReferenceElement) {
     return this.getRecommendationInfoAsHtml(htmlElement);
   }
 
-  protected registerEventListeners(_instance: Instance): void {
-    console.info('MainProcessTippySupport, registering event listener');
+  protected registerEventListeners(instance: Instance): void {
+    this.manageEventListeners(instance, true);
+  }
+
+  protected unregisterEventListeners(instance: Instance): void {
+    this.manageEventListeners(instance, false);
+  }
+
+  // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
+  private readonly contactClientBtnListener = () => {
+    console.info('called contactClientBtnListener private method');
+    showContactSupplierAction(this.bpmnVisualization).then(() => {
+      console.log('Contact client action complete!');
+    })
+      .catch(error => {
+        console.error('Error in contact client action:', error);
+      });
+  };
+
+  private manageEventListeners(_instance: Instance, register: boolean): void {
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
-    const contactClientBtn = document.querySelector('#Contact-Client');
-    // Console.info('tippy on show: contactClientBtn', contactClientBtn);
-    if (contactClientBtn) {
-      console.info('tippy on show: registering event listener on click');
-      contactClientBtn.addEventListener('click', () => {
-        showContactSupplierAction(this.bpmnVisualization).then(() => {
-          console.log('Contact client action complete!');
-        })
-          .catch(error => {
-            console.error('Error in contact client action:', error);
-          });
-      });
+    const allocateResourceBtn = document.querySelector('#Allocate-Resource')!;
+    if (register) {
+      allocateResourceBtn.addEventListener('click', showResourceAllocationAction);
+    } else {
+      allocateResourceBtn.removeEventListener('click', showResourceAllocationAction);
     }
 
-    const allocateResourceBtn = document.querySelector('#Allocate-Resource');
-    // Console.info('tippy on show: allocateResourceBtn', allocateResourceBtn);
-    if (allocateResourceBtn) {
-      // Console.info('tippy on show: registering event listener on click');
-      allocateResourceBtn.addEventListener('click', () => {
-        showResourceAllocationAction();
-      });
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
+    const contactClientBtn = document.querySelector('#Contact-Client')!;
+    if (register) {
+      contactClientBtn.addEventListener('click', this.contactClientBtnListener);
+    } else {
+      contactClientBtn.removeEventListener('click', this.contactClientBtnListener);
     }
-
-    console.info('DONE MainProcessTippySupport, registering event listener');
   }
 
   private getRecommendationInfoAsHtml(htmlElement: ReferenceElement) {
@@ -118,78 +140,91 @@ class MainProcessTippySupport extends AbstractTippySupport {
   }
 }
 
+// eslint-disable-next-line no-warning-comments -- cannot be managed now
+// TODO extract data in a dedicated "fetch simulation" class
+// Activity_1p3opxc awaiting approval (the task currently blocked)
+// Activity_015g8ru doc completed
+// Activity_0k8i7cb ordered
+// Activity_0yyl6g2 in transfer
+// Activity_16tcn1j changes transmitted
+const subProcessUserData = [
+  new Map<string, number>([['Activity_015g8ru', 12], ['Activity_0k8i7cb', 29]]),
+  new Map<string, number>([['Activity_0k8i7cb', 41], ['Activity_0yyl6g2', 6]]),
+  new Map<string, number>([['Activity_1p3opxc', 3], ['Activity_0k8i7cb', 5], ['Activity_0yyl6g2', 34], ['Activity_16tcn1j', 58]]),
+];
+
 class SubProcessTippySupport extends AbstractTippySupport {
   protected getContent() {
     return getWarningInfoAsHtml();
   }
 
-  protected registerEventListeners(_instance: Instance): void {
-    console.info('SubProcessTippySupport, registering event listener');
+  protected registerEventListeners(instance: Instance): void {
+    this.manageEventListeners(instance, true);
+  }
 
-    // eslint-disable-next-line no-warning-comments -- cannot be managed now
-    // TODO extract data in a dedicated "fetch simulation" class
-    // Activity_1p3opxc awaiting approval (the task currently blocked)
-    // Activity_015g8ru doc completed
-    // Activity_0k8i7cb ordered
-    // Activity_0yyl6g2 in transfer
-    // Activity_16tcn1j changes transmitted
-    const userData = [
-      new Map<string, number>([['Activity_015g8ru', 12], ['Activity_0k8i7cb', 29]]),
-      new Map<string, number>([['Activity_0k8i7cb', 41], ['Activity_0yyl6g2', 6]]),
-      new Map<string, number>([['Activity_1p3opxc', 3], ['Activity_0k8i7cb', 5], ['Activity_0yyl6g2', 34], ['Activity_16tcn1j', 58]]),
-    ];
+  protected unregisterEventListeners(instance: Instance): void {
+    this.manageEventListeners(instance, false);
+  }
 
-    // Highlight activity
-    const highlightElement = (data: Map<string, number>) => {
-      for (const [activityId, nbExec] of data) {
-        this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(activityId, 'already-completed-by-user');
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(activityId, {
-          position: 'top-center',
-          label: `${nbExec}`,
-          style: {
-            font: {color: '#fff', size: 16},
-            fill: {color: 'blueviolet'},
-            stroke: {color: 'blueviolet', width: 2},
-          },
-        });
+  private manageEventListeners(instance: Instance, register: boolean): void {
+    // Target instance.popper. Keep using document for now as the previous popper (when going back to the subprocess after a first venue)
+    // may still exist in the DOM of the subprocess view
+    const rows = document.querySelectorAll(`#${instance.popper.id} #popover-resources-available > tbody > tr`);
+    for (const [, row] of rows.entries()) {
+      if (register) {
+        row.addEventListener('mouseenter', this.rowMouseEnterListener);
+        row.addEventListener('mouseleave', this.rowMouseLeaveListener);
+      } else {
+        row.removeEventListener('mouseenter', this.rowMouseEnterListener);
+        row.removeEventListener('mouseleave', this.rowMouseLeaveListener);
       }
-    };
+    }
+  }
 
-    const resetStyleOfBpmnElements = (bpmnElementIds: string[]) => {
-      for (const bpmnElementId of bpmnElementIds) {
-        this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementId, 'already-completed-by-user');
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
-      }
-    };
+  // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
+  private readonly rowMouseEnterListener = (event: Event) => {
+    const rowIndex = (event.target as HTMLTableRowElement).sectionRowIndex;
+    const data = subProcessUserData[rowIndex];
+    if (data) {
+      this.highlightBpmnElements(data);
+    }
+  };
 
-    // Target instance.popper. Keep using document for now as it shows that we don't cleanly remove the popover from the DOM in the subprocess view
-    const rows = document.querySelectorAll('#popover-resources-available > tbody > tr');
-    for (const [i, row] of rows.entries()) {
-      row.addEventListener('mouseenter', () => {
-        const data = userData[i];
-        if (data) {
-          highlightElement(data);
-        }
-      });
-      row.addEventListener('mouseleave', () => {
-        const data = userData[i];
-        if (data) {
-          resetStyleOfBpmnElements(Array.from(data.keys()));
-        }
+  private readonly rowMouseLeaveListener = (event: Event) => {
+    const rowIndex = (event.target as HTMLTableRowElement).sectionRowIndex;
+    const data = subProcessUserData[rowIndex];
+    if (data) {
+      this.resetStyleOfBpmnElements(Array.from(data.keys()));
+    }
+  };
+
+  // Highlight activities that have already been managed by the current resource
+  private highlightBpmnElements(data: Map<string, number>): void {
+    for (const [bpmnElementId, nbExec] of data) {
+      this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(bpmnElementId, 'already-completed-by-user');
+      this.bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
+        position: 'top-center',
+        label: `${nbExec}`,
+        style: {
+          font: {color: '#fff', size: 16},
+          fill: {color: 'blueviolet'},
+          stroke: {color: 'blueviolet', width: 2},
+        },
       });
     }
+  }
 
-    // eslint-disable-next-line no-warning-comments -- cannot be managed now
-    // TODO manage unregister
-
-    console.info('DONE SubProcessTippySupport, registering event listener');
+  private resetStyleOfBpmnElements(bpmnElementIds: string[]): void {
+    for (const bpmnElementId of bpmnElementIds) {
+      this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementId, 'already-completed-by-user');
+      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
+    }
   }
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO used by subprocess
+// TODO used by subprocess, move somewhere else
 function getWarningInfoAsHtml() {
-// Function getWarningInfoAsHtml(htmlElement: ReferenceElement) {
   return `
         <div class="popover-container">
           <h4>Resource not available</h4>
@@ -231,16 +266,32 @@ function getWarningInfoAsHtml() {
     `;
 }
 
-function showSubProcessMonitoringData(bpmnVisualization: BpmnVisualization) {
-  const caseMonitoring = new SubProcessCaseMonitoring(bpmnVisualization);
-  caseMonitoring.showData();
-}
+const subProcessCaseMonitoring = new SubProcessCaseMonitoring(subProcessBpmnVisualization);
 
-export function hideSubCaseMonitoringData(bpmnVisualization: BpmnVisualization) {
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO should not instantiated again here, this prevents to correctly unregister/destroy tippy instances
-  const caseMonitoring = new SubProcessCaseMonitoring(bpmnVisualization);
-  caseMonitoring.hideData();
+function hideSubCaseMonitoringData() {
+  // Currently mandatory, if the diagram is not loaded error, this seems to be a bug in bpmn-visualization
+  // calling getElementsByIds when the diagram is not loaded generates an error. It should respond without errors.
+  // seen with bpmn-visualization@0.32.0
+  // 15:40:09,653 Uncaught TypeError: this.searchableModel is undefined
+  //     getBpmnSemantic bpmn-visualization.esm.js:6067
+  //     getElementsByIds bpmn-visualization.esm.js:5742
+  //     getElementsByIds bpmn-visualization.esm.js:5742
+  //     getVisitedEdges paths.ts:30
+  //     fetchCaseMonitoringData case-monitoring-data.ts:120
+  //     getCaseMonitoringData abstract.ts:32
+  //     restoreVisibilityOfAlreadyExecutedElements abstract.ts:67
+  //     hideData abstract.ts:25
+  //     hideSubCaseMonitoringData case-monitoring.ts:262
+  //     configureUseCaseSelectors use-case-management.ts:36
+  //     unselect use-case-management.ts:69
+  //     UseCaseSelector use-case-management.ts:53
+  //     UseCaseSelector use-case-management.ts:51
+  //     configureUseCaseSelectors use-case-management.ts:38
+  //     <anonymous> index.ts:37
+  // bpmn-visualization.esm.js:6067:24
+  if (isSubProcessBpmnDiagramIsAlreadyLoad()) {
+    subProcessCaseMonitoring.hideData();
+  }
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
@@ -248,5 +299,5 @@ export function hideSubCaseMonitoringData(bpmnVisualization: BpmnVisualization) 
 function showResourceAllocationAction() {
   // This should be managed by SubProcessNavigator
   displayView(subProcessViewName);
-  showSubProcessMonitoringData(subProcessBpmnVisualization);
+  subProcessCaseMonitoring.showData();
 }

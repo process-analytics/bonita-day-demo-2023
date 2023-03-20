@@ -4,9 +4,8 @@ import {PathResolver} from './utils/paths.js';
 
 export type CaseMonitoringData = {
   executedShapes: string[];
-  runningActivities: string[];
-  enabledShapes: string[];
   pendingShapes: string[];
+  runningShapes: string[];
   visitedEdges: string[];
 };
 
@@ -27,36 +26,28 @@ abstract class AbstractCaseMonitoringDataProvider {
    */
   fetch(): CaseMonitoringData {
     const executedShapes = this.getExecutedShapes();
-    const runningActivities = this.getRunningActivities();
-    const enabledShapes = this.getEnabledShapes();
     const pendingShapes = this.getPendingShapes();
+    const runningShapes = this.getRunningShapes();
 
-    const visitedEdges = this.pathResolver.getVisitedEdges([...executedShapes, ...runningActivities, ...enabledShapes, ...pendingShapes]);
+    const visitedEdges = this.pathResolver.getVisitedEdges([...executedShapes, ...runningShapes, ...pendingShapes]);
     return {
       executedShapes,
-      runningActivities,
-      enabledShapes,
       pendingShapes,
+      runningShapes,
       visitedEdges,
     };
   }
 
   abstract getExecutedShapes(): string[];
 
-  abstract getRunningActivities(): string[];
-
-  abstract getEnabledShapes(): string[];
-
   abstract getPendingShapes(): string[];
+
+  abstract getRunningShapes(): string[];
 }
 
 class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
   constructor(protected readonly bpmnVisualization: BpmnVisualization) {
     super(bpmnVisualization);
-  }
-
-  getEnabledShapes(): string[] {
-    return [];
   }
 
   getExecutedShapes(): string[] {
@@ -74,7 +65,7 @@ class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPr
     return pendingShapes;
   }
 
-  getRunningActivities(): string[] {
+  getRunningShapes(): string[] {
     const activities: string[] = [];
     addNonNullElement(activities, this.bpmnElementsSearcher.getElementIdByName('SRM subprocess'));
     return activities;
@@ -84,12 +75,6 @@ class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPr
 class SubProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
   constructor(protected readonly bpmnVisualization: BpmnVisualization) {
     super(bpmnVisualization);
-  }
-
-  getEnabledShapes(): string[] {
-    const shapes: string[] = [];
-    addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('SRM: Awaiting Approval'));
-    return shapes;
   }
 
   getExecutedShapes(): string[] {
@@ -104,8 +89,10 @@ class SubProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPro
     return [];
   }
 
-  getRunningActivities(): string[] {
-    return [];
+  getRunningShapes(): string[] {
+    const shapes: string[] = [];
+    addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('SRM: Awaiting Approval'));
+    return shapes;
   }
 }
 
@@ -113,16 +100,14 @@ export function fetchCaseMonitoringData(processId: string, bpmnVisualization: Bp
   const caseMonitoringDataProvider = processId === 'main' ? new MainProcessCaseMonitoringDataProvider(bpmnVisualization) : new SubProcessCaseMonitoringDataProvider(bpmnVisualization);
 
   const executedShapes = caseMonitoringDataProvider.getExecutedShapes();
-  const runningActivities = caseMonitoringDataProvider.getRunningActivities();
-  const enabledShapes = caseMonitoringDataProvider.getEnabledShapes();
+  const runningShapes = caseMonitoringDataProvider.getRunningShapes();
   const pendingShapes = caseMonitoringDataProvider.getPendingShapes();
 
-  const visitedEdges = new PathResolver(bpmnVisualization).getVisitedEdges([...executedShapes, ...runningActivities, ...enabledShapes, ...pendingShapes]);
+  const visitedEdges = new PathResolver(bpmnVisualization).getVisitedEdges([...executedShapes, ...runningShapes, ...pendingShapes]);
   return {
     executedShapes,
-    runningActivities,
-    enabledShapes,
     pendingShapes,
+    runningShapes,
     visitedEdges,
   };
 }

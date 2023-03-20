@@ -55,6 +55,7 @@ export function displayView(view: View): void {
   const subProcessBpmnContainerElt = document.querySelector('#secondary-bpmn-container')!;
 
   switch (view) {
+    // Go from main process to subprocess
     case subProcessViewName: {
       addSectionInBreadcrumb();
       mainBpmnContainerElt.classList.add('d-hide');
@@ -63,6 +64,7 @@ export function displayView(view: View): void {
       break;
     }
 
+    // Go from subprocess to main process
     default: {
       removeSectionInBreadcrumb();
       mainBpmnContainerElt.classList.remove('d-hide');
