@@ -20,17 +20,13 @@ import {displayView, isSubProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisuali
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
 class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
-  constructor(bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization, subProcessViewName);
+  constructor(bpmnVisualization: BpmnVisualization, tippySupport: AbstractTippySupport) {
+    super(bpmnVisualization, subProcessViewName, tippySupport);
   }
 
   protected highlightRunningElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
     this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
-  }
-
-  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
-    return new SubProcessTippySupport(bpmnVisualization);
   }
 
   // Duplicated with MainProcessCaseMonitoring.addInfoOnRunningElements
@@ -168,7 +164,7 @@ function getWarningInfoAsHtml() {
     `;
 }
 
-const subProcessCaseMonitoring = new SubProcessCaseMonitoring(subProcessBpmnVisualization);
+const subProcessCaseMonitoring = new SubProcessCaseMonitoring(subProcessBpmnVisualization, new SubProcessTippySupport(subProcessBpmnVisualization));
 
 export function hideSubProcessCaseMonitoringData() {
   // Currently mandatory, if the diagram is not loaded error, this seems to be a bug in bpmn-visualization

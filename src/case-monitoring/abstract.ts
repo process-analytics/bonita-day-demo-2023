@@ -6,9 +6,9 @@ export abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData | undefined;
   protected tippySupport: AbstractTippySupport;
 
-  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, private readonly processId: string) {
+  protected constructor(protected readonly bpmnVisualization: BpmnVisualization, private readonly processId: string, tippySupport: AbstractTippySupport) {
     console.info('init CaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
-    this.tippySupport = this.createTippySupportInstance(bpmnVisualization);
+    this.tippySupport = tippySupport;
     console.info('DONE init CaseMonitoring, processId', processId);
   }
 
@@ -49,8 +49,6 @@ export abstract class AbstractCaseMonitoring {
       },
     });
   }
-
-  protected abstract createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport;
 
   private reduceVisibilityOfAlreadyExecutedElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');

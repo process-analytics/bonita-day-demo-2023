@@ -5,8 +5,8 @@ import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
 class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
-  constructor(bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization, 'main');
+  constructor(bpmnVisualization: BpmnVisualization, tippySupport: AbstractTippySupport) {
+    super(bpmnVisualization, 'main', tippySupport);
   }
 
   getTippySupportInstance() {
@@ -64,10 +64,6 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
         },
       },
     );
-  }
-
-  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
-    return new SupplierProcessTippySupport(bpmnVisualization);
   }
 }
 
@@ -227,7 +223,7 @@ class SupplierContact {
   }
 }
 
-const supplierContact = new SupplierContact(bpmnVisualization, new SupplierProcessCaseMonitoring(bpmnVisualization));
+const supplierContact = new SupplierContact(bpmnVisualization, new SupplierProcessCaseMonitoring(bpmnVisualization, new SupplierProcessTippySupport(bpmnVisualization)));
 const processVisualizer = new ProcessVisualizer(bpmnVisualization);
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now

@@ -1,4 +1,4 @@
-import {MainProcessCaseMonitoring} from './case-monitoring/main-process.js';
+import {newMainProcessCaseMonitoring} from './case-monitoring/main-process.js';
 import {
   mainBpmnVisualization as bpmnVisualization,
   ProcessVisualizer,
@@ -17,7 +17,7 @@ export function configureUseCaseSelectors(selectedUseCase: string) {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   const subProcessNavigator = new SubProcessNavigator(bpmnVisualization);
 
-  const mainProcessCaseMonitoring = new MainProcessCaseMonitoring(bpmnVisualization);
+  const mainProcessCaseMonitoring = newMainProcessCaseMonitoring(bpmnVisualization);
 
   const useCases = new Map<string, UseCaseSelector>();
   useCases.set('process-monitoring', new UseCaseSelector('radio-process-monitoring', () => {
