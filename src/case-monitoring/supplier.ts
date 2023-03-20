@@ -1,6 +1,6 @@
 import {type BpmnVisualization} from 'bpmn-visualization/*';
 import {type ReferenceElement} from 'tippy.js';
-import {ProcessVisualizer} from '../diagram.js';
+import {mainBpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
@@ -83,41 +83,80 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
-  constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
+  // Create an AbortController
+  //required to stope the execution of the async function startInstance
+  private abortController: AbortController = new AbortController();
+  //store all created instances, so that they can be aborted from outside the class
+  static supplierContactInstances: SupplierContact[] = [];
 
-  async startInstance(): Promise<void> {
-    let prompt = '';
-    let answer = '';
-    let emailRetrievalTippyInstance;
-    let emailReviewTippyInstance;
-
-    // Add and show popover to "retrieve email suggestion"
-    const retrieveEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Retrieve email suggestion');
-    if (retrieveEmailActivityId !== undefined) {
-      prompt = 'Draft an email to ask about the supplier about the delay';
-      emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, prompt, answer);
-      emailRetrievalTippyInstance.show();
-    }
-
-    // Call chatgptAPI
-    answer = 'chatgpt answer';
-    await new Promise<void>(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
-
-    // Add and show popover to "Review and adapt email"
-    if (emailRetrievalTippyInstance) {
-      emailRetrievalTippyInstance.hide();
-    }
-
-    const reviewEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Review and adapt email');
-    if (reviewEmailActivityId !== undefined) {
-      emailReviewTippyInstance = this.addInfo(reviewEmailActivityId, prompt, answer);
-      emailReviewTippyInstance.show();
-    }
+  constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
+    SupplierContact.supplierContactInstances.push(this);
   }
+
+  async startCase(): Promise<void> {
+    return new Promise<void>(async (resolve, reject) => {
+      let prompt = '';
+      let answer = '';
+      let emailRetrievalTippyInstance;
+      let emailReviewTippyInstance;
+
+      // Add and show popover to "retrieve email suggestion"
+      const retrieveEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Retrieve email suggestion');
+      if (retrieveEmailActivityId !== undefined) {
+        prompt = 'Draft an email to ask about the supplier about the delay';
+        emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, prompt, answer);
+        emailRetrievalTippyInstance.show();
+      }
+
+      // Call chatgptAPI
+      answer = 'chatgpt answer';
+      await new Promise<void>(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 5000);
+      });
+
+      //check if cancellation is requested
+      if (this.abortController.signal.aborted) {
+        console.log('cancelation requested 1');
+        reject(new Error('Supplier instance canceled'));
+        return;
+      }
+
+      // Add and show popover to "Review and adapt email"
+      if (emailRetrievalTippyInstance) {
+        emailRetrievalTippyInstance.hide();
+      }
+
+      const reviewEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Review and adapt email');
+      if (reviewEmailActivityId !== undefined) {
+        emailReviewTippyInstance = this.addInfo(reviewEmailActivityId, prompt, answer);
+        emailReviewTippyInstance.show();
+      }
+
+      //check if cancellation is requested
+      if (this.abortController.signal.aborted) {
+        console.log('cancelation requested 2');
+        reject(new Error('Supplier instance canceled'));
+        return;
+      }
+
+      resolve();
+    });
+  }
+
+  //cancel the execution of the async startCase
+  stopCase(): void{
+    this.abortController.abort();
+  }
+  //stope all cases
+  static stopAllCases() {
+    for (const supplierInstance of SupplierContact.supplierContactInstances) {
+      supplierInstance.stopCase();
+    }
+    SupplierContact.supplierContactInstances.splice(0);
+  }
+
 
   protected addInfo(activityId: string, prompt: string, answer: string) {
     const tippySupportInstance = this.supplierMonitoring.getTippySupportInstance() as SupplierProcessTippySupport;
@@ -136,6 +175,8 @@ class SupplierContact {
   }
 }
 
+const supplierMonitoring = new SupplierProcessCaseMonitoring(mainBpmnVisualization);
+
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO trigger by main process
 export async function showContactSupplierAction(bpmnVisualization: BpmnVisualization): Promise<void> {
@@ -146,7 +187,19 @@ export async function showContactSupplierAction(bpmnVisualization: BpmnVisualiza
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   processVisualizer.showManuallyTriggeredProcess();
 
-  const supplierMonitoring = new SupplierProcessCaseMonitoring(bpmnVisualization);
+  //in case the contact button is selected multiple times, abort current execution, clean and then start a new case
+  hideSupplierContactData();
+
   const supplierContact = new SupplierContact(bpmnVisualization, supplierMonitoring);
-  await supplierContact.startInstance();
+  supplierContact.startCase()
+                  .then(() => console.log('Supplier instance completed successfully'))
+                  .catch((err) => console.log(`Supplier instance failed with error: ${err.message}`));
+
+}
+
+export function hideSupplierContactData(){
+  if(SupplierContact.supplierContactInstances.length > 0){
+    SupplierContact.stopAllCases();
+  }
+  supplierMonitoring.hideData();
 }

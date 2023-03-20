@@ -19,7 +19,7 @@ import 'tippy.js/dist/tippy.css';
 import type {BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from '../recommendation-data.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
-import {showContactSupplierAction} from './supplier.js';
+import {hideSupplierContactData, showContactSupplierAction} from './supplier.js';
 import {hideSubCaseMonitoringData, showResourceAllocationAction} from './sub-process.js';
 
 export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
@@ -31,6 +31,7 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
     super.hideData();
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO move the logic out of this class. Ideally in the subprocess navigator which should manage the data hide
+    hideSupplierContactData();
     hideSubCaseMonitoringData();
   }
 
