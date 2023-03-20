@@ -20,7 +20,7 @@ import type {BpmnVisualization} from 'bpmn-visualization';
 import {getActivityRecommendationData} from '../recommendation-data.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 import {hideSupplierContactData, showContactSupplierAction} from './supplier.js';
-import {hideSubCaseMonitoringData, showResourceAllocationAction} from './sub-process.js';
+import {hideSubProcessCaseMonitoringData, showResourceAllocationAction} from './sub-process.js';
 
 export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization) {
@@ -32,7 +32,7 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO move the logic out of this class. Ideally in the subprocess navigator which should manage the data hide
     hideSupplierContactData();
-    hideSubCaseMonitoringData();
+    hideSubProcessCaseMonitoringData();
   }
 
   protected highlightRunningElements(): void {
