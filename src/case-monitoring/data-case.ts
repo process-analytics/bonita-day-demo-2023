@@ -1,6 +1,6 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
-import {BpmnElementsSearcher} from './utils/bpmn-elements.js';
-import {PathResolver} from './utils/paths.js';
+import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
+import {PathResolver} from '../utils/paths.js';
 
 export type CaseMonitoringData = {
   executedShapes: string[];

@@ -1,6 +1,6 @@
 import {type BpmnElement, type BpmnSemantic, type BpmnVisualization} from 'bpmn-visualization/*';
 import tippy, {type Instance, type Props, type ReferenceElement} from 'tippy.js';
-import {type CaseMonitoringData, fetchCaseMonitoringData} from '../case-monitoring-data.js';
+import {type CaseMonitoringData, fetchCaseMonitoringData} from './data-case.js';
 
 export abstract class AbstractCaseMonitoring {
   protected caseMonitoringData: CaseMonitoringData | undefined;

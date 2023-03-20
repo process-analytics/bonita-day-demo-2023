@@ -17,8 +17,8 @@ limitations under the License.
 import {type Instance, type ReferenceElement} from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import type {BpmnVisualization} from 'bpmn-visualization';
-import {getActivityRecommendationData} from '../recommendation-data.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
+import {getActivityRecommendationData} from './data-recommendation.js';
 import {hideSupplierContactData, showContactSupplierAction} from './supplier.js';
 import {hideSubProcessCaseMonitoringData, showResourceAllocationAction} from './sub-process.js';
 
