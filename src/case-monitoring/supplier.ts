@@ -1,5 +1,5 @@
 import {type BpmnVisualization} from 'bpmn-visualization/*';
-import {type ReferenceElement} from 'tippy.js';
+import {type Instance, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
@@ -107,8 +107,8 @@ class SupplierContact {
     return new Promise<void>((resolve, reject) => {
       let prompt = '';
       let answer = '';
-      let emailRetrievalTippyInstance;
-      let emailReviewTippyInstance;
+      let emailRetrievalTippyInstance: Instance | undefined;
+      let emailReviewTippyInstance: Instance | undefined;
 
       // Add and show popover to "retrieve email suggestion"
       const retrieveEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Retrieve email suggestion');
@@ -121,36 +121,44 @@ class SupplierContact {
       // Call chatgptAPI
       answer = 'chatgpt answer';
 
-      setTimeout(() => {
+      // Wait for 5 seconds before resolving the Promise
+      const waitPromise = new Promise<void>((innerResolve, _innerReject) => {
+        setTimeout(() => {
+          innerResolve();
+        }, 5000);
+      });
+
+      waitPromise.then(() => {
+        // Check if cancellation is requested
+        if (this.abortController.signal.aborted) {
+          console.log('cancelation requested 1');
+          reject(new Error('Supplier instance canceled'));
+          return;
+        }
+
+        // Add and show popover to "Review and adapt email"
+        if (emailRetrievalTippyInstance) {
+          emailRetrievalTippyInstance.hide();
+        }
+
+        const reviewEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Review and adapt email');
+        if (reviewEmailActivityId !== undefined) {
+          emailReviewTippyInstance = this.addInfo(reviewEmailActivityId, prompt, answer);
+          emailReviewTippyInstance.show();
+        }
+
+        // Check if cancellation is requested
+        if (this.abortController.signal.aborted) {
+          console.log('cancelation requested 2');
+          reject(new Error('Supplier instance canceled'));
+          return;
+        }
+
         resolve();
-      }, 5000);
-
-      // Check if cancellation is requested
-      if (this.abortController.signal.aborted) {
-        console.log('cancelation requested 1');
-        reject(new Error('Supplier instance canceled'));
-        return;
-      }
-
-      // Add and show popover to "Review and adapt email"
-      if (emailRetrievalTippyInstance) {
-        emailRetrievalTippyInstance.hide();
-      }
-
-      const reviewEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Review and adapt email');
-      if (reviewEmailActivityId !== undefined) {
-        emailReviewTippyInstance = this.addInfo(reviewEmailActivityId, prompt, answer);
-        emailReviewTippyInstance.show();
-      }
-
-      // Check if cancellation is requested
-      if (this.abortController.signal.aborted) {
-        console.log('cancelation requested 2');
-        reject(new Error('Supplier instance canceled'));
-        return;
-      }
-      
-      resolve();
+      })
+        .catch((error: Error) => {
+          console.log(`Failed to wait error: ${error.message}`);
+        });
     });
   }
 
