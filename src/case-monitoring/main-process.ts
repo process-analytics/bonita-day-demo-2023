@@ -22,9 +22,13 @@ import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 import {hideSupplierContactData, showContactSupplierAction} from './supplier.js';
 import {hideSubProcessCaseMonitoringData, showResourceAllocationAction} from './sub-process.js';
 
-export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
-  constructor(bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization, 'main');
+export function newMainProcessCaseMonitoring(bpmnVisualization: BpmnVisualization) {
+  return new MainProcessCaseMonitoring(bpmnVisualization, new MainProcessTippySupport(bpmnVisualization));
+}
+
+class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
+  constructor(bpmnVisualization: BpmnVisualization, tippySupport: MainProcessTippySupport) {
+    super(bpmnVisualization, 'main', tippySupport);
   }
 
   hideData(): void {
@@ -38,10 +42,6 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   protected highlightRunningElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
     this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
-  }
-
-  protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
-    return new MainProcessTippySupport(bpmnVisualization);
   }
 
   // Duplicated with SubProcessCaseMonitoring.addInfoOnRunningElements
