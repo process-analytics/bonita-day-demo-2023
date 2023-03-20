@@ -170,7 +170,7 @@ function getWarningInfoAsHtml() {
 
 const subProcessCaseMonitoring = new SubProcessCaseMonitoring(subProcessBpmnVisualization);
 
-export function hideSubCaseMonitoringData() {
+export function hideSubProcessCaseMonitoringData() {
   // Currently mandatory, if the diagram is not loaded error, this seems to be a bug in bpmn-visualization
   // calling getElementsByIds when the diagram is not loaded generates an error. It should respond without errors.
   // seen with bpmn-visualization@0.32.0
@@ -183,7 +183,7 @@ export function hideSubCaseMonitoringData() {
   //     getCaseMonitoringData abstract.ts:32
   //     restoreVisibilityOfAlreadyExecutedElements abstract.ts:67
   //     hideData abstract.ts:25
-  //     hideSubCaseMonitoringData case-monitoring.ts:262
+  //     hideSubProcessCaseMonitoringData case-monitoring.ts:262
   //     configureUseCaseSelectors use-case-management.ts:36
   //     unselect use-case-management.ts:69
   //     UseCaseSelector use-case-management.ts:53
