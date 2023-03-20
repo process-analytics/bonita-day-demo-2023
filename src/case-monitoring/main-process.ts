@@ -27,7 +27,7 @@ export function newMainProcessCaseMonitoring(bpmnVisualization: BpmnVisualizatio
 }
 
 class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
-  constructor(bpmnVisualization: BpmnVisualization, tippySupport: AbstractTippySupport) {
+  constructor(bpmnVisualization: BpmnVisualization, tippySupport: MainProcessTippySupport) {
     super(bpmnVisualization, 'main', tippySupport);
   }
 

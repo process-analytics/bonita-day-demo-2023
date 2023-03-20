@@ -20,7 +20,7 @@ import {displayView, isSubProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisuali
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
 class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
-  constructor(bpmnVisualization: BpmnVisualization, tippySupport: AbstractTippySupport) {
+  constructor(bpmnVisualization: BpmnVisualization, tippySupport: SubProcessTippySupport) {
     super(bpmnVisualization, subProcessViewName, tippySupport);
   }
 

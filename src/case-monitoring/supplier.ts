@@ -5,12 +5,12 @@ import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
 class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
-  constructor(bpmnVisualization: BpmnVisualization, tippySupport: AbstractTippySupport) {
+  constructor(bpmnVisualization: BpmnVisualization, tippySupport: SupplierProcessTippySupport) {
     super(bpmnVisualization, 'main', tippySupport);
   }
 
-  getTippySupportInstance() {
-    return this.tippySupport;
+  getTippySupportInstance(): SupplierProcessTippySupport {
+    return this.tippySupport as SupplierProcessTippySupport;
   }
 
   addInfoOnChatGptActivity(bpmnElementId: string) {
@@ -207,7 +207,7 @@ class SupplierContact {
   }
 
   protected addInfo(activityId: string, prompt: string, answer: string) {
-    const tippySupportInstance = this.supplierMonitoring.getTippySupportInstance() as SupplierProcessTippySupport;
+    const tippySupportInstance = this.supplierMonitoring.getTippySupportInstance();
     if (tippySupportInstance !== undefined) {
       tippySupportInstance.setUserQuestion(prompt);
       tippySupportInstance.setChatGptAnswer(answer);
