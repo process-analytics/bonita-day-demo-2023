@@ -175,7 +175,7 @@ export function hideSubProcessCaseMonitoringData() {
   //     getElementsByIds bpmn-visualization.esm.js:5742
   //     getElementsByIds bpmn-visualization.esm.js:5742
   //     getVisitedEdges paths.ts:30
-  //     fetchCaseMonitoringData case-monitoring-data.ts:120
+  //     fetchCaseMonitoringData data-case.ts:120
   //     getCaseMonitoringData abstract.ts:32
   //     restoreVisibilityOfAlreadyExecutedElements abstract.ts:67
   //     hideData abstract.ts:25
