@@ -40,6 +40,23 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
     this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Flow_092it75'], {
       stroke: {color: 'blue', width: 4},
     });
+    // Reduce opacity of previous elements
+    // Temp implementation: the list should not be duplicated with the `highlightFirstElementsOnStart` method
+    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(
+      [
+        'Event_1t5st9j',
+        'Gateway_19radi6',
+        'Activity_04d6t36', // Shapes
+        'Flow_0i8gykc',
+        'Flow_06y94ol', // Edges
+      ],
+      {
+        opacity: 5,
+        font: {
+          opacity: 15, // The global opacity doesn't affect the font opacity, so we must redefine it here :-(
+        },
+      },
+    );
   }
 
   protected createTippySupportInstance(bpmnVisualization: BpmnVisualization): AbstractTippySupport {
