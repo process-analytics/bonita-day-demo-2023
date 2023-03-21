@@ -39,6 +39,19 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
     hideSubProcessCaseMonitoringData();
   }
 
+  // for supplier
+  // pause: on main activity, remove poper, remove overlays, remove CSS + add CSS like in subprocess
+  pause(): void {
+    super.hideData();
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+  }
+
+  // resume
+  resume(): void {
+    super.showData();
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+  }
+
   protected highlightRunningElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
     this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
@@ -84,14 +97,28 @@ class MainProcessTippySupport extends AbstractTippySupport {
 
   // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
   private readonly contactClientBtnListener = () => {
-    console.info('called contactClientBtnListener');
+    console.info('called contactClientBtnListener private method');
+    // TODO pause main process
+    console.info('click btn');
     showContactSupplierAction().then(() => {
-      console.info('Contact client action complete!');
+      console.log('Contact client action complete!');
     })
-      .catch(error => {
-        console.error('Error in contact client action:', error);
-      });
-    console.info('contactClientBtnListener: showContactSupplierAction called');
+        .then(() => {
+          console.info('I have been executed after showContactSupplierAction')
+        })
+        .catch(error => {
+          console.error('Error in contact client action:', error);
+        });
+
+    // new Promise<void>(resolve => {
+    //   setTimeout(() => {
+    //     resolve();
+    //   }, 5000);
+    // }).then(() => {
+    //   console.info('I have been executed after timeout')
+    // });
+    console.info('click btn done');
+
   };
 
   private manageEventListeners(instance: Instance, register: boolean): void {
