@@ -14,9 +14,9 @@ const happyPath = [
   // Activate paths after the first parallel gateway
   'Flow_06ca3ya',
   'Activity_0ec8azh',
-  'Flow_169iupn',
+  'Flow_0re9mrf',
   'Event_0e43ncy',
-  'Flow_1ojqrz1',
+  'Flow_0yxnijf',
   'Activity_1t65hvk',
   // Activate the path after subprocess
   'Flow_1y1kscn',
