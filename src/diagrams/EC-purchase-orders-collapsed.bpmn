@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" targetNamespace="http://example.com/bpmn">
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="sid-38422fae-e03e-43a3-bef4-bd33b32041b2" targetNamespace="http://example.com/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="11.5.0">
   <collaboration id="Collaboration_11alqf7">
     <participant id="Participant_0nuspec" name="Purchase Order Item" processRef="Process_0q9sk6e" />
-    <participant id="Participant_03ba50e" name="Client Contact" processRef="Process_063fapr" />
+    <participant id="Participant_03ba50e" name="Supplier Contact" processRef="Process_063fapr" />
   </collaboration>
   <process id="Process_0q9sk6e">
     <startEvent id="Event_1vogvxc" name="New POI needed">
@@ -11,16 +11,16 @@
     <parallelGateway id="Gateway_0xh0plz">
       <incoming>Flow_0i9hf3x</incoming>
       <outgoing>Flow_06ca3ya</outgoing>
-      <outgoing>Flow_169iupn</outgoing>
-      <outgoing>Flow_1ojqrz1</outgoing>
+      <outgoing>Flow_0yxnijf</outgoing>
+      <outgoing>Flow_0re9mrf</outgoing>
     </parallelGateway>
     <intermediateCatchEvent id="Event_0e43ncy" name="Vendor creates invoice">
-      <incoming>Flow_169iupn</incoming>
+      <incoming>Flow_0re9mrf</incoming>
       <outgoing>Flow_0hpz0ab</outgoing>
       <messageEventDefinition id="MessageEventDefinition_1guq03o" />
     </intermediateCatchEvent>
     <task id="Activity_1t65hvk" name="Create Purchase Order Item">
-      <incoming>Flow_1ojqrz1</incoming>
+      <incoming>Flow_0yxnijf</incoming>
       <outgoing>Flow_1a9zw3d</outgoing>
     </task>
     <parallelGateway id="Gateway_0apcz1e">
@@ -88,8 +88,6 @@
     </subProcess>
     <sequenceFlow id="Flow_0i9hf3x" sourceRef="Event_1vogvxc" targetRef="Gateway_0xh0plz" />
     <sequenceFlow id="Flow_06ca3ya" sourceRef="Gateway_0xh0plz" targetRef="Activity_0ec8azh" />
-    <sequenceFlow id="Flow_169iupn" sourceRef="Gateway_0xh0plz" targetRef="Event_0e43ncy" />
-    <sequenceFlow id="Flow_1ojqrz1" sourceRef="Gateway_0xh0plz" targetRef="Activity_1t65hvk" />
     <sequenceFlow id="Flow_0hpz0ab" sourceRef="Event_0e43ncy" targetRef="Gateway_0domayw" />
     <sequenceFlow id="Flow_1a9zw3d" sourceRef="Activity_1t65hvk" targetRef="Gateway_0domayw" />
     <sequenceFlow id="Flow_1y1kscn" sourceRef="Activity_0ec8azh" targetRef="Gateway_0apcz1e" />
@@ -108,9 +106,11 @@
     <sequenceFlow id="Flow_1vzcv72" sourceRef="Activity_083jf01" targetRef="Gateway_1ezcj46" />
     <sequenceFlow id="Flow_1kkicvr" sourceRef="Gateway_1ezcj46" targetRef="Activity_0yabbur" />
     <sequenceFlow id="Flow_12q12yb" sourceRef="Activity_0yabbur" targetRef="Event_07598zy" />
+    <sequenceFlow id="Flow_0yxnijf" sourceRef="Gateway_0xh0plz" targetRef="Activity_1t65hvk" />
+    <sequenceFlow id="Flow_0re9mrf" sourceRef="Gateway_0xh0plz" targetRef="Event_0e43ncy" />
   </process>
   <process id="Process_063fapr">
-    <startEvent id="Event_1t5st9j" name="start customer contact">
+    <startEvent id="Event_1t5st9j" name="Start supplier contact">
       <outgoing>Flow_0i8gykc</outgoing>
     </startEvent>
     <exclusiveGateway id="Gateway_0ng9ln7">
@@ -154,13 +154,13 @@
   <bpmndi:BPMNDiagram id="BpmnDiagram_1">
     <bpmndi:BPMNPlane id="BpmnPlane_1" bpmnElement="Collaboration_11alqf7">
       <bpmndi:BPMNShape id="Participant_0nuspec_di" bpmnElement="Participant_0nuspec" isHorizontal="true">
-        <omgdc:Bounds x="140" y="60" width="1480" height="470" />
+        <omgdc:Bounds x="140" y="60" width="1490" height="470" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1vogvxc_di" bpmnElement="Event_1vogvxc">
         <omgdc:Bounds x="192" y="262" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="168" y="305" width="84" height="14" />
+          <omgdc:Bounds x="180" y="305" width="84" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1ofs9bd_di" bpmnElement="Gateway_0xh0plz">
@@ -235,16 +235,6 @@
         <omgdi:waypoint x="300" y="255" />
         <omgdi:waypoint x="300" y="210" />
         <omgdi:waypoint x="380" y="210" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_169iupn_di" bpmnElement="Flow_169iupn">
-        <omgdi:waypoint x="300" y="305" />
-        <omgdi:waypoint x="300" y="370" />
-        <omgdi:waypoint x="472" y="370" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1ojqrz1_di" bpmnElement="Flow_1ojqrz1">
-        <omgdi:waypoint x="300" y="305" />
-        <omgdi:waypoint x="300" y="470" />
-        <omgdi:waypoint x="440" y="470" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0hpz0ab_di" bpmnElement="Flow_0hpz0ab">
         <omgdi:waypoint x="508" y="370" />
@@ -332,14 +322,24 @@
         <omgdi:waypoint x="1520" y="370" />
         <omgdi:waypoint x="1562" y="370" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yxnijf_di" bpmnElement="Flow_0yxnijf">
+        <omgdi:waypoint x="300" y="305" />
+        <omgdi:waypoint x="300" y="470" />
+        <omgdi:waypoint x="440" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0re9mrf_di" bpmnElement="Flow_0re9mrf">
+        <omgdi:waypoint x="300" y="305" />
+        <omgdi:waypoint x="300" y="370" />
+        <omgdi:waypoint x="472" y="370" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="Participant_03ba50e_di" bpmnElement="Participant_03ba50e" isHorizontal="true">
-        <omgdc:Bounds x="380" y="590" width="950" height="260" />
+        <omgdc:Bounds x="380" y="580" width="950" height="289" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1t5st9j_di" bpmnElement="Event_1t5st9j">
         <omgdc:Bounds x="432" y="682" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <omgdc:Bounds x="415" y="725" width="72" height="27" />
+          <omgdc:Bounds x="418" y="725" width="67" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0ng9ln7_di" bpmnElement="Gateway_0ng9ln7" isMarkerVisible="true">
