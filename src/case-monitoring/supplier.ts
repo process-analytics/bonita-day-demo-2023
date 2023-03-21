@@ -1,8 +1,9 @@
-import {type BpmnVisualization} from 'bpmn-visualization/*';
+import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
+import {getExecutionStepAfterReviewEmailChoice, ProcessExecutor, type ReviewEmailDecision} from './supplier-utils.js';
 
 class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization, tippySupport: SupplierProcessTippySupport) {
@@ -22,48 +23,6 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
     // Only popovers for now
     this.tippySupport.removeAllPopovers();
     console.info('end hideData / contact supplier pool');
-  }
-
-  highlightFirstElementsOnStart(): void {
-    // Event_1t5st9j start event
-    // Flow_0i8gykc
-    // Gateway_19radi6
-    // Flow_06y94ol
-    // Activity_04d6t36 chatGPT activity
-    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Event_1t5st9j', 'Gateway_19radi6', 'Activity_04d6t36'], {
-      stroke: {color: 'blue', width: 4},
-      fill: {color: 'blue', opacity: 10},
-    });
-    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Flow_0i8gykc', 'Flow_06y94ol'], {
-      stroke: {color: 'blue', width: 4},
-    });
-  }
-
-  highlightReviewEmail(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Activity_1oxewnq'], {
-      stroke: {color: 'blue', width: 3},
-      fill: {color: 'blue', opacity: 10},
-    });
-    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(['Flow_092it75'], {
-      stroke: {color: 'blue', width: 4},
-    });
-    // Reduce opacity of previous elements
-    // Temp implementation: the list should not be duplicated with the `highlightFirstElementsOnStart` method
-    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(
-      [
-        'Event_1t5st9j',
-        'Gateway_19radi6',
-        'Activity_04d6t36', // Shapes
-        'Flow_0i8gykc',
-        'Flow_06y94ol', // Edges
-      ],
-      {
-        opacity: 5,
-        font: {
-          opacity: 15, // The global opacity doesn't affect the font opacity, so we must redefine it here :-(
-        },
-      },
-    );
   }
 }
 
@@ -131,21 +90,113 @@ class SupplierContact {
   // Create an AbortController
   // required to stope the execution of the async function startInstance
   private readonly abortController: AbortController = new AbortController();
+  private readonly bpmnElementsSearcher: BpmnElementsSearcher;
 
-  constructor(readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
+  private processExecutor?: ProcessExecutor;
+
+  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
+    this.bpmnElementsSearcher = new BpmnElementsSearcher(this.bpmnVisualization);
+  }
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO this could should really be async!!!
   async startCase(): Promise<void> {
+    console.info('called startCase');
+    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase);
+    const processExecutorStarter = Promise.resolve(this.processExecutor);
+
+    // TMP for dev only
+    // In the future, this will be managed by the buttons of the popover attached to 'Review and Adapt Email'
+    const bpmnElementsRegistry = this.bpmnVisualization.bpmnElementsRegistry;
+
+    function registerInteractionForDevOnly(processExecutor: ProcessExecutor): void {
+      console.info('Register interaction for dev only');
+      const registerReviewDecisionOnClick = function (bpmnElementId: string, decision: ReviewEmailDecision) {
+        const gwChoiceHtmlElt = bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0].htmlElement;
+        gwChoiceHtmlElt.addEventListener('click', () => {
+          console.info('@@clicked choice %s --> %s', bpmnElementId, decision);
+          const nextExecutionStep = getExecutionStepAfterReviewEmailChoice(decision);
+          console.info('@@nextExecutionStep', nextExecutionStep);
+          processExecutor.execute(nextExecutionStep)
+          // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
+            .finally(() => {
+              // Nothing to do
+            });
+          console.info('@@registered execution of nextExecutionStep', nextExecutionStep);
+        });
+      };
+
+      registerReviewDecisionOnClick('Gateway_0ng9ln7', 'validated');
+      registerReviewDecisionOnClick('Activity_1oxewnq', 'regenerate');
+      registerReviewDecisionOnClick('Event_13tn0ty', 'abort');
+      console.info('DONE Register interaction for dev only');
+    }
+
+    processExecutorStarter.then(processExecutor => {
+      registerInteractionForDevOnly(processExecutor);
+      return processExecutor;
+    })
+      // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
+      .finally(() => {
+        // Nothing to do
+      });
+    // END OF - TMP for dev only
+    console.info('Registering ProcessExecutor start');
+    processExecutorStarter.then(async processExecutor => processExecutor.start())
+      // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
+      .finally(() => {
+        // Nothing to do
+      });
+    console.info('ProcessExecutor start registered');
+
+    console.info('Register tmp popover management');
+    Promise.resolve().then(async () => this.tmpRegisterPopoverMgt())
+      // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
+      .finally(() => {
+        // Nothing to do
+      });
+    console.info('Tmp popover management registered');
+  }
+
+  // Cancel the execution of the async startCase
+  stopCase(): void {
+    this.abortController.abort();
+    this.onEndCase();
+  }
+
+  onEndCase = (): void => {
+    // Hide data
+    this.supplierMonitoring.hideData();
+    // Hide pool
+    processVisualizer.hideManuallyTriggeredProcess();
+  };
+
+  protected addInfo(activityId: string, prompt: string, answer: string) {
+    const tippySupportInstance = this.supplierMonitoring.getTippySupportInstance();
+    if (tippySupportInstance !== undefined) {
+      tippySupportInstance.setUserQuestion(prompt);
+      tippySupportInstance.setChatGptAnswer(answer);
+    }
+
+    const tippyInstance = this.supplierMonitoring.addInfoOnChatGptActivity(activityId);
+    // TippyInstance.setContent('the content to set manually - chatgpt is working');
+    tippyInstance.setProps({
+      trigger: 'manual',
+      arrow: false,
+      hideOnClick: false,
+    });
+    return tippyInstance;
+  }
+
+  // Temp implementation Popover management. This will change and will be triggered by the ProcessExecutor in a near future
+  private async tmpRegisterPopoverMgt(): Promise<void> {
     let prompt = '';
     let answer = '';
     let emailRetrievalTippyInstance: Instance | undefined;
     let emailReviewTippyInstance: Instance | undefined;
 
-    this.supplierMonitoring.highlightFirstElementsOnStart();
-
     // Add and show popover to "retrieve email suggestion"
-    const retrieveEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Retrieve email suggestion');
+    const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion');
     if (retrieveEmailActivityId !== undefined) {
       prompt = 'Draft an email to ask about the supplier about the delay';
       emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, prompt, answer);
@@ -164,7 +215,7 @@ class SupplierContact {
 
     // Check if cancellation is requested
     if (this.abortController.signal.aborted) {
-      console.log('cancelation requested 1');
+      console.log('cancellation requested 1');
       throw new Error('Supplier instance canceled');
     }
 
@@ -173,9 +224,7 @@ class SupplierContact {
       emailRetrievalTippyInstance.hide();
     }
 
-    this.supplierMonitoring.highlightReviewEmail();
-
-    const reviewEmailActivityId = new BpmnElementsSearcher(this.bpmnVisualization).getElementIdByName('Review and adapt email');
+    const reviewEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Review and adapt email');
     if (reviewEmailActivityId !== undefined) {
       emailReviewTippyInstance = this.addInfo(reviewEmailActivityId, prompt, answer);
       emailReviewTippyInstance.show();
@@ -188,59 +237,72 @@ class SupplierContact {
       }, 5000);
     });
 
-    // Completed, remove instance from supplierContactInstances
-    // hide data and hide pool
-    this.onEndCase();
+    // // Completed, remove instance from supplierContactInstances
+    // // hide data and hide pool
+    // this.onEndCase();
   }
 
-  // Cancel the execution of the async startCase
-  stopCase(): void {
-    this.abortController.abort();
-    this.onEndCase();
-  }
+  // =====================================================================================================================
+  // For future usage, register dynamically this method at ProcessExecutor initialization
+  // =====================================================================================================================
 
-  onEndCase(): void {
-    // Hide data
-    this.supplierMonitoring.hideData();
-    // Hide pool
-    processVisualizer.hideManuallyTriggeredProcess();
-  }
-
-  protected addInfo(activityId: string, prompt: string, answer: string) {
-    const tippySupportInstance = this.supplierMonitoring.getTippySupportInstance();
-    if (tippySupportInstance !== undefined) {
-      tippySupportInstance.setUserQuestion(prompt);
-      tippySupportInstance.setChatGptAnswer(answer);
-    }
-
-    const tippyInstance = this.supplierMonitoring.addInfoOnChatGptActivity(activityId);
-    tippyInstance.setProps({
-      trigger: 'manual',
-      arrow: false,
-      hideOnClick: false,
-    });
-    return tippyInstance;
-  }
+  // update/set the execution step action to call this function
+  // async emailRetrievalOperations() {
+  //   await Promise.resolve()
+  //       .then(() => this.showEmailRetrievalPopover())
+  //       .then((result) => new Promise(resolve => setTimeout(() => resolve(result), 1000)))
+  //       .then(() => console.info('wait show email retrieval 1 done'))
+  //   ;
+  // }
+  //
+  // // private emailRetrievalTippyInstance?: Instance;
+  // private showEmailRetrievalPopover() {
+  //   const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion')!;
+  //   const tippySupport = this.supplierMonitoring.getTippySupportInstance();
+  //
+  //   // const tippyInstance = this.supplierMonitoring.addPopoverOnElement(activityId);
+  //   const tippyInstance = tippySupport.addPopover(retrieveEmailActivityId);
+  //   tippyInstance.setContent('The content of the manually displayed instance);
+  //   tippyInstance.setProps({
+  //     trigger: 'manual',
+  //     arrow: false,
+  //     hideOnClick: false,
+  //   });
+  //   // return tippyInstance;
+  //
+  //   // prompt = 'Draft an email to ask about the supplier about the delay';
+  //   // this.emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, 'Draft an email to ask about the supplier about the delay', 'answer');
+  //   tippyInstance.show();
+  //   return tippyInstance;
+  // }
 }
+
+// =====================================================================================================================
+// use by MainProcessCaseMonitoring
+// =====================================================================================================================
 
 const supplierContact = new SupplierContact(bpmnVisualization, new SupplierProcessCaseMonitoring(bpmnVisualization, new SupplierProcessTippySupport(bpmnVisualization)));
 const processVisualizer = new ProcessVisualizer(bpmnVisualization);
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO trigger by main process
+// TODO rename into showSupplierContactData
 export async function showContactSupplierAction(): Promise<void> {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO implement
-
-  // display contact supplier pool
-  processVisualizer.showManuallyTriggeredProcess();
-
-  supplierContact.startCase()
+  // TODO manage processVisualizer consistently
+  //   in supplierContact like for stopCase or outside like startCase
+  return Promise.resolve()
     .then(() => {
-      console.log('Supplier instance completed successfully');
+      console.info('init done, before showManuallyTriggeredProcess');
     })
-    .catch((error: Error) => {
-      console.log(`Supplier instance failed with error: ${error.message}`, error);
+    .then(() => {
+      processVisualizer.showManuallyTriggeredProcess();
+    })
+    .then(() => {
+      console.info('showManuallyTriggeredProcess executed');
+    })
+    .then(async () => supplierContact.startCase())
+    .then(() => {
+      console.info('Supplier case started successfully');
     });
 }
 
