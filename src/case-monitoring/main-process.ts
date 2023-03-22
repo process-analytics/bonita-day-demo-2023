@@ -51,6 +51,18 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
       this.addOverlay(bpmnElementId);
     }
   }
+
+  private addOverlay(bpmnElementId: string) {
+    this.bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
+      position: 'top-right',
+      label: '?',
+      style: {
+        font: {color: '#fff', size: 16},
+        fill: {color: '#4169E1'},
+        stroke: {color: '#4169E1', width: 2},
+      },
+    });
+  }
 }
 
 class MainProcessTippySupport extends AbstractTippySupport {
