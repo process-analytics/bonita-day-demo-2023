@@ -1,7 +1,6 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
-import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 import {getExecutionStepAfterReviewEmailChoice, ProcessExecutor} from './supplier-utils.js';
 
@@ -129,19 +128,15 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
-  private readonly bpmnElementsSearcher: BpmnElementsSearcher;
-
   private processExecutor?: ProcessExecutor;
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
-    this.bpmnElementsSearcher = new BpmnElementsSearcher(this.bpmnVisualization);
-  }
+  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO this could should really be async!!!
   async startCase(): Promise<void> {
     console.info('called startCase');
-    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase);
+    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.emailRetrievalOperations.bind(this), this.onEndCase);
     const processExecutorStarter = Promise.resolve(this.processExecutor);
 
     console.info('Registering ProcessExecutor start');
@@ -151,14 +146,6 @@ class SupplierContact {
         // Nothing to do
       });
     console.info('ProcessExecutor start registered');
-
-    console.info('Register tmp popover management');
-    Promise.resolve().then(async () => this.tmpRegisterPopoverMgt())
-      // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
-      .finally(() => {
-        // Nothing to do
-      });
-    console.info('Tmp popover management registered');
   }
 
   abortClicked() {
@@ -220,49 +207,8 @@ class SupplierContact {
       arrow: false,
       hideOnClick: false,
     });
+    tippyInstance.show();
     return tippyInstance;
-  }
-
-  // Temp implementation Popover management. This will change and will be triggered by the ProcessExecutor in a near future
-  private async tmpRegisterPopoverMgt(): Promise<void> {
-    let emailRetrievalTippyInstance: Instance | undefined;
-    let emailReviewTippyInstance: Instance | undefined;
-
-    // Add and show popover to "retrieve email suggestion"
-    const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion');
-    if (retrieveEmailActivityId !== undefined) {
-      emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId);
-      emailRetrievalTippyInstance.show();
-    }
-
-    // Wait for 5 seconds before resolving the Promise
-    await new Promise<void>(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
-
-    // Add and show popover to "Review and adapt email"
-    if (emailRetrievalTippyInstance !== undefined) {
-      emailRetrievalTippyInstance.hide();
-    }
-
-    const reviewEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Review and adapt email');
-    if (reviewEmailActivityId !== undefined) {
-      emailReviewTippyInstance = this.addInfo(reviewEmailActivityId);
-      emailReviewTippyInstance.show();
-    }
-
-    // Wait for 5 seconds before resolving the Promise
-    await new Promise<void>(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
-
-    // // Completed, remove instance from supplierContactInstances
-    // // hide data and hide pool
-    // this.onEndCase();
   }
 
   // =====================================================================================================================
@@ -270,13 +216,17 @@ class SupplierContact {
   // =====================================================================================================================
 
   // update/set the execution step action to call this function
-  // async emailRetrievalOperations() {
-  //   await Promise.resolve()
-  //       .then(() => this.showEmailRetrievalPopover())
-  //       .then((result) => new Promise(resolve => setTimeout(() => resolve(result), 1000)))
-  //       .then(() => console.info('wait show email retrieval 1 done'))
-  //   ;
-  // }
+  protected async emailRetrievalOperations(activityId: string): Promise<void> {
+    return Promise.resolve()
+      .then(() => this.addInfo(activityId))
+      // eslint-disable-next-line no-promise-executor-return
+      .then(async result => new Promise(resolve => setTimeout(() => {
+        resolve(result);
+      }, 1000)))
+      .then(() => {
+        console.info('wait show email retrieval 1 done');
+      });
+  }
   //
   // // private emailRetrievalTippyInstance?: Instance;
   // private showEmailRetrievalPopover() {

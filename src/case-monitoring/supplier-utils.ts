@@ -87,7 +87,7 @@ export class ProcessExecutor {
 
   private readonly executionCounts = new Map<string, number>();
 
-  constructor(bpmnVisualization: BpmnVisualization, private readonly endCaseCallBack: () => void) {
+  constructor(bpmnVisualization: BpmnVisualization, private readonly emailRetrievalOperationsCallBack: (id: string) => void, private readonly endCaseCallBack: () => void) {
     this.pathHighlighter = new PathHighlighter(bpmnVisualization);
   }
 
@@ -143,6 +143,9 @@ export class ProcessExecutor {
     if (executionStep.action) {
       Promise.resolve()
         .then(() => executionStep.action?.())
+        .then(() => {
+          this.emailRetrievalOperationsCallBack(executionStep.id);
+        })
         // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
         .finally(() => {
           // Nothing to do
