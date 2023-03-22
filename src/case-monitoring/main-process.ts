@@ -26,9 +26,10 @@ export function newMainProcessCaseMonitoring(bpmnVisualization: BpmnVisualizatio
   return new MainProcessCaseMonitoring(bpmnVisualization, new MainProcessTippySupport(bpmnVisualization));
 }
 
-class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
+export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization, tippySupport: MainProcessTippySupport) {
     super(bpmnVisualization, 'main', tippySupport);
+    tippySupport.setMainProcessCaseMonitoring(this);
   }
 
   hideData(): void {
@@ -42,14 +43,14 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   // for supplier
   // pause: on main activity, remove poper, remove overlays, remove CSS + add CSS like in subprocess
   pause(): void {
-    super.hideData();
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
   }
 
   // resume
   resume(): void {
-    super.showData();
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
   }
 
   protected highlightRunningElements(): void {
@@ -79,8 +80,14 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
 }
 
 class MainProcessTippySupport extends AbstractTippySupport {
+  private mainProcessCaseMonitoring?: MainProcessCaseMonitoring;
+
   constructor(protected readonly bpmnVisualization: BpmnVisualization) {
     super(bpmnVisualization);
+  }
+
+  setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring){
+    this.mainProcessCaseMonitoring = mainProcessCaseMonitoring;
   }
 
   protected getContent(htmlElement: ReferenceElement) {
@@ -100,7 +107,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
     console.info('called contactClientBtnListener private method');
     // TODO pause main process
     console.info('click btn');
-    showContactSupplierAction().then(() => {
+    showContactSupplierAction(this.mainProcessCaseMonitoring!).then(() => {
       console.log('Contact client action complete!');
     })
         .then(() => {
