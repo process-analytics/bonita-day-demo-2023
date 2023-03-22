@@ -33,7 +33,6 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
   private addInfoOnRunningElements(bpmnElementIds: string[]) {
     for (const bpmnElementId of bpmnElementIds) {
       this.tippySupport.addPopover(bpmnElementId);
-      this.addOverlay(bpmnElementId);
     }
   }
 }

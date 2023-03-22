@@ -35,18 +35,6 @@ export abstract class AbstractCaseMonitoring {
     // Do nothing by default
   }
 
-  protected addOverlay(bpmnElementId: string) {
-    this.bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
-      position: 'top-right',
-      label: '?',
-      style: {
-        font: {color: '#fff', size: 16},
-        fill: {color: '#4169E1'},
-        stroke: {color: '#4169E1', width: 2},
-      },
-    });
-  }
-
   private reduceVisibilityOfAlreadyExecutedElements(): void {
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
