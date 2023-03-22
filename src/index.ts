@@ -30,7 +30,7 @@ const configureToggleAdvertiseSection = () => {
   };
 
   registerToggleDisplayOnClick('#logo');
-  registerToggleDisplayOnClick('.project-advertising button');
+  registerToggleDisplayOnClick('.project-advertising-container .btn-close');
 };
 
 configureBreadcrumb();
