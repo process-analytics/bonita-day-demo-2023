@@ -40,14 +40,14 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
     hideSubProcessCaseMonitoringData();
   }
 
-  // for supplier
+  // For supplier
   // pause: on main activity, remove poper, remove overlays, remove CSS + add CSS like in subprocess
   pause(): void {
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
   }
 
-  // resume
+  // Resume
   resume(): void {
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
@@ -86,7 +86,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
     super(bpmnVisualization);
   }
 
-  setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring){
+  setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring) {
     this.mainProcessCaseMonitoring = mainProcessCaseMonitoring;
   }
 
@@ -105,19 +105,18 @@ class MainProcessTippySupport extends AbstractTippySupport {
   // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
   private readonly contactClientBtnListener = () => {
     console.info('called contactClientBtnListener private method');
-    // TODO pause main process
     console.info('click btn');
     showContactSupplierAction(this.mainProcessCaseMonitoring!).then(() => {
       console.log('Contact client action complete!');
     })
-        .then(() => {
-          console.info('I have been executed after showContactSupplierAction')
-        })
-        .catch(error => {
-          console.error('Error in contact client action:', error);
-        });
+      .then(() => {
+        console.info('I have been executed after showContactSupplierAction');
+      })
+      .catch(error => {
+        console.error('Error in contact client action:', error);
+      });
 
-    // new Promise<void>(resolve => {
+    // New Promise<void>(resolve => {
     //   setTimeout(() => {
     //     resolve();
     //   }, 5000);
@@ -125,7 +124,6 @@ class MainProcessTippySupport extends AbstractTippySupport {
     //   console.info('I have been executed after timeout')
     // });
     console.info('click btn done');
-
   };
 
   private manageEventListeners(instance: Instance, register: boolean): void {
