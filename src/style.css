@@ -292,6 +292,19 @@ header {
 /*padding: 10px;
 }*/
 
+.popover-container {
+  max-width: 400px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.popover-container textarea {
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
