@@ -68,7 +68,6 @@ header {
 
 .project-advertising {
   display: flex;
-  align-items: center;
   justify-content: center;
   height: var(--bpmn-container-height);
 }
