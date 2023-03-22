@@ -94,10 +94,13 @@ class MainProcessTippySupport extends AbstractTippySupport {
     console.info('contactClientBtnListener: showContactSupplierAction called');
   };
 
-  private manageEventListeners(_instance: Instance, register: boolean): void {
+  private manageEventListeners(instance: Instance, register: boolean): void {
+    // In the query selectors, target instance.popper. Keep using document for now as the previous popper (when going back to the subprocess after a first venue)
+    // may still exist in the DOM of the subprocess view
+
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
-    const allocateResourceBtn = document.querySelector('#Allocate-Resource')!;
+    const allocateResourceBtn = document.querySelector(`#${instance.popper.id} #Allocate-Resource`)!;
     if (register) {
       allocateResourceBtn.addEventListener('click', showResourceAllocationAction);
     } else {
@@ -106,7 +109,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
 
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
-    const contactClientBtn = document.querySelector('#Contact-Client')!;
+    const contactClientBtn = document.querySelector(`#${instance.popper.id} #Contact-Client`)!;
     if (register) {
       contactClientBtn.addEventListener('click', this.contactClientBtnListener);
     } else {
