@@ -33,10 +33,10 @@
       <outgoing>Flow_0jp4uz8</outgoing>
       <outgoing>Flow_0wd8pwa</outgoing>
     </exclusiveGateway>
-    <task id="Activity_06cvihl" name="Record Service Entry Sheet">
+    <userTask id="Activity_06cvihl" name="Record Service Entry Sheet">
       <incoming>Flow_0jp4uz8</incoming>
       <outgoing>Flow_0pu7ps3</outgoing>
-    </task>
+    </userTask>
     <exclusiveGateway id="Gateway_0jqn9hp">
       <incoming>Flow_0wd8pwa</incoming>
       <incoming>Flow_0pu7ps3</incoming>
@@ -47,38 +47,38 @@
       <incoming>Flow_14tr1q9</incoming>
       <outgoing>Flow_19cdedl</outgoing>
     </parallelGateway>
-    <task id="Activity_00vbm9s" name="Record Goods Receipts">
+    <userTask id="Activity_00vbm9s" name="Record Goods Receipts">
       <incoming>Flow_1448s6h</incoming>
       <outgoing>Flow_14tr1q9</outgoing>
-    </task>
+    </userTask>
     <parallelGateway id="Gateway_0domayw">
       <incoming>Flow_19cdedl</incoming>
       <incoming>Flow_0hpz0ab</incoming>
       <incoming>Flow_1a9zw3d</incoming>
       <outgoing>Flow_06uo70h</outgoing>
     </parallelGateway>
-    <task id="Activity_1u4jwkv" name="Record Invoice Receipt">
+    <userTask id="Activity_1u4jwkv" name="Record Invoice Receipt">
       <incoming>Flow_06uo70h</incoming>
       <outgoing>Flow_0lrixjg</outgoing>
-    </task>
+    </userTask>
     <exclusiveGateway id="Gateway_0a68dfj">
       <incoming>Flow_0lrixjg</incoming>
       <outgoing>Flow_1r9qd61</outgoing>
       <outgoing>Flow_1lkft1n</outgoing>
     </exclusiveGateway>
-    <task id="Activity_083jf01" name="Remove Payment Block">
+    <serviceTask id="Activity_083jf01" name="Remove Payment Block">
       <incoming>Flow_1r9qd61</incoming>
       <outgoing>Flow_1vzcv72</outgoing>
-    </task>
+    </serviceTask>
     <exclusiveGateway id="Gateway_1ezcj46">
       <incoming>Flow_1lkft1n</incoming>
       <incoming>Flow_1vzcv72</incoming>
       <outgoing>Flow_1kkicvr</outgoing>
     </exclusiveGateway>
-    <task id="Activity_0yabbur" name="Clear Invoice">
+    <serviceTask id="Activity_0yabbur" name="Clear Invoice">
       <incoming>Flow_1kkicvr</incoming>
       <outgoing>Flow_12q12yb</outgoing>
-    </task>
+    </serviceTask>
     <endEvent id="Event_07598zy">
       <incoming>Flow_12q12yb</incoming>
     </endEvent>
@@ -119,23 +119,23 @@
       <outgoing>Flow_1b8bdo1</outgoing>
       <outgoing>Flow_1b13tzq</outgoing>
     </exclusiveGateway>
-    <task id="Activity_1oxewnq" name="Review and adapt email">
+    <userTask id="Activity_1oxewnq" name="Review and adapt email">
       <incoming>Flow_092it75</incoming>
       <outgoing>Flow_0adzt76</outgoing>
-    </task>
-    <task id="Activity_04d6t36" name="Retrieve email suggestion">
+    </userTask>
+    <serviceTask id="Activity_04d6t36" name="Retrieve email suggestion">
       <incoming>Flow_06y94ol</incoming>
       <outgoing>Flow_092it75</outgoing>
-    </task>
+    </serviceTask>
     <exclusiveGateway id="Gateway_19radi6">
       <incoming>Flow_0i8gykc</incoming>
       <incoming>Flow_1glx5xw</incoming>
       <outgoing>Flow_06y94ol</outgoing>
     </exclusiveGateway>
-    <task id="Activity_0tb47yw" name="Send email to client">
+    <serviceTask id="Activity_0tb47yw" name="Send email to client">
       <incoming>Flow_1b8bdo1</incoming>
       <outgoing>Flow_1jay9w3</outgoing>
-    </task>
+    </serviceTask>
     <endEvent id="Event_13tn0ty" name="abort">
       <incoming>Flow_1b13tzq</incoming>
     </endEvent>
