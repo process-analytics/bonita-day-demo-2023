@@ -77,9 +77,6 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
-  // Create an AbortController
-  // required to stope the execution of the async function startInstance
-  private readonly abortController: AbortController = new AbortController();
   private readonly bpmnElementsSearcher: BpmnElementsSearcher;
 
   private processExecutor?: ProcessExecutor;
@@ -150,7 +147,6 @@ class SupplierContact {
 
   // Cancel the execution of the async startCase
   stopCase(): void {
-    this.abortController.abort();
     this.onEndCase();
   }
 
@@ -190,12 +186,6 @@ class SupplierContact {
         resolve();
       }, 5000);
     });
-
-    // Check if cancellation is requested
-    if (this.abortController.signal.aborted) {
-      console.log('cancellation requested 1');
-      throw new Error('Supplier instance canceled');
-    }
 
     // Add and show popover to "Review and adapt email"
     if (emailRetrievalTippyInstance !== undefined) {
