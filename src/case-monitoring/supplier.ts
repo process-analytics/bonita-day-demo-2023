@@ -229,21 +229,22 @@ class SupplierContact {
     }
 
     async function delay(ms: number, args: any) {
-      return new Promise(resolve => setTimeout(resolve, ms, args));
+      // eslint-disable-next-line no-promise-executor-return -- cannot be managed now
+      return new Promise(timeup => setTimeout(timeup, ms, args));
     }
 
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO too much promises here
     const firstDelay = 1500;
     const secondDelay = 2000;
     return Promise.resolve()
-    // TODO see if we can add a delay before the popover is displayed (with the delay tippy option)
       .then(() => this.addInfo(activityId))
       .then(tippyInstance => {
         console.info('register delay');
         delay(firstDelay, tippyInstance)
           .then(tippyInstance => {
             console.info('wait show email retrieval done - part 1');
-            // TODO manage types
+            // TO DO manage types
             (tippyInstance as Instance).setContent('Please be patient....');
             console.info('content updated');
             delay(secondDelay, tippyInstance)
@@ -252,8 +253,15 @@ class SupplierContact {
                 (tippyInstance as Instance).hide();
                 console.info('popover hidden');
                 // Hard coded for now, could be pass a method parameter in the future
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises -- cannot be managed now
                 this.processExecutor?.execute('Activity_1oxewnq');
+              })
+              .finally(() => {
+                console.info('End of second delay mgt');
               });
+          })
+          .finally(() => {
+            console.info('End of first delay mgt');
           });
       },
       );
