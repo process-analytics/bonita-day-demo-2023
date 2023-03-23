@@ -77,15 +77,29 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     }
   }
 
+  private hidePopoverOnClick(): void {
+    const bpmnElementId = 'Activity_1oxewnq'; // Hard coded for now "review and adapt email"
+
+    // Duplicated with process-monitoring removePopover --> candidate to extract for reuse
+    const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+    const htmlElement = bpmnElement.htmlElement;
+    if ('_tippy' in htmlElement) {
+      (htmlElement._tippy as Instance).hide();
+    }
+  }
+
   private readonly onAbortClick = () => {
+    this.hidePopoverOnClick();
     supplierContact.abortClicked();
   };
 
   private readonly onValidateClick = () => {
+    this.hidePopoverOnClick();
     supplierContact.validateClicked();
   };
 
   private readonly onGenerateClick = () => {
+    this.hidePopoverOnClick();
     supplierContact.generateClicked();
   };
 
