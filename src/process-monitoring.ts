@@ -33,13 +33,13 @@ const happyPath = [
   'Flow_0wd8pwa',
   'Gateway_0jqn9hp',
   'Flow_1nxinu7',
-  // End "Vendor Create Invoice" branch
-  'Flow_0hpz0ab',
   // End "Record Goods Receipts" branch
   'Flow_14tr1q9',
   // Finalize the Subprocess path
   'Gateway_01gpztl',
   'Flow_19cdedl',
+  // End "Vendor Create Invoice" branch
+  'Flow_0hpz0ab',
   // Finalize the 1st part of the path
   'Gateway_0domayw',
   // Last path elements
