@@ -3,7 +3,7 @@ import {type Instance, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
-import {getExecutionStepAfterReviewEmailChoice, ProcessExecutor, type ReviewEmailDecision} from './supplier-utils.js';
+import {getExecutionStepAfterReviewEmailChoice, ProcessExecutor} from './supplier-utils.js';
 
 class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization, tippySupport: SupplierProcessTippySupport) {
@@ -38,6 +38,58 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     return this.getEmailReviewContent();
   }
 
+  protected registerEventListeners(instance: Instance): void {
+    this.manageEventListeners(instance, true);
+  }
+
+  protected unregisterEventListeners(instance: Instance): void {
+    this.manageEventListeners(instance, false);
+  }
+
+  private manageEventListeners(instance: Instance, register: boolean): void {
+    // Abort button
+    const abortBtn = document.querySelector(`#${instance.popper.id} #abort`);
+    if (abortBtn) {
+      if (register) {
+        abortBtn.addEventListener('click', this.onAbortClick);
+      } else {
+        abortBtn.removeEventListener('click', this.onAbortClick);
+      }
+    }
+
+    // Validate button
+    const validateBtn = document.querySelector(`#${instance.popper.id} #validate`);
+    if (validateBtn) {
+      if (register) {
+        validateBtn.addEventListener('click', this.onValidateClick);
+      } else {
+        validateBtn.removeEventListener('click', this.onValidateClick);
+      }
+    }
+
+    // Generate new email button
+    const generateBtn = document.querySelector(`#${instance.popper.id} #generate`);
+    if (generateBtn) {
+      if (register) {
+        generateBtn.addEventListener('click', this.onGenerateClick);
+      } else {
+        generateBtn.removeEventListener('click', this.onGenerateClick);
+      }
+    }
+  }
+
+  private readonly onAbortClick = () => {
+    supplierContact.abortClicked();
+  };
+
+  private readonly onValidateClick = () => {
+    supplierContact.validateClicked();
+  };
+
+  private readonly onGenerateClick = () => {
+    supplierContact.generateClicked();
+  };
+
   private getEmailRetrievalContent() {
     return `
         <div class="popover-container">
@@ -67,7 +119,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     popoverContent += `
         <div class="mt-2 columns">
           <div class="column col-4 text-left"><button id="abort" class="btn btn-sm btn-error">Abort</button></div>
-          <div class="column col-4 text-center"><button id="genarate" class="btn btn-sm btn-success">Generate</button></div>
+          <div class="column col-4 text-center"><button id="generate" class="btn btn-sm btn-success">Generate</button></div>
           <div class="column col-4 text-right"><button id="validate" class="btn btn-sm btn-success">Validate</button></div>
         </div>`;
 
@@ -77,9 +129,6 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
-  // Create an AbortController
-  // required to stope the execution of the async function startInstance
-  private readonly abortController: AbortController = new AbortController();
   private readonly bpmnElementsSearcher: BpmnElementsSearcher;
 
   private processExecutor?: ProcessExecutor;
@@ -95,42 +144,6 @@ class SupplierContact {
     this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase);
     const processExecutorStarter = Promise.resolve(this.processExecutor);
 
-    // TMP for dev only
-    // In the future, this will be managed by the buttons of the popover attached to 'Review and Adapt Email'
-    const bpmnElementsRegistry = this.bpmnVisualization.bpmnElementsRegistry;
-
-    function registerInteractionForDevOnly(processExecutor: ProcessExecutor): void {
-      console.info('Register interaction for dev only');
-      const registerReviewDecisionOnClick = function (bpmnElementId: string, decision: ReviewEmailDecision) {
-        const gwChoiceHtmlElt = bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0].htmlElement;
-        gwChoiceHtmlElt.addEventListener('click', () => {
-          console.info('@@clicked choice %s --> %s', bpmnElementId, decision);
-          const nextExecutionStep = getExecutionStepAfterReviewEmailChoice(decision);
-          console.info('@@nextExecutionStep', nextExecutionStep);
-          processExecutor.execute(nextExecutionStep)
-          // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
-            .finally(() => {
-              // Nothing to do
-            });
-          console.info('@@registered execution of nextExecutionStep', nextExecutionStep);
-        });
-      };
-
-      registerReviewDecisionOnClick('Gateway_0ng9ln7', 'validated');
-      registerReviewDecisionOnClick('Activity_1oxewnq', 'regenerate');
-      registerReviewDecisionOnClick('Event_13tn0ty', 'abort');
-      console.info('DONE Register interaction for dev only');
-    }
-
-    processExecutorStarter.then(processExecutor => {
-      registerInteractionForDevOnly(processExecutor);
-      return processExecutor;
-    })
-      // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
-      .finally(() => {
-        // Nothing to do
-      });
-    // END OF - TMP for dev only
     console.info('Registering ProcessExecutor start');
     processExecutorStarter.then(async processExecutor => processExecutor.start())
       // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
@@ -148,9 +161,47 @@ class SupplierContact {
     console.info('Tmp popover management registered');
   }
 
+  abortClicked() {
+    console.log('Abort clicked');
+    const nextExecutionStep = getExecutionStepAfterReviewEmailChoice('abort');
+    console.info('@@nextExecutionStep', nextExecutionStep);
+    this.processExecutor?.execute(nextExecutionStep)
+      .then(result => {
+        console.log('Execution result:', result);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  validateClicked() {
+    console.log('Validate clicked');
+    const nextExecutionStep = getExecutionStepAfterReviewEmailChoice('validated');
+    console.info('@@nextExecutionStep', nextExecutionStep);
+    this.processExecutor?.execute(nextExecutionStep)
+      .then(result => {
+        console.log('Execution result:', result);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  generateClicked() {
+    console.log('Generate clicked');
+    const nextExecutionStep = getExecutionStepAfterReviewEmailChoice('regenerate');
+    console.info('@@nextExecutionStep', nextExecutionStep);
+    this.processExecutor?.execute(nextExecutionStep)
+      .then(result => {
+        console.log('Execution result:', result);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
   // Cancel the execution of the async startCase
   stopCase(): void {
-    this.abortController.abort();
     this.onEndCase();
   }
 
@@ -190,12 +241,6 @@ class SupplierContact {
         resolve();
       }, 5000);
     });
-
-    // Check if cancellation is requested
-    if (this.abortController.signal.aborted) {
-      console.log('cancellation requested 1');
-      throw new Error('Supplier instance canceled');
-    }
 
     // Add and show popover to "Review and adapt email"
     if (emailRetrievalTippyInstance !== undefined) {
