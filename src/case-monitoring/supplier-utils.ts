@@ -85,6 +85,8 @@ type ExecutionStep = {
   isLastStep?: boolean;
 };
 
+const processExecutorWaitTimeBeforeCallingEndCaseCallback = 1500;
+
 export class ProcessExecutor {
   private readonly pathHighlighter: PathHighlighter;
 
@@ -167,16 +169,17 @@ export class ProcessExecutor {
         });
       logProcessExecution('DONE call execution of next step', executionStep.nextExecutionStep);
     } else if (executionStep.isLastStep) {
-      logProcessExecution('detected as last step, so clearing everything');
-      this.clear();
-      logProcessExecution('clear done');
-
       logProcessExecution('registering endCaseCallBack call');
       new Promise<void>(resolve => {
         setTimeout(() => {
           resolve();
-        }, 2000);
+        }, processExecutorWaitTimeBeforeCallingEndCaseCallback);
       })
+        .then(() => {
+          logProcessExecution('detected as last step, so clearing everything');
+          this.clear();
+          logProcessExecution('clear done');
+        })
         .then(() => {
           logProcessExecution('calling endCaseCallBack');
         })
