@@ -28,7 +28,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 
   protected getContent(htmlElement: ReferenceElement) {
     const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
-    // Activity retreieve email suggestion
+    // Activity retrieve email suggestion
     if (bpmnSemantic?.id === 'Activity_04d6t36') {
       return this.getEmailRetrievalContent();
     }
@@ -217,7 +217,16 @@ class SupplierContact {
 
   // update/set the execution step action to call this function
   // TODO declare as arrow function to avoid rebind
-  protected async emailRetrievalOperations(activityId: string): Promise<void> {
+  private async emailRetrievalOperations(activityId: string): Promise<void> {
+    // same logic as in SupplierProcessTippySupport
+    // Activity "review email"
+    if (activityId === 'Activity_1oxewnq') {
+      return Promise.resolve()
+          .then(() => this.addInfo(activityId))
+          .then(() => console.info("review email popover is displayed!"))
+          ;
+    }
+
     function delay(ms: number, args: any) {
       return new Promise(resolve => setTimeout(resolve, ms, args));
     }
@@ -249,25 +258,25 @@ class SupplierContact {
   }
   //
   // // private emailRetrievalTippyInstance?: Instance;
-  // private showEmailRetrievalPopover(activityId: string) {
-  //   const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion')!;
-  //   const tippySupport = this.supplierMonitoring.getTippySupportInstance();
-  //
-  //   // const tippyInstance = this.supplierMonitoring.addPopoverOnElement(activityId);
-  //   const tippyInstance = tippySupport.addPopover(retrieveEmailActivityId);
-  //   tippyInstance.setContent('The content of the manually displayed instance);
-  //   tippyInstance.setProps({
-  //     trigger: 'manual',
-  //     arrow: false,
-  //     hideOnClick: false,
-  //   });
-  //   // return tippyInstance;
-  //
-  //   // prompt = 'Draft an email to ask about the supplier about the delay';
-  //   // this.emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, 'Draft an email to ask about the supplier about the delay', 'answer');
-  //   tippyInstance.show();
-  //   return tippyInstance;
-  // }
+  // private showEmailRetrievalPopover = (activityId: string) => {
+    // const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion')!;
+    // const tippySupport = this.supplierMonitoring.getTippySupportInstance();
+    //
+    // // const tippyInstance = this.supplierMonitoring.addPopoverOnElement(activityId);
+    // const tippyInstance = tippySupport.addPopover(retrieveEmailActivityId);
+    // tippyInstance.setContent('The content of the manually displayed instance);
+    // tippyInstance.setProps({
+    //   trigger: 'manual',
+    //   arrow: false,
+    //   hideOnClick: false,
+    // });
+    // // return tippyInstance;
+    //
+    // // prompt = 'Draft an email to ask about the supplier about the delay';
+    // // this.emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, 'Draft an email to ask about the supplier about the delay', 'answer');
+    // tippyInstance.show();
+    // return tippyInstance;
+  // };
 }
 
 // =====================================================================================================================

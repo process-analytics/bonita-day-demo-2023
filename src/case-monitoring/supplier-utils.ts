@@ -35,15 +35,18 @@ const executionSteps = new Map<string, ExecutionStep>([
   // Activity_04d6t36 chatGPT activity
   ['Activity_04d6t36', {id: 'Activity_04d6t36', incomingEdgeId: 'Flow_06y94ol',
     action() {
-      console.info('#### call popover');
-      // Resume when done
+      console.info('#### action on Activity_04d6t36');
     },
     // Manage manually or with resume?
     // nextExecutionStep: 'Activity_1oxewnq',
     // duration: 3_000
   }],
   // Activity_1oxewnq review email. Stop here, next step chosen by user
-  ['Activity_1oxewnq', {id: 'Activity_1oxewnq', incomingEdgeId: 'Flow_092it75'}],
+  ['Activity_1oxewnq', {id: 'Activity_1oxewnq', incomingEdgeId: 'Flow_092it75',
+    action() {
+      console.info('#### action on Activity_1oxewnq');
+    },
+  }],
 
   // After email review
   // Event_13tn0ty abort
@@ -147,7 +150,6 @@ export class ProcessExecutor {
           // This is a temp implementation, this should be done with executionStep.action?.()
           // but this requires to be able to dynamically set the action function which is not possible for now
           // instead, we hard code the action behavior here as we only have 2 different actions to manage.
-
           this.emailRetrievalOperationsCallBack(executionStep.id);
         })
         // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
