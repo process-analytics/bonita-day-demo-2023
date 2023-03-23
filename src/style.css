@@ -66,23 +66,26 @@ header {
   flex-direction: column;
 }
 
-.project-advertising {
-  display: flex;
-  justify-content: center;
-  height: var(--bpmn-container-height);
-}
-.project-advertising button {
-  align-self: flex-start;
+.project-advertising-container .btn-close {
+  right: 0;
   background: var(--color-background-navbar);
   border-color: var(--color-divider);
   border-style: solid;
   border-width: .1rem;
   color: var(--color-divider);
 }
-
-.project-advertising button:hover {
+.project-advertising-container .btn-close:hover {
   background: var(--color-divider);
   color: white;
+}
+
+.project-advertising {
+  display: flex;
+  justify-content: center;
+  height: var(--bpmn-container-height);
+}
+.project-advertising img {
+  object-fit: contain;
 }
 
 .project-advertising-outline {
