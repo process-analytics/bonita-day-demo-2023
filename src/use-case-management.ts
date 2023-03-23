@@ -5,7 +5,7 @@ import {
   SubProcessNavigator,
   displayView,
 } from './diagram.js';
-import {hideHappyPath, showHappyPath} from './process-monitoring.js';
+import {ProcessMonitoring} from './process-monitoring.js';
 
 const displayMainView = () => {
   displayView('main');
@@ -17,14 +17,15 @@ export function configureUseCaseSelectors(selectedUseCase: string) {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
   const subProcessNavigator = new SubProcessNavigator(bpmnVisualization);
 
+  const processMonitoring = new ProcessMonitoring(bpmnVisualization);
   const mainProcessCaseMonitoring = newMainProcessCaseMonitoring(bpmnVisualization);
 
   const useCases = new Map<string, UseCaseSelector>();
   useCases.set('process-monitoring', new UseCaseSelector('radio-process-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess(true);
-    showHappyPath(bpmnVisualization);
+    processMonitoring.showHappyPath();
   }, () => {
-    hideHappyPath(bpmnVisualization);
+    processMonitoring.showHappyPath();
   }));
   useCases.set('case-monitoring', new UseCaseSelector('radio-case-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess();

@@ -1,6 +1,6 @@
 // Initially taken from https://github.com/process-analytics/icpm-demo-2022/blob/v1.0.0/src/happy-path.js
 
-import {type BpmnVisualization} from 'bpmn-visualization';
+import {type BpmnElementsRegistry, type BpmnVisualization} from 'bpmn-visualization';
 import tippy, {type Instance, type Props} from 'tippy.js';
 import 'tippy.js/animations/scale.css';
 import {BpmnElementsIdentifier} from './utils/bpmn-elements.js';
@@ -66,95 +66,103 @@ const animationDurationOfEdgeArrow = 0.3 * speedFactor;
 const animationDelay = animationDuration / 2;
 const animationDurationOfEdgeLine = animationDuration - animationDurationOfEdgeArrow;
 
-function getHappyPathClasses(bpmnVisualization: BpmnVisualization, index: number, elementId: string) {
-  const bpmnElementsIdentifier = new BpmnElementsIdentifier(bpmnVisualization);
+export class ProcessMonitoring {
+  private readonly bpmnElementsRegistry: BpmnElementsRegistry;
+  private readonly bpmnElementsIdentifier: BpmnElementsIdentifier;
+  constructor(private readonly bpmnVisualization: BpmnVisualization) {
+    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
+    this.bpmnElementsIdentifier = new BpmnElementsIdentifier(bpmnVisualization);
+  }
 
-  const delay = index * animationDelay;
+  showHappyPath() {
+    const headElt = document.querySelectorAll('head')[0];
 
-  let classToAdd;
-  let styleInnerHtml;
-  if (bpmnElementsIdentifier.isActivity(elementId)) {
-    styleInnerHtml = `.animate-${elementId} > rect { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
-    classToAdd = 'pulse-happy';
-  } else if (bpmnElementsIdentifier.isEvent(elementId)) {
-    styleInnerHtml = `.animate-${elementId} > ellipse { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
-    classToAdd = 'pulse-happy';
-  } else if (bpmnElementsIdentifier.isGateway(elementId)) {
-    styleInnerHtml = `.animate-${elementId} > path { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
-    classToAdd = 'gateway-happy';
-  } else {
-    // Flow
-    styleInnerHtml
-        = `.animate-${elementId} > path:nth-child(2) { animation-delay: ${delay}s; animation-duration: ${animationDurationOfEdgeLine}s; }
+    /* Iterate over the elements in the happyPath
+     apply css and add a delay so that we see the css applied in a sequential manner */
+    for (const [index, elementId] of happyPath.entries()) {
+      const {classToAdd, styleInnerHtml} = this.getHappyPathClasses(index, elementId);
+
+      const style = document.createElement('style');
+      style.id = elementId;
+      style.type = 'text/css';
+      style.innerHTML = styleInnerHtml;
+      headElt.append(style);
+
+      this.bpmnElementsRegistry.addCssClasses(elementId, [classToAdd, `animate-${elementId}`]);
+    }
+
+    // Add popover
+    this.addPopover(happyPathElementWithPopover);
+  }
+
+  hideHappyPath() {
+    this.bpmnElementsRegistry.removeCssClasses(happyPath, [
+      'highlight-happy-path',
+      'pulse-happy',
+      'gateway-happy',
+      'growing-happy',
+      ...happyPath.map(elementId => {
+        const styleOfElement = document.querySelector(`#${elementId}`);
+        styleOfElement?.parentNode?.removeChild(styleOfElement);
+        return `animate-${elementId}`;
+      }),
+    ]);
+
+    // Remove popover
+    this.removePopover(happyPathElementWithPopover);
+  }
+
+  private getHappyPathClasses(index: number, elementId: string) {
+    const delay = index * animationDelay;
+
+    let classToAdd;
+    let styleInnerHtml;
+    if (this.bpmnElementsIdentifier.isActivity(elementId)) {
+      styleInnerHtml = `.animate-${elementId} > rect { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
+      classToAdd = 'pulse-happy';
+    } else if (this.bpmnElementsIdentifier.isEvent(elementId)) {
+      styleInnerHtml = `.animate-${elementId} > ellipse { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
+      classToAdd = 'pulse-happy';
+    } else if (this.bpmnElementsIdentifier.isGateway(elementId)) {
+      styleInnerHtml = `.animate-${elementId} > path { animation-delay: ${delay}s; animation-duration: ${animationDuration}s; }`;
+      classToAdd = 'gateway-happy';
+    } else {
+      // Flow
+      styleInnerHtml
+          = `.animate-${elementId} > path:nth-child(2) { animation-delay: ${delay}s; animation-duration: ${animationDurationOfEdgeLine}s; }
 .animate-${elementId} > path:nth-child(3) { animation-delay: ${delay + (animationDurationOfEdgeLine / 2)}s; animation-duration: ${animationDurationOfEdgeArrow}s; }`;
-    classToAdd = 'growing-happy';
+      classToAdd = 'growing-happy';
+    }
+
+    return {classToAdd, styleInnerHtml};
   }
 
-  return {classToAdd, styleInnerHtml};
-}
+  private addPopover(bpmnElementId: string) {
+    const bpmnElement = this.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
 
-export function showHappyPath(bpmnVisualization: BpmnVisualization) {
-  const headElt = document.querySelectorAll('head')[0];
+    const tippyInstance = tippy(bpmnElement.htmlElement, {
+      theme: 'light',
+      placement: 'top',
+      animation: 'scale',
+      appendTo: this.bpmnVisualization.graph.container,
+      content: '45 cases (7.36%) <br/> ⏳ 2.08 months',
+      arrow: true,
+      interactive: true,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
+      allowHTML: true,
+      trigger: 'manual',
+      hideOnClick: false,
+    } as Partial<Props>);
 
-  /* Iterate over the elements in the happyPath
-   apply css and add a delay so that we see the css applied in a sequential manner */
-  for (const [index, elementId] of happyPath.entries()) {
-    const {classToAdd, styleInnerHtml} = getHappyPathClasses(bpmnVisualization, index, elementId);
-
-    const style = document.createElement('style');
-    style.id = elementId;
-    style.type = 'text/css';
-    style.innerHTML = styleInnerHtml;
-    headElt.append(style);
-
-    bpmnVisualization.bpmnElementsRegistry.addCssClasses(elementId, [classToAdd, `animate-${elementId}`]);
+    tippyInstance.show();
   }
 
-  // Add popover
-  addPopover(happyPathElementWithPopover, bpmnVisualization);
-}
-
-export function hideHappyPath(bpmnVisualization: BpmnVisualization) {
-  bpmnVisualization.bpmnElementsRegistry.removeCssClasses(happyPath, [
-    'highlight-happy-path',
-    'pulse-happy',
-    'gateway-happy',
-    'growing-happy',
-    ...happyPath.map(elementId => {
-      const styleOfElement = document.querySelector(`#${elementId}`);
-      styleOfElement?.parentNode?.removeChild(styleOfElement);
-      return `animate-${elementId}`;
-    }),
-  ]);
-
-  // Remove popover
-  removePopover(happyPathElementWithPopover, bpmnVisualization);
-}
-
-function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
-  const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
-
-  const tippyInstance = tippy(bpmnElement.htmlElement, {
-    theme: 'light',
-    placement: 'top',
-    animation: 'scale',
-    appendTo: bpmnVisualization.graph.container,
-    content: '45 cases (7.36%) <br/> ⏳ 2.08 months',
-    arrow: true,
-    interactive: true,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
-    allowHTML: true,
-    trigger: 'manual',
-    hideOnClick: false,
-  } as Partial<Props>);
-
-  tippyInstance.show();
-}
-
-function removePopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
-  const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
-  const htmlElement = bpmnElement.htmlElement;
-  if ('_tippy' in htmlElement) {
-    (htmlElement._tippy as Instance).destroy();
+  private removePopover(bpmnElementId: string) {
+    const bpmnElement = this.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+    const htmlElement = bpmnElement.htmlElement;
+    if ('_tippy' in htmlElement) {
+      (htmlElement._tippy as Instance).destroy();
+    }
   }
 }
+
