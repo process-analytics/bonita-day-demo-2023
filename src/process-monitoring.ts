@@ -1,6 +1,8 @@
 // Initially taken from https://github.com/process-analytics/icpm-demo-2022/blob/v1.0.0/src/happy-path.js
 
 import {type BpmnVisualization} from 'bpmn-visualization';
+import tippy, {type Instance, type Props} from 'tippy.js';
+import 'tippy.js/animations/scale.css';
 import {BpmnElementsIdentifier} from './utils/bpmn-elements.js';
 
 /* Start event --> SRM subprocess
@@ -55,7 +57,7 @@ const happyPath = [
   'Event_07598zy',
 ];
 
-const happyPathElementWithOverlays = 'Event_1vogvxc';
+const happyPathElementWithPopover = 'Event_1vogvxc';
 
 const speedFactor = 1; // For now, it is only used while debugging to accelerate the animation. In the future, it could be used to let user choose the animation speed.
 const animationDuration = speedFactor;
@@ -108,18 +110,8 @@ export function showHappyPath(bpmnVisualization: BpmnVisualization) {
     bpmnVisualization.bpmnElementsRegistry.addCssClasses(elementId, [classToAdd, `animate-${elementId}`]);
   }
 
-  bpmnVisualization.bpmnElementsRegistry.addOverlays(
-    happyPathElementWithOverlays,
-    {
-      position: 'top-center',
-      label: '45 traces \n (7.36%) \n ⏳ 2.08 months',
-      style: {
-        font: {color: 'green', size: 14},
-        fill: {color: 'White', opacity: 40},
-        stroke: {color: 'black', width: 0},
-      },
-    },
-  );
+  // Add popover
+  addPopover(happyPathElementWithPopover, bpmnVisualization);
 }
 
 export function hideHappyPath(bpmnVisualization: BpmnVisualization) {
@@ -135,7 +127,34 @@ export function hideHappyPath(bpmnVisualization: BpmnVisualization) {
     }),
   ]);
 
-  bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(
-    happyPathElementWithOverlays,
-  );
+  // Remove popover
+  removePopover(happyPathElementWithPopover, bpmnVisualization);
+}
+
+function addPopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
+  const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+
+  const tippyInstance = tippy(bpmnElement.htmlElement, {
+    theme: 'light',
+    placement: 'top',
+    animation: 'scale',
+    appendTo: bpmnVisualization.graph.container,
+    content: '45 cases (7.36%) <br/> ⏳ 2.08 months',
+    arrow: true,
+    interactive: true,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
+    allowHTML: true,
+    trigger: 'manual',
+    hideOnClick: false,
+  } as Partial<Props>);
+
+  tippyInstance.show();
+}
+
+function removePopover(bpmnElementId: string, bpmnVisualization: BpmnVisualization) {
+  const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+  const htmlElement = bpmnElement.htmlElement;
+  if ('_tippy' in htmlElement) {
+    (htmlElement._tippy as Instance).destroy();
+  }
 }
