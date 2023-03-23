@@ -136,7 +136,7 @@ class SupplierContact {
   // TODO this could should really be async!!!
   async startCase(): Promise<void> {
     console.info('called startCase');
-    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase, this.emailRetrievalOperations.bind(this));
+    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase, this.emailRetrievalOperations);
     const processExecutorStarter = Promise.resolve(this.processExecutor);
 
     console.info('Registering ProcessExecutor start');
@@ -216,8 +216,7 @@ class SupplierContact {
   // =====================================================================================================================
 
   // update/set the execution step action to call this function
-  // TODO declare as arrow function to avoid rebind
-  private async emailRetrievalOperations(activityId: string): Promise<void> {
+  private readonly emailRetrievalOperations = async (activityId: string): Promise<void> => {
     // Same logic as in SupplierProcessTippySupport
     // Activity "review email"
     if (activityId === 'Activity_1oxewnq') {
@@ -265,7 +264,7 @@ class SupplierContact {
           });
       },
       );
-  }
+  };
 }
 
 // =====================================================================================================================
