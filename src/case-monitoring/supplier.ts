@@ -226,7 +226,7 @@ class SupplierContact {
   }
 
   // =====================================================================================================================
-  // For future usage, register dynamically this method at ProcessExecutor initialization
+  // Called by the ProcessExecutor
   // =====================================================================================================================
 
   // update/set the execution step action to call this function
@@ -258,7 +258,7 @@ class SupplierContact {
           .then(tippyInstance => {
             console.info('wait show email retrieval done - part 1');
             // TO DO manage types
-            (tippyInstance as Instance).setContent('Please be patient....');
+            (tippyInstance as Instance).setContent('Please be patient, ChatGPT is working for you...');
             console.info('content updated');
             delay(secondDelay, tippyInstance)
               .then(tippyInstance => {
