@@ -216,20 +216,40 @@ class SupplierContact {
   // =====================================================================================================================
 
   // update/set the execution step action to call this function
+  // TODO declare as arrow function to avoid rebind
   protected async emailRetrievalOperations(activityId: string): Promise<void> {
+    function delay(ms: number, args: any) {
+      return new Promise(resolve => setTimeout(resolve, ms, args));
+    }
+    // TODO too much promises here
+    const firstDelay = 1_500;
+    const secondDelay = 2_000;
     return Promise.resolve()
       .then(() => this.addInfo(activityId))
       // eslint-disable-next-line no-promise-executor-return
-      .then(async result => new Promise(resolve => setTimeout(() => {
-        resolve(result);
-      }, 1000)))
-      .then(() => {
-        console.info('wait show email retrieval 1 done');
-      });
+      .then(tippyInstance => {
+            console.info('register delay');
+            delay(firstDelay, tippyInstance)
+                .then(tippyInstance => {
+                  console.info('wait show email retrieval done - part 1');
+                  // TODO manage types
+                  (tippyInstance as Instance).setContent('Please be patient....')
+                  console.info('content updated');
+                  delay(secondDelay, tippyInstance)
+                      .then(tippyInstance => {
+                        console.info('wait show email retrieval done - part 2');
+                        (tippyInstance as Instance).hide();
+                        console.info('popover hidden');
+                        // hard coded for now, could be pass a method parameter in the future
+                        this.processExecutor?.execute('Activity_1oxewnq')
+                      });
+                });
+          }
+      )
   }
   //
   // // private emailRetrievalTippyInstance?: Instance;
-  // private showEmailRetrievalPopover() {
+  // private showEmailRetrievalPopover(activityId: string) {
   //   const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion')!;
   //   const tippySupport = this.supplierMonitoring.getTippySupportInstance();
   //
