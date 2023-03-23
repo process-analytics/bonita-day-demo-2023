@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 import {type BpmnVisualization, type ShapeStyleUpdate} from 'bpmn-visualization';
+import {delay} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: any[]): void {
   console.info(`[EXEC] ${message}`, ...optionalParameters);
@@ -35,15 +36,15 @@ const executionSteps = new Map<string, ExecutionStep>([
   // Activity_04d6t36 chatGPT activity
   ['Activity_04d6t36', {id: 'Activity_04d6t36', incomingEdgeId: 'Flow_06y94ol',
     action() {
-      console.info('#### call popover');
-      // Resume when done
+      console.info('#### action on Activity_04d6t36');
     },
-    // Manage manually or with resume?
-    // nextExecutionStep: 'Activity_1oxewnq',
-    // duration: 3_000
   }],
   // Activity_1oxewnq review email. Stop here, next step chosen by user
-  ['Activity_1oxewnq', {id: 'Activity_1oxewnq', incomingEdgeId: 'Flow_092it75'}],
+  ['Activity_1oxewnq', {id: 'Activity_1oxewnq', incomingEdgeId: 'Flow_092it75',
+    action() {
+      console.info('#### action on Activity_1oxewnq');
+    },
+  }],
 
   // After email review
   // Event_13tn0ty abort
@@ -73,7 +74,7 @@ export const getExecutionStepAfterReviewEmailChoice = (decision: ReviewEmailDeci
 
 type ExecutionStep = {
   id: string;
-  /** In milliseconds. */
+  /** In milliseconds, override the default duration set for the shape or the edge. */
   duration?: number;
   incomingEdgeId?: string;
   nextExecutionStep?: string | ExecutionStep;
@@ -82,12 +83,14 @@ type ExecutionStep = {
   isLastStep?: boolean;
 };
 
+const processExecutorWaitTimeBeforeCallingEndCaseCallback = 1500;
+
 export class ProcessExecutor {
   private readonly pathHighlighter: PathHighlighter;
 
   private readonly executionCounts = new Map<string, number>();
 
-  constructor(bpmnVisualization: BpmnVisualization, private readonly endCaseCallBack: () => void) {
+  constructor(bpmnVisualization: BpmnVisualization, private readonly endCaseCallBack: () => void, private readonly emailRetrievalOperationsCallBack: (id: string) => void) {
     this.pathHighlighter = new PathHighlighter(bpmnVisualization);
   }
 
@@ -108,10 +111,7 @@ export class ProcessExecutor {
     const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
       .then(id => this.pathHighlighter.markAsExecuted(id, isEdge))
       .then(id => this.markAsExecuted(id))
-    // eslint-disable-next-line  no-promise-executor-return -- improve declaration of this timeout
-      .then(async id => new Promise(resolve => setTimeout(() => {
-        resolve(id);
-      }, waitDuration)))
+      .then(async () => delay(waitDuration))
       .then(() => {
         logProcessExecution(`end of wait after ${id} highlight`);
       });
@@ -143,6 +143,12 @@ export class ProcessExecutor {
     if (executionStep.action) {
       Promise.resolve()
         .then(() => executionStep.action?.())
+        .then(() => {
+          // This is a temp implementation, this should be done with executionStep.action?.()
+          // but this requires to be able to dynamically set the action function which is not possible for now
+          // instead, we hard code the action behavior here as we only have 2 different actions to manage.
+          this.emailRetrievalOperationsCallBack(executionStep.id);
+        })
         // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
         .finally(() => {
           // Nothing to do
@@ -158,16 +164,13 @@ export class ProcessExecutor {
         });
       logProcessExecution('DONE call execution of next step', executionStep.nextExecutionStep);
     } else if (executionStep.isLastStep) {
-      logProcessExecution('detected as last step, so clearing everything');
-      this.clear();
-      logProcessExecution('clear done');
-
       logProcessExecution('registering endCaseCallBack call');
-      new Promise<void>(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, 2000);
-      })
+      delay(processExecutorWaitTimeBeforeCallingEndCaseCallback)
+        .then(() => {
+          logProcessExecution('detected as last step, so clearing everything');
+          this.clear();
+          logProcessExecution('clear done');
+        })
         .then(() => {
           logProcessExecution('calling endCaseCallBack');
         })

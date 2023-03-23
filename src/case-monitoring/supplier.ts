@@ -1,7 +1,7 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
-import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
+import {delay} from '../utils/shared.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 import {getExecutionStepAfterReviewEmailChoice, ProcessExecutor} from './supplier-utils.js';
 
@@ -29,7 +29,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 
   protected getContent(htmlElement: ReferenceElement) {
     const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
-    // Activity retreieve email suggestion
+    // Activity retrieve email suggestion
     if (bpmnSemantic?.id === 'Activity_04d6t36') {
       return this.getEmailRetrievalContent();
     }
@@ -78,15 +78,29 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     }
   }
 
+  private hidePopoverOnClick(): void {
+    const bpmnElementId = 'Activity_1oxewnq'; // Hard coded for now "review and adapt email"
+
+    // Duplicated with process-monitoring removePopover --> candidate to extract for reuse
+    const bpmnElement = bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+    const htmlElement = bpmnElement.htmlElement;
+    if ('_tippy' in htmlElement) {
+      (htmlElement._tippy as Instance).hide();
+    }
+  }
+
   private readonly onAbortClick = () => {
+    this.hidePopoverOnClick();
     supplierContact.abortClicked();
   };
 
   private readonly onValidateClick = () => {
+    this.hidePopoverOnClick();
     supplierContact.validateClicked();
   };
 
   private readonly onGenerateClick = () => {
+    this.hidePopoverOnClick();
     supplierContact.generateClicked();
   };
 
@@ -129,19 +143,15 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
-  private readonly bpmnElementsSearcher: BpmnElementsSearcher;
-
   private processExecutor?: ProcessExecutor;
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
-    this.bpmnElementsSearcher = new BpmnElementsSearcher(this.bpmnVisualization);
-  }
+  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO this could should really be async!!!
   async startCase(): Promise<void> {
     console.info('called startCase');
-    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase);
+    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase, this.emailRetrievalOperations);
     const processExecutorStarter = Promise.resolve(this.processExecutor);
 
     console.info('Registering ProcessExecutor start');
@@ -151,14 +161,6 @@ class SupplierContact {
         // Nothing to do
       });
     console.info('ProcessExecutor start registered');
-
-    console.info('Register tmp popover management');
-    Promise.resolve().then(async () => this.tmpRegisterPopoverMgt())
-      // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
-      .finally(() => {
-        // Nothing to do
-      });
-    console.info('Tmp popover management registered');
   }
 
   abortClicked() {
@@ -220,84 +222,59 @@ class SupplierContact {
       arrow: false,
       hideOnClick: false,
     });
+    tippyInstance.show();
     return tippyInstance;
   }
 
-  // Temp implementation Popover management. This will change and will be triggered by the ProcessExecutor in a near future
-  private async tmpRegisterPopoverMgt(): Promise<void> {
-    let emailRetrievalTippyInstance: Instance | undefined;
-    let emailReviewTippyInstance: Instance | undefined;
-
-    // Add and show popover to "retrieve email suggestion"
-    const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion');
-    if (retrieveEmailActivityId !== undefined) {
-      emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId);
-      emailRetrievalTippyInstance.show();
-    }
-
-    // Wait for 5 seconds before resolving the Promise
-    await new Promise<void>(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
-
-    // Add and show popover to "Review and adapt email"
-    if (emailRetrievalTippyInstance !== undefined) {
-      emailRetrievalTippyInstance.hide();
-    }
-
-    const reviewEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Review and adapt email');
-    if (reviewEmailActivityId !== undefined) {
-      emailReviewTippyInstance = this.addInfo(reviewEmailActivityId);
-      emailReviewTippyInstance.show();
-    }
-
-    // Wait for 5 seconds before resolving the Promise
-    await new Promise<void>(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
-    });
-
-    // // Completed, remove instance from supplierContactInstances
-    // // hide data and hide pool
-    // this.onEndCase();
-  }
-
   // =====================================================================================================================
-  // For future usage, register dynamically this method at ProcessExecutor initialization
+  // Called by the ProcessExecutor
   // =====================================================================================================================
 
   // update/set the execution step action to call this function
-  // async emailRetrievalOperations() {
-  //   await Promise.resolve()
-  //       .then(() => this.showEmailRetrievalPopover())
-  //       .then((result) => new Promise(resolve => setTimeout(() => resolve(result), 1000)))
-  //       .then(() => console.info('wait show email retrieval 1 done'))
-  //   ;
-  // }
-  //
-  // // private emailRetrievalTippyInstance?: Instance;
-  // private showEmailRetrievalPopover() {
-  //   const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion')!;
-  //   const tippySupport = this.supplierMonitoring.getTippySupportInstance();
-  //
-  //   // const tippyInstance = this.supplierMonitoring.addPopoverOnElement(activityId);
-  //   const tippyInstance = tippySupport.addPopover(retrieveEmailActivityId);
-  //   tippyInstance.setContent('The content of the manually displayed instance);
-  //   tippyInstance.setProps({
-  //     trigger: 'manual',
-  //     arrow: false,
-  //     hideOnClick: false,
-  //   });
-  //   // return tippyInstance;
-  //
-  //   // prompt = 'Draft an email to ask about the supplier about the delay';
-  //   // this.emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, 'Draft an email to ask about the supplier about the delay', 'answer');
-  //   tippyInstance.show();
-  //   return tippyInstance;
-  // }
+  private readonly emailRetrievalOperations = async (activityId: string): Promise<void> => {
+    // Same logic as in SupplierProcessTippySupport
+    // Activity "review email"
+    if (activityId === 'Activity_1oxewnq') {
+      return Promise.resolve()
+        .then(() => this.addInfo(activityId))
+        .then(() => {
+          console.info('review email popover is displayed!');
+        });
+    }
+
+    // eslint-disable-next-line no-warning-comments -- cannot be managed now
+    // TODO too much promises here
+    const firstDelay = 1500;
+    const secondDelay = 2000;
+    return Promise.resolve()
+      .then(() => this.addInfo(activityId))
+      .then(tippyInstance => {
+        console.info('register delay');
+        delay(firstDelay, tippyInstance)
+          .then(tippyInstance => {
+            console.info('wait show email retrieval done - part 1');
+            // TO DO manage types
+            (tippyInstance as Instance).setContent('Please be patient, ChatGPT is working for you...');
+            console.info('content updated');
+            delay(secondDelay, tippyInstance)
+              .then(tippyInstance => {
+                console.info('wait show email retrieval done - part 2');
+                (tippyInstance as Instance).hide();
+                console.info('popover hidden');
+                // Hard coded for now, could be pass a method parameter in the future
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises -- cannot be managed now
+                this.processExecutor?.execute('Activity_1oxewnq');
+              })
+              .finally(() => {
+                console.info('End of second delay mgt');
+              });
+          })
+          .finally(() => {
+            console.info('End of first delay mgt');
+          });
+      },
+      );
+  };
 }
 
 // =====================================================================================================================
