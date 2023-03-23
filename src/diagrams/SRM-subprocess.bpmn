@@ -15,30 +15,30 @@
         <outgoing>Flow_1rwzq1j</outgoing>
       </task>
       <sequenceFlow id="Flow_0s5y561" sourceRef="Activity_157vm5m" targetRef="Activity_1243ie0" />
-      <task id="Activity_1p3opxc" name="SRM: Awaiting Approval">
+      <userTask id="Activity_1p3opxc" name="SRM: Awaiting Approval">
         <incoming>Flow_1rwzq1j</incoming>
         <outgoing>Flow_1nlqg7e</outgoing>
-      </task>
+      </userTask>
       <sequenceFlow id="Flow_1rwzq1j" sourceRef="Activity_1243ie0" targetRef="Activity_1p3opxc" />
-      <task id="Activity_015g8ru" name="SRM: Document Completed">
+      <userTask id="Activity_015g8ru" name="SRM: Document Completed">
         <incoming>Flow_1nlqg7e</incoming>
         <outgoing>Flow_04cm5oz</outgoing>
-      </task>
+      </userTask>
       <sequenceFlow id="Flow_04cm5oz" sourceRef="Activity_015g8ru" targetRef="Gateway_0w0fs3j" />
       <parallelGateway id="Gateway_0w0fs3j">
         <incoming>Flow_04cm5oz</incoming>
         <outgoing>Flow_1wopkz6</outgoing>
         <outgoing>Flow_0rey3eo</outgoing>
       </parallelGateway>
-      <task id="Activity_0k8i7cb" name="SRM: Ordered">
+      <userTask id="Activity_0k8i7cb" name="SRM: Ordered">
         <incoming>Flow_1wopkz6</incoming>
         <outgoing>Flow_0527lsx</outgoing>
-      </task>
+      </userTask>
       <sequenceFlow id="Flow_1wopkz6" sourceRef="Gateway_0w0fs3j" targetRef="Activity_0k8i7cb" />
-      <task id="Activity_0yyl6g2" name="SRM: In Transfer to Execution Syst.">
+      <userTask id="Activity_0yyl6g2" name="SRM: In Transfer to Execution Syst.">
         <incoming>Flow_0rey3eo</incoming>
         <outgoing>Flow_1en4snw</outgoing>
-      </task>
+      </userTask>
       <sequenceFlow id="Flow_0rey3eo" sourceRef="Gateway_0w0fs3j" targetRef="Activity_0yyl6g2" />
       <parallelGateway id="Gateway_1cjjox7">
         <incoming>Flow_0527lsx</incoming>
@@ -47,10 +47,10 @@
       </parallelGateway>
       <sequenceFlow id="Flow_0527lsx" sourceRef="Activity_0k8i7cb" targetRef="Gateway_1cjjox7" />
       <sequenceFlow id="Flow_1en4snw" sourceRef="Activity_0yyl6g2" targetRef="Gateway_1cjjox7" />
-      <task id="Activity_16tcn1j" name="SRM: Change was Transmitted">
+      <userTask id="Activity_16tcn1j" name="SRM: Change was Transmitted">
         <incoming>Flow_1aug177</incoming>
         <outgoing>Flow_0ymzzvk</outgoing>
-      </task>
+      </userTask>
       <sequenceFlow id="Flow_1aug177" sourceRef="Gateway_1cjjox7" targetRef="Activity_16tcn1j" />
       <endEvent id="Event_0bp3ymm">
         <incoming>Flow_0ymzzvk</incoming>
