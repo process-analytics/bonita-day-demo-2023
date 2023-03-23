@@ -37,9 +37,6 @@ const executionSteps = new Map<string, ExecutionStep>([
     action() {
       console.info('#### action on Activity_04d6t36');
     },
-    // Manage manually or with resume?
-    // nextExecutionStep: 'Activity_1oxewnq',
-    // duration: 3_000
   }],
   // Activity_1oxewnq review email. Stop here, next step chosen by user
   ['Activity_1oxewnq', {id: 'Activity_1oxewnq', incomingEdgeId: 'Flow_092it75',
@@ -76,7 +73,7 @@ export const getExecutionStepAfterReviewEmailChoice = (decision: ReviewEmailDeci
 
 type ExecutionStep = {
   id: string;
-  /** In milliseconds. */
+  /** In milliseconds, override the default duration set for the shape or the edge. */
   duration?: number;
   incomingEdgeId?: string;
   nextExecutionStep?: string | ExecutionStep;
