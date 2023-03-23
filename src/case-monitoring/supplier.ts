@@ -218,65 +218,46 @@ class SupplierContact {
   // update/set the execution step action to call this function
   // TODO declare as arrow function to avoid rebind
   private async emailRetrievalOperations(activityId: string): Promise<void> {
-    // same logic as in SupplierProcessTippySupport
+    // Same logic as in SupplierProcessTippySupport
     // Activity "review email"
     if (activityId === 'Activity_1oxewnq') {
       return Promise.resolve()
-          .then(() => this.addInfo(activityId))
-          .then(() => console.info("review email popover is displayed!"))
-          ;
+        .then(() => this.addInfo(activityId))
+        .then(() => {
+          console.info('review email popover is displayed!');
+        });
     }
 
-    function delay(ms: number, args: any) {
+    async function delay(ms: number, args: any) {
       return new Promise(resolve => setTimeout(resolve, ms, args));
     }
+
     // TODO too much promises here
-    const firstDelay = 1_500;
-    const secondDelay = 2_000;
+    const firstDelay = 1500;
+    const secondDelay = 2000;
     return Promise.resolve()
-// TODO see if we can add a delay before the popover is displayed (with the delay tippy option)
+    // TODO see if we can add a delay before the popover is displayed (with the delay tippy option)
       .then(() => this.addInfo(activityId))
       .then(tippyInstance => {
-            console.info('register delay');
-            delay(firstDelay, tippyInstance)
-                .then(tippyInstance => {
-                  console.info('wait show email retrieval done - part 1');
-                  // TODO manage types
-                  (tippyInstance as Instance).setContent('Please be patient....')
-                  console.info('content updated');
-                  delay(secondDelay, tippyInstance)
-                      .then(tippyInstance => {
-                        console.info('wait show email retrieval done - part 2');
-                        (tippyInstance as Instance).hide();
-                        console.info('popover hidden');
-                        // hard coded for now, could be pass a method parameter in the future
-                        this.processExecutor?.execute('Activity_1oxewnq')
-                      });
-                });
-          }
-      )
+        console.info('register delay');
+        delay(firstDelay, tippyInstance)
+          .then(tippyInstance => {
+            console.info('wait show email retrieval done - part 1');
+            // TODO manage types
+            (tippyInstance as Instance).setContent('Please be patient....');
+            console.info('content updated');
+            delay(secondDelay, tippyInstance)
+              .then(tippyInstance => {
+                console.info('wait show email retrieval done - part 2');
+                (tippyInstance as Instance).hide();
+                console.info('popover hidden');
+                // Hard coded for now, could be pass a method parameter in the future
+                this.processExecutor?.execute('Activity_1oxewnq');
+              });
+          });
+      },
+      );
   }
-  //
-  // // private emailRetrievalTippyInstance?: Instance;
-  // private showEmailRetrievalPopover = (activityId: string) => {
-    // const retrieveEmailActivityId = this.bpmnElementsSearcher.getElementIdByName('Retrieve email suggestion')!;
-    // const tippySupport = this.supplierMonitoring.getTippySupportInstance();
-    //
-    // // const tippyInstance = this.supplierMonitoring.addPopoverOnElement(activityId);
-    // const tippyInstance = tippySupport.addPopover(retrieveEmailActivityId);
-    // tippyInstance.setContent('The content of the manually displayed instance);
-    // tippyInstance.setProps({
-    //   trigger: 'manual',
-    //   arrow: false,
-    //   hideOnClick: false,
-    // });
-    // // return tippyInstance;
-    //
-    // // prompt = 'Draft an email to ask about the supplier about the delay';
-    // // this.emailRetrievalTippyInstance = this.addInfo(retrieveEmailActivityId, 'Draft an email to ask about the supplier about the delay', 'answer');
-    // tippyInstance.show();
-    // return tippyInstance;
-  // };
 }
 
 // =====================================================================================================================
