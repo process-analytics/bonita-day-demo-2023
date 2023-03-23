@@ -87,7 +87,7 @@ export class ProcessExecutor {
 
   private readonly executionCounts = new Map<string, number>();
 
-  constructor(bpmnVisualization: BpmnVisualization, private readonly emailRetrievalOperationsCallBack: (id: string) => void, private readonly endCaseCallBack: () => void) {
+  constructor(bpmnVisualization: BpmnVisualization, private readonly endCaseCallBack: () => void, private readonly emailRetrievalOperationsCallBack: (id: string) => void) {
     this.pathHighlighter = new PathHighlighter(bpmnVisualization);
   }
 
@@ -144,6 +144,10 @@ export class ProcessExecutor {
       Promise.resolve()
         .then(() => executionStep.action?.())
         .then(() => {
+          // This is a temp implementation, this should be done with executionStep.action?.()
+          // but this requires to be able to dynamically set the action function which is not possible for now
+          // instead, we hard code the action behavior here as we only have 2 different actions to manage.
+
           this.emailRetrievalOperationsCallBack(executionStep.id);
         })
         // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/

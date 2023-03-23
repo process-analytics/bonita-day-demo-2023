@@ -136,7 +136,7 @@ class SupplierContact {
   // TODO this could should really be async!!!
   async startCase(): Promise<void> {
     console.info('called startCase');
-    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.emailRetrievalOperations.bind(this), this.onEndCase);
+    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase, this.emailRetrievalOperations.bind(this));
     const processExecutorStarter = Promise.resolve(this.processExecutor);
 
     console.info('Registering ProcessExecutor start');
