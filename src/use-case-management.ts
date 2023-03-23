@@ -23,9 +23,9 @@ export function configureUseCaseSelectors(selectedUseCase: string) {
   const useCases = new Map<string, UseCaseSelector>();
   useCases.set('process-monitoring', new UseCaseSelector('radio-process-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess(true);
-    processMonitoring.showHappyPath();
+    processMonitoring.start();
   }, () => {
-    processMonitoring.showHappyPath();
+    processMonitoring.stop();
   }));
   useCases.set('case-monitoring', new UseCaseSelector('radio-case-monitoring', () => {
     processVisualizer.hideManuallyTriggeredProcess();

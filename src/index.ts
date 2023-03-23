@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import 'spectre.css/dist/spectre-icons.css';
 import {configureBreadcrumb} from './breadcrumb.js';
 import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.js';
 
