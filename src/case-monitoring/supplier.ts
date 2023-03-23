@@ -234,8 +234,8 @@ class SupplierContact {
     const firstDelay = 1_500;
     const secondDelay = 2_000;
     return Promise.resolve()
+// TODO see if we can add a delay before the popover is displayed (with the delay tippy option)
       .then(() => this.addInfo(activityId))
-      // eslint-disable-next-line no-promise-executor-return
       .then(tippyInstance => {
             console.info('register delay');
             delay(firstDelay, tippyInstance)
