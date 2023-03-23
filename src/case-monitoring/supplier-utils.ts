@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 import {type BpmnVisualization, type ShapeStyleUpdate} from 'bpmn-visualization';
+import {delay} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: any[]): void {
   console.info(`[EXEC] ${message}`, ...optionalParameters);
@@ -110,10 +111,7 @@ export class ProcessExecutor {
     const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
       .then(id => this.pathHighlighter.markAsExecuted(id, isEdge))
       .then(id => this.markAsExecuted(id))
-    // eslint-disable-next-line  no-promise-executor-return -- improve declaration of this timeout
-      .then(async id => new Promise(resolve => setTimeout(() => {
-        resolve(id);
-      }, waitDuration)))
+      .then(async () => delay(waitDuration))
       .then(() => {
         logProcessExecution(`end of wait after ${id} highlight`);
       });
@@ -167,11 +165,7 @@ export class ProcessExecutor {
       logProcessExecution('DONE call execution of next step', executionStep.nextExecutionStep);
     } else if (executionStep.isLastStep) {
       logProcessExecution('registering endCaseCallBack call');
-      new Promise<void>(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, processExecutorWaitTimeBeforeCallingEndCaseCallback);
-      })
+      delay(processExecutorWaitTimeBeforeCallingEndCaseCallback)
         .then(() => {
           logProcessExecution('detected as last step, so clearing everything');
           this.clear();

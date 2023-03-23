@@ -1,6 +1,7 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
+import {delay} from '../utils/shared.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 import {getExecutionStepAfterReviewEmailChoice, ProcessExecutor} from './supplier-utils.js';
 
@@ -239,11 +240,6 @@ class SupplierContact {
         .then(() => {
           console.info('review email popover is displayed!');
         });
-    }
-
-    async function delay(ms: number, args: any) {
-      // eslint-disable-next-line no-promise-executor-return -- cannot be managed now
-      return new Promise(timeup => setTimeout(timeup, ms, args));
     }
 
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
