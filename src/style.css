@@ -32,14 +32,13 @@ header {
   background-color: var(--color-background-navbar);
 }
 
+/* Override class of Spectre CSS. To be declare after Spectre CSS to override it*/
 .btn {
-  /* Override class of Spectre CSS. To be declare after Spectre CSS to override it*/
   overflow-wrap: break-word;
   height: auto;
   white-space: inherit;
 }
 
-/* Override Spectre CSS. To be declare after Spectre CSS to override it*/
 .divider {
   border-color: var(--color-divider);
 }
@@ -57,6 +56,12 @@ header {
   cursor: pointer;
 }
 
+.btn-light {
+  background: var(--color-background-navbar);
+  border-color: var(--color-divider);
+  color: var(--color-divider);
+}
+
 /* ****************************************************************************************************************** */
 /* Project Advertising section */
 /* ****************************************************************************************************************** */
@@ -68,11 +73,8 @@ header {
 
 .project-advertising-container .btn-close {
   right: 0;
-  background: var(--color-background-navbar);
-  border-color: var(--color-divider);
   border-style: solid;
   border-width: .1rem;
-  color: var(--color-divider);
 }
 .project-advertising-container .btn-close:hover {
   background: var(--color-divider);
