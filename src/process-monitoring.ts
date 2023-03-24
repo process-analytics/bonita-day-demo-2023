@@ -74,7 +74,30 @@ export class ProcessMonitoring {
     this.bpmnElementsIdentifier = new BpmnElementsIdentifier(bpmnVisualization);
   }
 
-  showHappyPath() {
+  start() {
+    this.configureResetButton();
+    this.showHappyPath();
+  }
+
+  stop() {
+    this.configureResetButton(false);
+    this.hideHappyPath();
+  }
+
+  private configureResetButton(enable = true) {
+    const btnElement = document.querySelector<HTMLButtonElement>('#' + this.bpmnVisualization.graph.container.id + ' #btn-reset');
+    if (btnElement) {
+      if (enable) {
+        btnElement.classList.remove('d-hide');
+        btnElement.addEventListener('click', this.resetHappyPath);
+      } else {
+        btnElement.classList.add('d-hide');
+        btnElement.removeEventListener('click', this.resetHappyPath);
+      }
+    }
+  }
+
+  private showHappyPath() {
     const headElt = document.querySelectorAll('head')[0];
 
     /* Iterate over the elements in the happyPath
@@ -95,7 +118,7 @@ export class ProcessMonitoring {
     this.addPopover(happyPathElementWithPopover);
   }
 
-  hideHappyPath() {
+  private hideHappyPath() {
     this.bpmnElementsRegistry.removeCssClasses(happyPath, [
       'highlight-happy-path',
       'pulse-happy',
@@ -111,6 +134,19 @@ export class ProcessMonitoring {
     // Remove popover
     this.removePopover(happyPathElementWithPopover);
   }
+
+  private readonly resetHappyPath = () => {
+    Promise.resolve()
+      .then(() => {
+        this.hideHappyPath();
+      })
+      .then(() => {
+        this.showHappyPath();
+      })
+      .catch(error => {
+        console.error('Error while resetting the happy path', error);
+      });
+  };
 
   private getHappyPathClasses(index: number, elementId: string) {
     const delay = index * animationDelay;
