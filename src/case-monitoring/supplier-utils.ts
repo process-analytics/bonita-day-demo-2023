@@ -189,6 +189,10 @@ export class ProcessExecutor {
     }
   }
 
+  getExecutionCount(elementId: string) {
+    return this.executionCounts.get(elementId);
+  }
+
   private clear(): void {
     this.pathHighlighter.clear();
     logProcessExecution('execution counts before clear', this.executionCounts);
