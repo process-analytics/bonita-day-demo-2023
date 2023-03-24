@@ -104,8 +104,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
 
   // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
   private readonly contactClientBtnListener = () => {
-    console.info('called contactClientBtnListener private method');
-    console.info('click btn');
+    console.info('called contactClientBtnListener');
     showContactSupplierAction(this.mainProcessCaseMonitoring!).then(() => {
       console.log('Contact client action complete!');
     })
@@ -115,14 +114,6 @@ class MainProcessTippySupport extends AbstractTippySupport {
       .catch(error => {
         console.error('Error in contact client action:', error);
       });
-
-    // New Promise<void>(resolve => {
-    //   setTimeout(() => {
-    //     resolve();
-    //   }, 5000);
-    // }).then(() => {
-    //   console.info('I have been executed after timeout')
-    // });
     console.info('click btn done');
   };
 
