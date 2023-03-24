@@ -33,24 +33,25 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   }
 
   hideData(): void {
+    hideSupplierContactData();
     super.hideData();
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
     // TODO move the logic out of this class. Ideally in the subprocess navigator which should manage the data hide
-    hideSupplierContactData();
     hideSubProcessCaseMonitoringData();
   }
 
   // For supplier
   // pause: on main activity, remove poper, remove overlays, remove CSS + add CSS like in subprocess
   pause(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
+    super.hideData();
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 
   // Resume
   resume(): void {
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
+    super.showData();
   }
 
   protected highlightRunningElements(): void {
