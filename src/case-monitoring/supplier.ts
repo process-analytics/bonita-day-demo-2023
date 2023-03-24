@@ -124,7 +124,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
               </tr>       
               <tr>
                 <td>ChatGPT:</td>
-                <td><textarea cols="30" rows="3">${answer}</textarea>
+                <td><textarea cols="30" rows="5">${answer}</textarea>
               </tr>
             </tbody>
           </table>`;
@@ -143,7 +143,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
-  private processExecutor?: ProcessExecutor;
+  processExecutor?: ProcessExecutor;
 
   constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
@@ -317,31 +317,27 @@ export function hideSupplierContactData() {
 const chatGptAnswers = [
   `Dear [Supplier Name],
 
-  I hope this email finds you well. I am writing to inquire about the status of the delivery of the goods that we ordered from your company. Our records show that the delivery was scheduled to arrive on [expected delivery date], however, we have yet to receive the shipment.
+  I am writing to inquire about the status of my recent order with your company. The expected delivery date has passed and I have not received any update on the status of the shipment.
   
-  We understand that there may be unforeseen circumstances that can cause delays in the delivery process, and we would appreciate any information you can provide about the current status of our order. If there are any issues or concerns that may be causing the delay, please let us know so that we can work together to find a solution.
+  I understand that unexpected delays may occur, but I would greatly appreciate it if you could provide me with an update on the expected delivery date or any information regarding the delay. Please let me know if there are any issues with my order or if there is anything I can do to help expedite the process.
   
-  Please provide us with an updated estimated delivery date, as well as any other relevant information that may help us track the progress of our order. We value our business relationship with your company and look forward to continuing to work together in the future.
-  
-  Thank you for your attention to this matter.
+  Thank you for your attention to this matter, and I look forward to hearing back from you soon.
   
   Best regards,
+  
   [Your Name]
   `,
   `Dear [Supplier Name],
 
-  I hope this email finds you well. I am writing to inquire about the delivery of our order that was expected to arrive on [Expected Delivery Date]. We have not received the shipment yet and I would like to know the status of the delivery.
+  I wanted to check on the status of my recent order with your company. The expected delivery date has passed and I haven't received an update. Can you please provide me with an update on the status of the shipment?
   
-  Could you please let me know when we can expect to receive the order? If there are any issues that are causing the delay, please inform us so we can work together to find a solution.
+  Thank you,
   
-  Thank you for your prompt attention to this matter. We value our business relationship with your company and look forward to receiving our order soon.
-  
-  Best regards,
   [Your Name]
   `,
   `Dear [Supplier Name],
 
-  I hope this email finds you well. I am writing to inquire about the status of our order, which was expected to be delivered by [expected delivery date]. However, we have yet to receive the shipment.
+  I am writing to inquire about the status of our order, which was expected to be delivered by [expected delivery date]. However, we have yet to receive the shipment.
   
   Could you please provide us with an update on the current status of our order and the expected delivery date? We understand that unforeseen circumstances can cause delays and appreciate any information you can provide to help us track the progress of our order.
   
@@ -358,6 +354,9 @@ function getPrompt() {
 
 // Call to chat gpt API
 function getAnswer() {
-  const randomIndex = Math.floor(Math.random() * chatGptAnswers.length);
-  return chatGptAnswers[randomIndex];
+  // TODO generalize the hard coded activity id
+  let count = supplierContact.processExecutor?.getExecutionCount('Activity_1oxewnq') ?? 1;
+  count -= 1; // Count starts from 1
+  const index = count >= chatGptAnswers.length ? count % chatGptAnswers.length : count;
+  return chatGptAnswers[index];
 }
