@@ -3,6 +3,7 @@ import {type Instance, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {delay} from '../utils/shared.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
+import {type MainProcessCaseMonitoring} from './main-process.js';
 import {getExecutionStepAfterReviewEmailChoice, ProcessExecutor} from './supplier-utils.js';
 
 class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
@@ -144,8 +145,13 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 
 class SupplierContact {
   processExecutor?: ProcessExecutor;
+  private mainProcessCaseMonitoring?: MainProcessCaseMonitoring;
 
   constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
+
+  setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring) {
+    this.mainProcessCaseMonitoring = mainProcessCaseMonitoring;
+  }
 
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO this could should really be async!!!
@@ -204,14 +210,15 @@ class SupplierContact {
 
   // Cancel the execution of the async startCase
   stopCase(): void {
-    this.onEndCase();
-  }
-
-  onEndCase = (): void => {
     // Hide data
     this.supplierMonitoring.hideData();
     // Hide pool
     processVisualizer.hideManuallyTriggeredProcess();
+  }
+
+  onEndCase = (): void => {
+    this.stopCase();
+    this.mainProcessCaseMonitoring?.resume();
   };
 
   protected addInfo(activityId: string) {
@@ -286,10 +293,11 @@ const processVisualizer = new ProcessVisualizer(bpmnVisualization);
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
 // TODO rename into showSupplierContactData
-export async function showContactSupplierAction(): Promise<void> {
+export async function showContactSupplierAction(mainProcessCaseMonitoring: MainProcessCaseMonitoring): Promise<void> {
   // eslint-disable-next-line no-warning-comments -- cannot be managed now
   // TODO manage processVisualizer consistently
   //   in supplierContact like for stopCase or outside like startCase
+  supplierContact.setMainProcessCaseMonitoring(mainProcessCaseMonitoring);
   return Promise.resolve()
     .then(() => {
       console.info('init done, before showManuallyTriggeredProcess');
@@ -299,6 +307,9 @@ export async function showContactSupplierAction(): Promise<void> {
     })
     .then(() => {
       console.info('showManuallyTriggeredProcess executed');
+    })
+    .then(() => {
+      mainProcessCaseMonitoring.pause();
     })
     .then(async () => supplierContact.startCase())
     .then(() => {

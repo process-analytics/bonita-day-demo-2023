@@ -26,9 +26,10 @@ export function newMainProcessCaseMonitoring(bpmnVisualization: BpmnVisualizatio
   return new MainProcessCaseMonitoring(bpmnVisualization, new MainProcessTippySupport(bpmnVisualization));
 }
 
-class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
+export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization, tippySupport: MainProcessTippySupport) {
     super(bpmnVisualization, 'main', tippySupport);
+    tippySupport.setMainProcessCaseMonitoring(this);
   }
 
   hideData(): void {
@@ -37,6 +38,19 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
     // TODO move the logic out of this class. Ideally in the subprocess navigator which should manage the data hide
     hideSupplierContactData();
     hideSubProcessCaseMonitoringData();
+  }
+
+  // For supplier
+  // pause: on main activity, remove popover, remove overlays, remove CSS + add CSS like in subprocess
+  pause(): void {
+    this.resetRunningElements();
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+  }
+
+  // Resume
+  resume(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+    this.highlightRunningElements();
   }
 
   protected highlightRunningElements(): void {
@@ -66,8 +80,14 @@ class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
 }
 
 class MainProcessTippySupport extends AbstractTippySupport {
+  private mainProcessCaseMonitoring?: MainProcessCaseMonitoring;
+
   constructor(protected readonly bpmnVisualization: BpmnVisualization) {
     super(bpmnVisualization);
+  }
+
+  setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring) {
+    this.mainProcessCaseMonitoring = mainProcessCaseMonitoring;
   }
 
   protected getContent(htmlElement: ReferenceElement) {
@@ -85,7 +105,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
   // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
   private readonly contactClientBtnListener = () => {
     console.info('called contactClientBtnListener');
-    showContactSupplierAction().then(() => {
+    showContactSupplierAction(this.mainProcessCaseMonitoring!).then(() => {
       console.info('Contact client action complete!');
     })
       .catch(error => {

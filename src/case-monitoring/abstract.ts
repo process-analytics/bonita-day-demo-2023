@@ -35,17 +35,7 @@ export abstract class AbstractCaseMonitoring {
     // Do nothing by default
   }
 
-  private reduceVisibilityOfAlreadyExecutedElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
-  }
-
-  private restoreVisibilityOfAlreadyExecutedElements() {
-    // eslint-disable-next-line no-warning-comments -- question to answer by Nour
-    // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().pendingShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
-  }
-
-  private resetRunningElements() {
+  protected resetRunningElements() {
     const bpmnElementIds = this.getCaseMonitoringData().runningShapes;
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementIds, ['state-running-late', 'state-enabled']);
     for (const bpmnElementId of bpmnElementIds) {
@@ -53,6 +43,14 @@ export abstract class AbstractCaseMonitoring {
     }
 
     this.tippySupport.removeAllPopovers();
+  }
+
+  private reduceVisibilityOfAlreadyExecutedElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
+  }
+
+  private restoreVisibilityOfAlreadyExecutedElements() {
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 }
 
