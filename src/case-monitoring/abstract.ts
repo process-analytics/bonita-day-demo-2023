@@ -35,14 +35,6 @@ export abstract class AbstractCaseMonitoring {
     // Do nothing by default
   }
 
-  private reduceVisibilityOfAlreadyExecutedElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
-  }
-
-  private restoreVisibilityOfAlreadyExecutedElements() {
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
-  }
-
   protected resetRunningElements() {
     const bpmnElementIds = this.getCaseMonitoringData().runningShapes;
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementIds, ['state-running-late', 'state-enabled']);
@@ -51,6 +43,14 @@ export abstract class AbstractCaseMonitoring {
     }
 
     this.tippySupport.removeAllPopovers();
+  }
+
+  private reduceVisibilityOfAlreadyExecutedElements(): void {
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
+  }
+
+  private restoreVisibilityOfAlreadyExecutedElements() {
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 }
 
