@@ -124,35 +124,35 @@ class SubProcessTippySupport extends AbstractTippySupport {
 function getWarningInfoAsHtml() {
   return `
         <div class="popover-container">
-          <h4>Resource not available</h4>
-          <p>The resource "pierre" is not available to execute this task.</p>
-          <p>Here are some other suggestions:</p>
-          <table id="popover-resources-available">
-            <thead>
+          <h4>Actor not available</h4>
+          <p><b>Pierre</b> is not available to execute this task.</p>
+          <p>Here are the actors who can replace him:</p>
+          <table id="popover-resources-available" class="">
+            <thead class="popover-title">
               <tr>
-                <th>Resource Name</th>
-                <th>Availability</th>
+                <th class="text-left">Name</th>
+                <th>Workload</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               <tr class="popover-row">
-                <td>Resource 1</td>
-                <td>Yes</td>
+                <td>Maribel</td>
+                <td class="text-center">75%</td>
                 <td class="popover-action">
                     <button class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
               <tr class="popover-row">
-                <td>Resource 2</td>
-                <td>Yes</td>
+                <td>Jawad</td>
+                <td class="text-center">38%</td>
                 <td class="popover-action">
                     <button class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
               <tr class="popover-row">
-                <td>Resource 3</td>
-                <td>Yes</td>
+                <td>Mei</td>
+                <td class="text-center">82%</td>
                 <td class="popover-action">
                     <button class="btn btn-sm btn-success">Assign</button>
                 </td>

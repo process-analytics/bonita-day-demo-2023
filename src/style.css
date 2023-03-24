@@ -315,11 +315,9 @@ table {
   width: 100%;
 }
 
-th.popover-title {
-  text-align: center;
+thead.popover-title tr {
   font-weight: bold;
-  font-size: 16px;
-  padding: 10px;
+  font-size: .8rem;
 }
 
 tr.popover-row:hover {
