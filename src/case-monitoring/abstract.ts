@@ -45,7 +45,7 @@ export abstract class AbstractCaseMonitoring {
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().pendingShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 
-  private resetRunningElements() {
+  protected resetRunningElements() {
     const bpmnElementIds = this.getCaseMonitoringData().runningShapes;
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementIds, ['state-running-late', 'state-enabled']);
     for (const bpmnElementId of bpmnElementIds) {
