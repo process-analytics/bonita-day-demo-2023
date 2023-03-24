@@ -43,14 +43,14 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   // For supplier
   // pause: on main activity, remove popover, remove overlays, remove CSS + add CSS like in subprocess
   pause(): void {
-    super.resetRunningElements();
+    this.resetRunningElements();
     this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
   }
 
   // Resume
   resume(): void {
     this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
-    super.showData();
+    this.highlightRunningElements();
   }
 
   protected highlightRunningElements(): void {
