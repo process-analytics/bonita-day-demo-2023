@@ -210,14 +210,14 @@ class SupplierContact {
 
   // Cancel the execution of the async startCase
   stopCase(): void {
-    this.onEndCase();
-  }
-
-  onEndCase = (): void => {
     // Hide data
     this.supplierMonitoring.hideData();
     // Hide pool
     processVisualizer.hideManuallyTriggeredProcess();
+  }
+
+  onEndCase = (): void => {
+    this.stopCase();
     this.mainProcessCaseMonitoring?.resume();
   };
 
