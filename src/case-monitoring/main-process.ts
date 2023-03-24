@@ -106,15 +106,12 @@ class MainProcessTippySupport extends AbstractTippySupport {
   private readonly contactClientBtnListener = () => {
     console.info('called contactClientBtnListener');
     showContactSupplierAction(this.mainProcessCaseMonitoring!).then(() => {
-      console.log('Contact client action complete!');
+      console.info('Contact client action complete!');
     })
-      .then(() => {
-        console.info('I have been executed after showContactSupplierAction');
-      })
       .catch(error => {
         console.error('Error in contact client action:', error);
       });
-    console.info('click btn done');
+    console.info('contactClientBtnListener: showContactSupplierAction called');
   };
 
   private manageEventListeners(instance: Instance, register: boolean): void {
