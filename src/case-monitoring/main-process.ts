@@ -121,7 +121,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
     let popoverContent = `
         <div class="popover-container">
         <h4>Task running late</h4>
-        <p>Here are some suggestions:</p>
+        <p>The following are steps that can be taken to mitigate the problem:</p>
         <table>
           <tbody>`;
 

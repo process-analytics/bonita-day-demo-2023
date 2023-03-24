@@ -5,10 +5,10 @@ type ActivityRecommendations = {
 
 const recommendationData = new Map<string, ActivityRecommendations[]>();
 recommendationData.set('SRM subprocess', [{
-  title: 'Allocate Resource',
-  description: 'Resource unavailable for SRM: Awaiting Approval',
+  title: 'Reassign Actor',
+  description: 'Actor is unavailable',
 },
-{title: 'Contact Client', description: 'late delivery'}],
+{title: 'Contact Supplier', description: 'Notify a delay'}],
 );
 
 export function getRecommendationData(): Map<string, ActivityRecommendations[]> {
