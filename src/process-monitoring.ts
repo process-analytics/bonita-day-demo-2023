@@ -115,7 +115,11 @@ export class ProcessMonitoring {
     }
 
     // Add popover
-    this.addPopover(happyPathElementWithPopover);
+    const tippyInstance = this.addPopover(happyPathElementWithPopover);
+    //show after 500 ms
+    setTimeout(() => {
+      tippyInstance.show();
+    }, 1000);
   }
 
   private hideHappyPath() {
@@ -176,12 +180,12 @@ export class ProcessMonitoring {
   private addPopover(bpmnElementId: string) {
     const bpmnElement = this.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
 
-    const tippyInstance = tippy(bpmnElement.htmlElement, {
+    return tippy(bpmnElement.htmlElement, {
       theme: 'light',
       placement: 'top',
       animation: 'scale',
       appendTo: this.bpmnVisualization.graph.container,
-      content: '45 cases (7.36%) <br/> ⏳ 2.08 months',
+      content: '913 cases (86.36%) <br/> ⏳ 2.08 months',
       arrow: true,
       interactive: true,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
@@ -189,8 +193,6 @@ export class ProcessMonitoring {
       trigger: 'manual',
       hideOnClick: false,
     } as Partial<Props>);
-
-    tippyInstance.show();
   }
 
   private removePopover(bpmnElementId: string) {
