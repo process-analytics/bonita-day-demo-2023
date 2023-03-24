@@ -98,22 +98,28 @@ class MainProcessTippySupport extends AbstractTippySupport {
     // In the query selectors, target instance.popper. Keep using document for now as the previous popper (when going back to the subprocess after a first venue)
     // may still exist in the DOM of the subprocess view
 
-    // eslint-disable-next-line no-warning-comments -- cannot be managed now
-    // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
-    const allocateResourceBtn = document.querySelector(`#${instance.popper.id} #Allocate-Resource`)!;
-    if (register) {
-      allocateResourceBtn.addEventListener('click', showResourceAllocationAction);
+    // the "button id" comes from the recommendation data
+    const allocateActorBtn = document.querySelector(`#${instance.popper.id} #reassign-actor`);
+    if (allocateActorBtn) {
+      if (register) {
+        allocateActorBtn.addEventListener('click', showResourceAllocationAction);
+      } else {
+        allocateActorBtn.removeEventListener('click', showResourceAllocationAction);
+      }
     } else {
-      allocateResourceBtn.removeEventListener('click', showResourceAllocationAction);
+      console.warn('NO "allocate actor" btn');
     }
 
-    // eslint-disable-next-line no-warning-comments -- cannot be managed now
-    // TODO avoid hard coding or manage this in the same class that generate 'getRecommendationInfoAsHtml'
-    const contactClientBtn = document.querySelector(`#${instance.popper.id} #Contact-Client`)!;
-    if (register) {
-      contactClientBtn.addEventListener('click', this.contactClientBtnListener);
+    // The "button id" comes from the recommendation data
+    const contactSupplierBtn = document.querySelector(`#${instance.popper.id} #contact-supplier`);
+    if (contactSupplierBtn) {
+      if (register) {
+        contactSupplierBtn.addEventListener('click', this.contactClientBtnListener);
+      } else {
+        contactSupplierBtn.removeEventListener('click', this.contactClientBtnListener);
+      }
     } else {
-      contactClientBtn.removeEventListener('click', this.contactClientBtnListener);
+      console.warn('NO "supplier contact" btn');
     }
   }
 
@@ -128,8 +134,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
     const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
     const activityRecommendationData = getActivityRecommendationData(bpmnSemantic?.name ?? '');
     for (const recommendation of activityRecommendationData) {
-      // Replace space with hyphen (-) to be passed as the button id
-      const buttonId = recommendation.title.replace(/\s+/g, '-');
+      const buttonId = recommendation.id;
       popoverContent += `
             <tr class="popover-row">
                 <td class="popover-key">${recommendation.title}</td>
