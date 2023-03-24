@@ -40,9 +40,7 @@ export abstract class AbstractCaseMonitoring {
   }
 
   private restoreVisibilityOfAlreadyExecutedElements() {
-    // eslint-disable-next-line no-warning-comments -- question to answer by Nour
-    // TODO why adding pending?  the CSS class was not added in reduceVisibilityOfAlreadyExecutedElements
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().pendingShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
+    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 
   protected resetRunningElements() {
