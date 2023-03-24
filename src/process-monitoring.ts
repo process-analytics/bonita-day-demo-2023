@@ -4,6 +4,7 @@ import {type BpmnElementsRegistry, type BpmnVisualization} from 'bpmn-visualizat
 import tippy, {type Instance, type Props} from 'tippy.js';
 import 'tippy.js/animations/scale.css';
 import {BpmnElementsIdentifier} from './utils/bpmn-elements.js';
+import {delay} from './utils/shared.js';
 
 /* Start event --> SRM subprocess
   --> vendor creates order item --> create purchase order item
@@ -117,9 +118,12 @@ export class ProcessMonitoring {
     // Add popover
     const tippyInstance = this.addPopover(happyPathElementWithPopover);
     // Show after 1 sec
-    setTimeout(() => {
+    delay(1000).then(() => {
       tippyInstance.show();
-    }, 1000);
+    })
+      .catch(error => {
+        console.error('Error showing popover:', error);
+      });
   }
 
   private hideHappyPath() {
