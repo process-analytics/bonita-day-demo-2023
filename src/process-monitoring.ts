@@ -116,7 +116,7 @@ export class ProcessMonitoring {
 
     // Add popover
     const tippyInstance = this.addPopover(happyPathElementWithPopover);
-    //show after 500 ms
+    // Show after 1 sec
     setTimeout(() => {
       tippyInstance.show();
     }, 1000);
