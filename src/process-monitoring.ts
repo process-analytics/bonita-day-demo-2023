@@ -4,6 +4,7 @@ import {type BpmnElementsRegistry, type BpmnVisualization} from 'bpmn-visualizat
 import tippy, {type Instance, type Props} from 'tippy.js';
 import 'tippy.js/animations/scale.css';
 import {BpmnElementsIdentifier} from './utils/bpmn-elements.js';
+import {delay} from './utils/shared.js';
 
 /* Start event --> SRM subprocess
   --> vendor creates order item --> create purchase order item
@@ -115,7 +116,14 @@ export class ProcessMonitoring {
     }
 
     // Add popover
-    this.addPopover(happyPathElementWithPopover);
+    const tippyInstance = this.addPopover(happyPathElementWithPopover);
+    // Show after 1 sec
+    delay(1000).then(() => {
+      tippyInstance.show();
+    })
+      .catch(error => {
+        console.error('Error showing popover:', error);
+      });
   }
 
   private hideHappyPath() {
@@ -176,12 +184,12 @@ export class ProcessMonitoring {
   private addPopover(bpmnElementId: string) {
     const bpmnElement = this.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
 
-    const tippyInstance = tippy(bpmnElement.htmlElement, {
+    return tippy(bpmnElement.htmlElement, {
       theme: 'light',
       placement: 'top',
       animation: 'scale',
       appendTo: this.bpmnVisualization.graph.container,
-      content: '45 cases (7.36%) <br/> ⏳ 2.08 months',
+      content: '913 cases (86.36%) <br/> ⏳ 2.08 months',
       arrow: true,
       interactive: true,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- tippy type
@@ -189,8 +197,6 @@ export class ProcessMonitoring {
       trigger: 'manual',
       hideOnClick: false,
     } as Partial<Props>);
-
-    tippyInstance.show();
   }
 
   private removePopover(bpmnElementId: string) {

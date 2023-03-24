@@ -125,7 +125,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
               </tr>       
               <tr>
                 <td>ChatGPT:</td>
-                <td><textarea cols="30" rows="3">${answer}</textarea>
+                <td><textarea cols="30" rows="5">${answer}</textarea>
               </tr>
             </tbody>
           </table>`;
@@ -144,8 +144,8 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
 }
 
 class SupplierContact {
+  processExecutor?: ProcessExecutor;
   private mainProcessCaseMonitoring?: MainProcessCaseMonitoring;
-  private processExecutor?: ProcessExecutor;
 
   constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
 
@@ -321,6 +321,43 @@ export function hideSupplierContactData() {
   supplierContact.stopCase();
 }
 
+// =================================================================================================================
+// ChatGPT
+// ================================================================================================================
+
+const chatGptAnswers = [
+  `Dear [Supplier Name],
+
+  I am writing to inquire about the status of my recent order with your company. The expected delivery date has passed and I have not received any update on the status of the shipment.
+  
+  I understand that unexpected delays may occur, but I would greatly appreciate it if you could provide me with an update on the expected delivery date or any information regarding the delay. Please let me know if there are any issues with my order or if there is anything I can do to help expedite the process.
+  
+  Thank you for your attention to this matter, and I look forward to hearing back from you soon.
+  
+  Best regards,
+  
+  [Your Name]
+  `,
+  `Dear [Supplier Name],
+
+  I wanted to check on the status of my recent order with your company. The expected delivery date has passed and I haven't received an update. Can you please provide me with an update on the status of the shipment?
+  
+  Thank you,
+  
+  [Your Name]
+  `,
+  `Dear [Supplier Name],
+
+  I am writing to inquire about the status of our order, which was expected to be delivered by [expected delivery date]. However, we have yet to receive the shipment.
+  
+  Could you please provide us with an update on the current status of our order and the expected delivery date? We understand that unforeseen circumstances can cause delays and appreciate any information you can provide to help us track the progress of our order.
+  
+  Thank you for your attention to this matter, and we look forward to receiving the shipment soon.
+  
+  Best regards,
+  [Your Name]`,
+];
+
 // Ideally user input
 function getPrompt() {
   return 'Draft a short email to ask the supplier about the delay';
@@ -328,5 +365,9 @@ function getPrompt() {
 
 // Call to chat gpt API
 function getAnswer() {
-  return 'chatGPT answer';
+  // TODO generalize the hard coded activity id
+  let count = supplierContact.processExecutor?.getExecutionCount('Activity_1oxewnq') ?? 1;
+  count -= 1; // Count starts from 1
+  const index = count >= chatGptAnswers.length ? count % chatGptAnswers.length : count;
+  return chatGptAnswers[index];
 }

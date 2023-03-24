@@ -1,14 +1,20 @@
 type ActivityRecommendations = {
+  /** The id is used to identify the related "act" button. */
+  id: string;
   title: string;
   description: string;
 };
 
 const recommendationData = new Map<string, ActivityRecommendations[]>();
 recommendationData.set('SRM subprocess', [{
-  title: 'Allocate Resource',
-  description: 'Resource unavailable for SRM: Awaiting Approval',
+  id: 'reassign-actor',
+  title: 'Reassign Actor',
+  description: 'Actor is unavailable',
 },
-{title: 'Contact Client', description: 'late delivery'}],
+{
+  id: 'contact-supplier',
+  title: 'Contact Supplier',
+  description: 'Notify a delay'}],
 );
 
 export function getRecommendationData(): Map<string, ActivityRecommendations[]> {
