@@ -34,6 +34,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     if (bpmnSemantic?.id === 'Activity_04d6t36') {
       return this.getEmailRetrievalContent();
     }
+
     // Activity Review and adapt email
     return this.getEmailReviewContent();
   }
@@ -223,17 +224,17 @@ class SupplierContact {
 
   private addInfo(activityId: string) {
     const tippyInstance = this.supplierMonitoring.addInfoOnChatGptActivity(activityId);
-      // Activity_04d6t36 chatGPT activity
-      // Activity_1oxewnq review email
-    const isChatGPTActivity = activityId === 'Activity_04d6t36';
+    // Activity_04d6t36 chatGPT activity
+    // Activity_1oxewnq review email
+    const isChatGptActivity = activityId === 'Activity_04d6t36';
     tippyInstance.setProps({
-      theme: isChatGPTActivity ? 'light': '',
+      theme: isChatGptActivity ? 'light' : '',
       trigger: 'manual',
-      arrow: !isChatGPTActivity,
-      placement: isChatGPTActivity ? 'bottom' : 'top',
+      arrow: !isChatGptActivity,
+      placement: isChatGptActivity ? 'bottom' : 'top',
       hideOnClick: false,
-      // default is 350px
-      maxWidth: isChatGPTActivity ? '350px': '450px',
+      // Default is 350px
+      maxWidth: isChatGptActivity ? '350px' : '450px',
     });
     tippyInstance.show();
     return tippyInstance;
@@ -267,7 +268,7 @@ class SupplierContact {
           .then(tippyInstance => {
             console.info('wait show email retrieval done - part 1');
             // TO DO manage types
-            (tippyInstance as Instance).setContent(this.getChatGPTWaitMessage());
+            (tippyInstance as Instance).setContent(this.getChatGptWaitMessage());
             console.info('content updated');
             delay(secondDelay, tippyInstance)
               .then(tippyInstance => {
@@ -289,7 +290,7 @@ class SupplierContact {
       );
   };
 
-  private getChatGPTWaitMessage(): string {
+  private getChatGptWaitMessage(): string {
     return `<div style="display: flex; width: 11rem;">
     <div class="loading mr-2" style="flex-basis: 1rem;"></div>
     <div>ChatGPT is working for you...</div>
