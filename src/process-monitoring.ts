@@ -185,7 +185,6 @@ export class ProcessMonitoring {
     const bpmnElement = this.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
 
     return tippy(bpmnElement.htmlElement, {
-      theme: 'light',
       placement: 'top',
       animation: 'scale',
       appendTo: this.bpmnVisualization.graph.container,
