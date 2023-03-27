@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import {type BpmnVisualization, type ShapeStyleUpdate} from 'bpmn-visualization';
+import {type BpmnVisualization, type Overlay, type ShapeStyleUpdate} from 'bpmn-visualization';
 import {delay} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: any[]): void {
@@ -291,15 +291,7 @@ class PathHighlighter {
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
 
         // Add overlay
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(id, {
-          position: 'middle',
-          label: `${executionCount}`,
-          style: {
-            font: {color: 'white', size: 22},
-            fill: {color: 'blue'},
-            stroke: {color: 'blue', width: 2},
-          },
-        });
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(id, createEdgeCounterOverlay(executionCount, 1));
       }
     } else {
       logProcessExecution(`highlighting shape ${id}`);
@@ -331,16 +323,8 @@ class PathHighlighter {
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
 
         // Add overlay
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, {
-          position: 'middle',
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- here, we are sure there is a value and we don't put undefined values
-          label: `${this.executionCounts.get(this.pastExecutedId)}`,
-          style: {
-            font: {color: 'white', size: 22},
-            fill: {color: 'rgba(0, 0, 255, 0.2)'},
-            stroke: {color: 'rgba(0, 0, 255, 0.2)', width: 2},
-          },
-        });
+        // execution count: here, we are sure there is a value, and we don't put undefined values
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.pastExecutedId)!, 0.2));
       }
     }
 
@@ -355,16 +339,8 @@ class PathHighlighter {
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.lastExecutedId);
 
         // Add overlay
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, {
-          position: 'middle',
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- here, we are sure there is a value and we don't put undefined values
-          label: `${this.executionCounts.get(this.lastExecutedId)}`,
-          style: {
-            font: {color: 'white', size: 22},
-            fill: {color: 'rgba(0, 0, 255, 0.5)'},
-            stroke: {color: 'rgba(0, 0, 255, 0.5)', width: 2},
-          },
-        });
+        // execution count: here, we are sure there is a value, and we don't put undefined values
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.lastExecutedId)!, 0.5));
       }
     }
 
@@ -396,4 +372,17 @@ class PathHighlighter {
     this.pastExecutedId = undefined;
     this.executionCounts.clear();
   }
+}
+
+function createEdgeCounterOverlay(count: number, opacity: number): Overlay {
+  const overlay: Overlay = {
+    position: 'middle',
+    label: `${count}`,
+    style: {
+      font: {color: 'white', size: 22},
+      fill: {color: `rgba(0, 0, 255, ${opacity})`},
+      stroke: {color: `rgba(0, 0, 255, ${opacity})`, width: 2},
+    },
+  };
+  return overlay;
 }
