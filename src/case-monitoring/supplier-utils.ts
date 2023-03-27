@@ -163,7 +163,13 @@ export class ProcessExecutor {
       // Console.info('register edge promiseMarkAsExecuted execution')
       // mainPromise.then(() => markAsExecuted(incomingEdgeId, true, executionDurationEdge));
       // console.info('registered edge promiseMarkAsExecuted execution')
-      const promiseMarkAsExecuted = markAsExecuted({id: incomingEdgeId, isEdge: true, waitDuration: executionDurationEdge});
+      const promiseMarkAsExecuted = markAsExecuted({
+        id: incomingEdgeId,
+        isEdge: true,
+        waitDuration: executionDurationEdge,
+        displayExecutionCounter: executionStep.incomingEdgeDisplayExecutionCount ?? false,
+        executionCount: this.getExecutionCount(incomingEdgeId),
+      });
       // const promiseMarkAsExecuted = markAsExecuted(incomingEdgeId, true, executionDurationEdge);
       console.info('await edge promiseMarkAsExecuted execution');
       await promiseMarkAsExecuted;
@@ -286,7 +292,11 @@ class PathHighlighter {
       });
       logProcessExecution(`done highlight of ${id}`);
 
-      if (id === 'Flow_1glx5xw') {
+      if (marker.displayExecutionCounter) {
+        // TODO store the execution counter for the current id
+        // reuse this value when handling in pastExecutedId and lastExecutedId
+        // store the information in a Map: strin id of the element, value number: counter
+
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
 
