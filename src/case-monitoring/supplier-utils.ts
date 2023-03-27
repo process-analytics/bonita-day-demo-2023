@@ -113,7 +113,7 @@ type MarkExecutionOptions = {
   waitDuration: number;
   displayExecutionCounter?: boolean;
   executionCount?: number;
-}
+};
 
 // TODO duplication with MarkExecutionOptions
 type PathHighlightMarker = {
@@ -121,8 +121,7 @@ type PathHighlightMarker = {
   isEdge: boolean;
   displayExecutionCounter?: boolean;
   executionCount?: number;
-}
-
+};
 
 export class ProcessExecutor {
   private readonly pathHighlighter: PathHighlighter;
@@ -149,7 +148,7 @@ export class ProcessExecutor {
     }
 
     const markAsExecuted = async (options: MarkExecutionOptions) => Promise.resolve(options)
-    // const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
+    // Const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
       .then(options => this.pathHighlighter.markAsExecuted(options))
       .then(id => this.markAsExecuted(id))
       .then(async () => delay(options.waitDuration))
@@ -170,7 +169,7 @@ export class ProcessExecutor {
         displayExecutionCounter: executionStep.incomingEdgeDisplayExecutionCount ?? false,
         executionCount: this.getExecutionCount(incomingEdgeId),
       });
-      // const promiseMarkAsExecuted = markAsExecuted(incomingEdgeId, true, executionDurationEdge);
+      // Const promiseMarkAsExecuted = markAsExecuted(incomingEdgeId, true, executionDurationEdge);
       console.info('await edge promiseMarkAsExecuted execution');
       await promiseMarkAsExecuted;
       console.info('edge promiseMarkAsExecuted execution done');
@@ -185,7 +184,7 @@ export class ProcessExecutor {
       isEdge: false,
       waitDuration: executionStep.duration ?? executionDurationShapeDefault,
     });
-    // const promiseMarkAsExecuted = markAsExecuted(elementId, false, executionStep.duration ?? executionDurationShapeDefault);
+    // Const promiseMarkAsExecuted = markAsExecuted(elementId, false, executionStep.duration ?? executionDurationShapeDefault);
     console.info('await shape promiseMarkAsExecuted execution');
     await promiseMarkAsExecuted;
     console.info('shape promiseMarkAsExecuted execution done');
@@ -282,7 +281,7 @@ class PathHighlighter {
 
   markAsExecuted(marker: PathHighlightMarker) {
     const id = marker.id;
-  // markAsExecuted(id: string, isEdge = false) {
+    // MarkAsExecuted(id: string, isEdge = false) {
     if (marker.isEdge) {
       logProcessExecution(`highlighting ${id}`);
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
