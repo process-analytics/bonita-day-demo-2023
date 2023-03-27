@@ -99,7 +99,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
     // Return to main process
     displayView('main');
 
-    // Show notifaction
+    // Show notification
     const button = event.currentTarget as HTMLButtonElement;
     const row = button.closest('tr')!;
     const toastMessage = `An assignment notification is sent to ${row.cells[0].textContent ?? ''}`;
