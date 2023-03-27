@@ -275,7 +275,7 @@ class PathHighlighter {
 
   private pastExecutedId: string | undefined;
   private lastExecutedId: string | undefined;
-  private readonly executionCounterMap = new Map<string, number>();
+  private readonly executionCounts = new Map<string, number>();
 
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 
@@ -292,7 +292,7 @@ class PathHighlighter {
 
       if (marker.displayExecutionCounter) {
         const executionCount = marker.executionCount ?? 0;
-        this.executionCounterMap.set(id, executionCount);
+        this.executionCounts.set(id, executionCount);
 
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
@@ -333,14 +333,14 @@ class PathHighlighter {
       );
       logProcessExecution(`done highly reduce opacity of ${this.pastExecutedId}`);
 
-      if (this.executionCounterMap.has(this.pastExecutedId)) {
+      if (this.executionCounts.has(this.pastExecutedId)) {
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
 
         // Add overlay
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, {
           position: 'middle',
-          label: `${this.executionCounterMap.get(this.pastExecutedId) ?? 0}`,
+          label: `${this.executionCounts.get(this.pastExecutedId) ?? 0}`,
           style: {
             font: {color: 'white', size: 22},
             fill: {color: 'rgba(0, 0, 255, 0.2)'},
@@ -356,14 +356,14 @@ class PathHighlighter {
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
       logProcessExecution(`done reduce opacity of ${this.lastExecutedId}`);
 
-      if (this.executionCounterMap.has(this.lastExecutedId)) {
+      if (this.executionCounts.has(this.lastExecutedId)) {
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.lastExecutedId);
 
         // Add overlay
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, {
           position: 'middle',
-          label: `${this.executionCounterMap.get(this.lastExecutedId) ?? 0}`,
+          label: `${this.executionCounts.get(this.lastExecutedId) ?? 0}`,
           style: {
             font: {color: 'white', size: 22},
             fill: {color: 'rgba(0, 0, 255, 0.5)'},
