@@ -2,6 +2,7 @@ import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance, type Props, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {delay} from '../utils/shared.js';
+import {disableUseCaseSelectors, enableUseCaseSelectors} from '../use-case-selectors';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 import {type MainProcessCaseMonitoring} from './main-process.js';
 import {type InnerActionParameters, ProcessExecutor, type ReviewEmailDecision} from './supplier-utils.js';
@@ -168,6 +169,7 @@ class SupplierContact {
 
   async startCase(): Promise<void> {
     console.info('called startCase');
+    disableUseCaseSelectors();
     const processExecutorStarter = Promise.resolve(this.processExecutor);
     console.info('Registering ProcessExecutor start');
     processExecutorStarter.then(async processExecutor => processExecutor.start())
@@ -186,6 +188,7 @@ class SupplierContact {
 
   onEndCase = (): void => {
     this.stopCase();
+    enableUseCaseSelectors();
     this.mainProcessCaseMonitoring?.resume();
   };
 
