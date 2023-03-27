@@ -67,6 +67,8 @@ const animationDurationOfEdgeArrow = 0.3 * speedFactor;
 const animationDelay = animationDuration / 2;
 const animationDurationOfEdgeLine = animationDuration - animationDurationOfEdgeArrow;
 
+const delayBeforeShowingPopover = 1000;
+
 export class ProcessMonitoring {
   private readonly bpmnElementsRegistry: BpmnElementsRegistry;
   private readonly bpmnElementsIdentifier: BpmnElementsIdentifier;
@@ -117,8 +119,7 @@ export class ProcessMonitoring {
 
     // Add popover
     const tippyInstance = this.addPopover(happyPathElementWithPopover);
-    // Show after 1 sec
-    delay(1000).then(() => {
+    delay(delayBeforeShowingPopover).then(() => {
       tippyInstance.show();
     })
       .catch(error => {
