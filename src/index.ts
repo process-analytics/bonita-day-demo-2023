@@ -15,6 +15,8 @@ limitations under the License.
 */
 
 import 'spectre.css/dist/spectre-icons.css';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light.css';
 import {configureBreadcrumb} from './breadcrumb.js';
 import {configureUseCaseSelectors, defaultUseCase} from './use-case-management.js';
 

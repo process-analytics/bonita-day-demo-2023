@@ -294,20 +294,18 @@ header {
 /* More generally case-monitoring */
 /* ================================================================================================================== */
 
-/*padding: 10px;
-}*/
-
 .popover-container {
   max-width: 400px;
-  margin-top: 4px;
-  margin-bottom: 4px;
+  margin-top: .2rem;
+  margin-bottom: .2rem;
 }
 
 .popover-container textarea {
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
-  padding: 8px;
+  padding: .4rem;
+  resize: none;
 }
 
 table {

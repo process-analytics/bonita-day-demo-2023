@@ -71,7 +71,6 @@ export abstract class AbstractTippySupport {
     // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment -- temp
     const thisInstance = this;
     const tippyInstance = tippy(bpmnElement.htmlElement, {
-      theme: 'light',
       placement: 'bottom',
       appendTo: this.bpmnVisualization.graph.container,
       content: 'Loading...',
