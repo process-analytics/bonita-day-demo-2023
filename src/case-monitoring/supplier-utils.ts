@@ -349,8 +349,10 @@ class PathHighlighter {
   }
 
   clear(): void {
+    const bpmnElementsRegistry = this.bpmnVisualization.bpmnElementsRegistry;
+
     // Use reset style by property as global reset method isn't available in bpmn-visualization@0.33.0
-    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(Array.from(this.executedPath),
+    bpmnElementsRegistry.updateStyle(Array.from(this.executedPath),
       {
         opacity: 'default',
         fill: {
@@ -368,9 +370,17 @@ class PathHighlighter {
       },
     );
     this.executedPath.clear();
+
+    // Remove overlays
+    for (const elementIdWithOverlay of this.executionCounts.keys()) {
+      bpmnElementsRegistry.removeAllOverlays(elementIdWithOverlay);
+    }
+
+    this.executionCounts.clear();
+
+    // Other cleaning
     this.lastExecutedId = undefined;
     this.pastExecutedId = undefined;
-    this.executionCounts.clear();
   }
 }
 
