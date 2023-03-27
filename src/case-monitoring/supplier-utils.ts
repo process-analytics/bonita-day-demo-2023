@@ -141,7 +141,6 @@ export class ProcessExecutor {
     }
 
     const markAsExecuted = async (options: MarkExecutionOptions) => Promise.resolve(options)
-    // Const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
       .then(options => this.markAsExecuted(options.id))
       .then(() => {
         options.executionCount = this.getExecutionCount(options.id);
@@ -164,7 +163,6 @@ export class ProcessExecutor {
         waitDuration: executionDurationEdge,
         displayExecutionCounter: executionStep.incomingEdgeDisplayExecutionCount ?? false,
       });
-      // Const promiseMarkAsExecuted = markAsExecuted(incomingEdgeId, true, executionDurationEdge);
       console.info('await edge promiseMarkAsExecuted execution');
       await promiseMarkAsExecuted;
       console.info('edge promiseMarkAsExecuted execution done');
