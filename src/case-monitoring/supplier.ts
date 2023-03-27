@@ -1,18 +1,18 @@
 import {type BpmnVisualization} from 'bpmn-visualization';
-import {type Instance, type ReferenceElement} from 'tippy.js';
+import {type Instance, type Props, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {delay} from '../utils/shared.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 import {type MainProcessCaseMonitoring} from './main-process.js';
-import {getExecutionStepAfterReviewEmailChoice, ProcessExecutor} from './supplier-utils.js';
+import {type InnerActionParameters, ProcessExecutor, type ReviewEmailDecision} from './supplier-utils.js';
 
 class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization, tippySupport: SupplierProcessTippySupport) {
     super(bpmnVisualization, 'main', tippySupport);
   }
 
-  addInfoOnChatGptActivity(bpmnElementId: string) {
-    return this.tippySupport.addPopover(bpmnElementId);
+  displayInfoOnChatGptActivity(parameters: InnerActionParameters) {
+    return (this.tippySupport as SupplierProcessTippySupport).addChatGptPopover(parameters);
   }
 
   hideData(): void {
@@ -28,53 +28,84 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     super(bpmnVisualization);
   }
 
+  // For ChatGPT popovers, we cannot only rely on the super.addPopover method
+  // We manage 2 popovers, that don't have the same design
+  // We need specific methods to add/remove listeners on "review email" buttons
+  addChatGptPopover(parameters: InnerActionParameters) {
+    const elementId = parameters.elementId;
+    const tippyInstance = this.addPopover(elementId);
+    // Activity_04d6t36 chatGPT activity
+    // Activity_1oxewnq review email
+    const isChatGptActivity = elementId === 'Activity_04d6t36';
+    const tippyProps: Partial<Props> = {
+      theme: isChatGptActivity ? 'light' : '',
+      trigger: 'manual',
+      arrow: !isChatGptActivity,
+      hideOnClick: false,
+      placement: isChatGptActivity ? 'bottom' : 'top',
+      // Default is 350px
+      maxWidth: isChatGptActivity ? '350px' : '450px',
+    };
+
+    // Review and adapt email
+    if (elementId === 'Activity_1oxewnq') {
+      console.info('SupplierProcessTippySupport.addChatGptPopover detected "Review Email"" activity');
+
+      // eslint-disable-next-line no-warning-comments -- cannot be managed now
+      // TODO temp find a better way
+      // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment -- temp
+      const thisInstance = this;
+      tippyProps.onShown = (instance: Instance) => {
+        // Kind of duplication with AbstractTippySupport but we cannot use the regular registerEventListeners/unregisterEventListeners and the getContent methods.
+        // We must pass more parameters to the related methods.
+        instance.setContent(thisInstance.getEmailReviewContent(parameters));
+        thisInstance.manageEmailReviewEventListeners(instance, true, parameters);
+      };
+
+      tippyProps.onHide = (instance: Instance) => {
+        thisInstance.manageEmailReviewEventListeners(instance, false, parameters);
+      };
+    }
+
+    tippyInstance.setProps(tippyProps);
+    return tippyInstance;
+  }
+
   protected getContent(htmlElement: ReferenceElement) {
     const bpmnSemantic = this.registeredBpmnElements.get(htmlElement);
     // Activity retrieve email suggestion
     if (bpmnSemantic?.id === 'Activity_04d6t36') {
       return this.getEmailRetrievalContent();
     }
-    // Activity Review and adapt email
 
-    return this.getEmailReviewContent();
+    // Activity Review and adapt email --> manage in "addChatGptPopover"
+    return '';
   }
 
-  protected registerEventListeners(instance: Instance): void {
-    this.manageEventListeners(instance, true);
-  }
+  private manageEmailReviewEventListeners(tippyInstance: Instance, register: boolean, parameters: InnerActionParameters): void {
+    const listener = (event: Event): void => {
+      console.info('manageEmailReviewEventListeners: called listener', event);
+      this.hidePopoverOnClick();
 
-  protected unregisterEventListeners(instance: Instance): void {
-    this.manageEventListeners(instance, false);
-  }
+      const button = event.target as HTMLButtonElement;
+      const decision = button.id as ReviewEmailDecision;
+      console.info('manageEmailReviewEventListeners: decision', decision);
+      parameters.resume(decision)
+        .then(() => {
+          console.info('manageEmailReviewEventListeners, end of call resume with decision', decision);
+        })
+        .catch(error => {
+          console.error('manageEmailReviewEventListeners, end of call resume with decision "%s"', decision, error);
+        });
+    };
 
-  private manageEventListeners(instance: Instance, register: boolean): void {
-    // Abort button
-    const abortBtn = document.querySelector(`#${instance.popper.id} #abort`);
-    if (abortBtn) {
+    const allButtons = document.querySelectorAll(`#${tippyInstance.popper.id} #abort,#validate,#generate`);
+    console.info('manageEmailReviewEventListeners, allButtons', allButtons);
+    for (const button of allButtons) {
       if (register) {
-        abortBtn.addEventListener('click', this.onAbortClick);
+        button.addEventListener('click', listener);
       } else {
-        abortBtn.removeEventListener('click', this.onAbortClick);
-      }
-    }
-
-    // Validate button
-    const validateBtn = document.querySelector(`#${instance.popper.id} #validate`);
-    if (validateBtn) {
-      if (register) {
-        validateBtn.addEventListener('click', this.onValidateClick);
-      } else {
-        validateBtn.removeEventListener('click', this.onValidateClick);
-      }
-    }
-
-    // Generate new email button
-    const generateBtn = document.querySelector(`#${instance.popper.id} #generate`);
-    if (generateBtn) {
-      if (register) {
-        generateBtn.addEventListener('click', this.onGenerateClick);
-      } else {
-        generateBtn.removeEventListener('click', this.onGenerateClick);
+        button.removeEventListener('click', listener);
       }
     }
   }
@@ -90,21 +121,6 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     }
   }
 
-  private readonly onAbortClick = () => {
-    this.hidePopoverOnClick();
-    supplierContact.abortClicked();
-  };
-
-  private readonly onValidateClick = () => {
-    this.hidePopoverOnClick();
-    supplierContact.validateClicked();
-  };
-
-  private readonly onGenerateClick = () => {
-    this.hidePopoverOnClick();
-    supplierContact.generateClicked();
-  };
-
   private getEmailRetrievalContent() {
     return `
         <div class="popover-container">
@@ -112,54 +128,47 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
         </div>`;
   }
 
-  private getEmailReviewContent() {
+  private getEmailReviewContent(parameters: InnerActionParameters) {
     const prompt = getPrompt();
-    const answer = getAnswer();
-    let popoverContent = `
-        <div class="popover-container">
+    const answer = getAnswer(parameters.executionCount);
+    return `<div class="popover-container">
+          <h4>Review email proposed by ChatGPT</h4>
           <table>
             <tbody>
               <tr>
-                <td>Prompt: </td>
-                <td><textarea cols="30" rows="3">${prompt}</textarea>
-              </tr>       
+                <td>Suggestion</td>
+                <td><textarea cols="30" rows="6">${answer}</textarea>
+              </tr>
               <tr>
-                <td>ChatGPT:</td>
-                <td><textarea cols="30" rows="5">${answer}</textarea>
+                <td>Prompt</td>
+                <td><textarea cols="30" rows="3">${prompt}</textarea>
               </tr>
             </tbody>
-          </table>`;
-
-    // Add buttons
-    popoverContent += `
+          </table>
         <div class="mt-2 columns">
           <div class="column col-4 text-left"><button id="abort" class="btn btn-sm btn-error">Abort</button></div>
           <div class="column col-4 text-center"><button id="generate" class="btn btn-sm btn-success">Generate</button></div>
           <div class="column col-4 text-right"><button id="validate" class="btn btn-sm btn-success">Validate</button></div>
-        </div>`;
-
-    popoverContent += '</div>';
-    return popoverContent;
+        </div>
+      </div>`;
   }
 }
 
 class SupplierContact {
-  processExecutor?: ProcessExecutor;
+  private readonly processExecutor: ProcessExecutor;
   private mainProcessCaseMonitoring?: MainProcessCaseMonitoring;
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {}
+  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
+    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase, this.emailRetrievalOperations);
+  }
 
   setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring) {
     this.mainProcessCaseMonitoring = mainProcessCaseMonitoring;
   }
 
-  // eslint-disable-next-line no-warning-comments -- cannot be managed now
-  // TODO this could should really be async!!!
   async startCase(): Promise<void> {
     console.info('called startCase');
-    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase, this.emailRetrievalOperations);
     const processExecutorStarter = Promise.resolve(this.processExecutor);
-
     console.info('Registering ProcessExecutor start');
     processExecutorStarter.then(async processExecutor => processExecutor.start())
       // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
@@ -169,50 +178,9 @@ class SupplierContact {
     console.info('ProcessExecutor start registered');
   }
 
-  abortClicked() {
-    console.log('Abort clicked');
-    const nextExecutionStep = getExecutionStepAfterReviewEmailChoice('abort');
-    console.info('@@nextExecutionStep', nextExecutionStep);
-    this.processExecutor?.execute(nextExecutionStep)
-      .then(result => {
-        console.log('Execution result:', result);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }
-
-  validateClicked() {
-    console.log('Validate clicked');
-    const nextExecutionStep = getExecutionStepAfterReviewEmailChoice('validated');
-    console.info('@@nextExecutionStep', nextExecutionStep);
-    this.processExecutor?.execute(nextExecutionStep)
-      .then(result => {
-        console.log('Execution result:', result);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }
-
-  generateClicked() {
-    console.log('Generate clicked');
-    const nextExecutionStep = getExecutionStepAfterReviewEmailChoice('regenerate');
-    console.info('@@nextExecutionStep', nextExecutionStep);
-    this.processExecutor?.execute(nextExecutionStep)
-      .then(result => {
-        console.log('Execution result:', result);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }
-
   // Cancel the execution of the async startCase
   stopCase(): void {
-    // Hide data
     this.supplierMonitoring.hideData();
-    // Hide pool
     processVisualizer.hideManuallyTriggeredProcess();
   }
 
@@ -221,14 +189,8 @@ class SupplierContact {
     this.mainProcessCaseMonitoring?.resume();
   };
 
-  protected addInfo(activityId: string) {
-    const tippyInstance = this.supplierMonitoring.addInfoOnChatGptActivity(activityId);
-    // TippyInstance.setContent('the content to set manually - chatgpt is working');
-    tippyInstance.setProps({
-      trigger: 'manual',
-      arrow: false,
-      hideOnClick: false,
-    });
+  protected displayInfoInPopover(parameters: InnerActionParameters) {
+    const tippyInstance = this.supplierMonitoring.displayInfoOnChatGptActivity(parameters);
     tippyInstance.show();
     return tippyInstance;
   }
@@ -238,12 +200,14 @@ class SupplierContact {
   // =====================================================================================================================
 
   // update/set the execution step action to call this function
-  private readonly emailRetrievalOperations = async (activityId: string): Promise<void> => {
+  private readonly emailRetrievalOperations = async (parameters: InnerActionParameters): Promise<void> => {
+    console.info('emailRetrievalOperations, parameters', parameters);
     // Same logic as in SupplierProcessTippySupport
     // Activity "review email"
-    if (activityId === 'Activity_1oxewnq') {
+    const elementId = parameters.elementId;
+    if (elementId === 'Activity_1oxewnq') {
       return Promise.resolve()
-        .then(() => this.addInfo(activityId))
+        .then(() => this.displayInfoInPopover(parameters))
         .then(() => {
           console.info('review email popover is displayed!');
         });
@@ -254,23 +218,26 @@ class SupplierContact {
     const firstDelay = 1500;
     const secondDelay = 2000;
     return Promise.resolve()
-      .then(() => this.addInfo(activityId))
+      .then(() => this.displayInfoInPopover(parameters))
       .then(tippyInstance => {
         console.info('register delay');
         delay(firstDelay, tippyInstance)
           .then(tippyInstance => {
             console.info('wait show email retrieval done - part 1');
             // TO DO manage types
-            (tippyInstance as Instance).setContent('Please be patient, ChatGPT is working for you...');
+            (tippyInstance as Instance).setContent(this.getChatGptWaitMessage());
             console.info('content updated');
             delay(secondDelay, tippyInstance)
               .then(tippyInstance => {
                 console.info('wait show email retrieval done - part 2');
                 (tippyInstance as Instance).hide();
                 console.info('popover hidden');
-                // Hard coded for now, could be pass a method parameter in the future
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises -- cannot be managed now
-                this.processExecutor?.execute('Activity_1oxewnq');
+              })
+              .then(() => {
+                parameters.resume()
+                  .catch(error => {
+                    console.error('Error while resuming %s', parameters.elementId, error);
+                  });
               })
               .finally(() => {
                 console.info('End of second delay mgt');
@@ -282,6 +249,13 @@ class SupplierContact {
       },
       );
   };
+
+  private getChatGptWaitMessage(): string {
+    return `<div style="display: flex; width: 11rem;">
+    <div class="loading mr-2" style="flex-basis: 1rem;"></div>
+    <div>ChatGPT is working for you...</div>
+  </div>`;
+  }
 }
 
 // =====================================================================================================================
@@ -363,11 +337,8 @@ function getPrompt() {
   return 'Draft a short email to ask the supplier about the delay';
 }
 
-// Call to chat gpt API
-function getAnswer() {
-  // TODO generalize the hard coded activity id
-  let count = supplierContact.processExecutor?.getExecutionCount('Activity_1oxewnq') ?? 1;
-  count -= 1; // Count starts from 1
-  const index = count >= chatGptAnswers.length ? count % chatGptAnswers.length : count;
-  return chatGptAnswers[index];
+// Simulate the call to the ChatGPT API
+function getAnswer(executionCount: number) {
+  console.info('Getting ChatGPT answer for execution count', executionCount);
+  return chatGptAnswers[executionCount % chatGptAnswers.length];
 }

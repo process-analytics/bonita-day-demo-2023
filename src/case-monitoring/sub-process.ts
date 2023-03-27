@@ -67,16 +67,32 @@ class SubProcessTippySupport extends AbstractTippySupport {
     // Target instance.popper. Keep using document for now as the previous popper (when going back to the subprocess after a first venue)
     // may still exist in the DOM of the subprocess view
     const rows = document.querySelectorAll(`#${instance.popper.id} #popover-resources-available > tbody > tr`);
-    for (const [, row] of rows.entries()) {
+    for (const [index, row] of rows.entries()) {
+      const assignBtn = document.querySelector(`#${instance.popper.id} #popover-resources-available > tbody > tr #btn-assign-${index}`);
       if (register) {
         row.addEventListener('mouseenter', this.rowMouseEnterListener);
         row.addEventListener('mouseleave', this.rowMouseLeaveListener);
+        // Assign button
+        if (assignBtn) {
+          assignBtn.addEventListener('click', this.assignResource);
+        } else {
+          console.warn('NO "assign" btn');
+        }
       } else {
         row.removeEventListener('mouseenter', this.rowMouseEnterListener);
         row.removeEventListener('mouseleave', this.rowMouseLeaveListener);
+        if (assignBtn) {
+          assignBtn.removeEventListener('click', this.assignResource);
+        } else {
+          console.warn('NO "assign" btn');
+        }
       }
     }
   }
+
+  private readonly assignResource = (_event: Event) => {
+    displayView('main');
+  };
 
   // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
   private readonly rowMouseEnterListener = (event: Event) => {
@@ -140,21 +156,21 @@ function getWarningInfoAsHtml() {
                 <td>Maribel</td>
                 <td class="text-center">75%</td>
                 <td class="popover-action">
-                    <button class="btn btn-sm btn-success">Assign</button>
+                    <button id="btn-assign-0" class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
               <tr class="popover-row">
                 <td>Jawad</td>
                 <td class="text-center">38%</td>
                 <td class="popover-action">
-                    <button class="btn btn-sm btn-success">Assign</button>
+                    <button id="btn-assign-1" class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
               <tr class="popover-row">
                 <td>Mei</td>
                 <td class="text-center">82%</td>
                 <td class="popover-action">
-                    <button class="btn btn-sm btn-success">Assign</button>
+                    <button id="btn-assign-2" class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
             </tbody>

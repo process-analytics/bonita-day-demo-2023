@@ -37,14 +37,24 @@ const executionSteps = new Map<string, ExecutionStep>([
   ['Gateway_19radi6', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_0i8gykc', nextExecutionStep: 'Activity_04d6t36'}],
   // Activity_04d6t36 chatGPT activity
   ['Activity_04d6t36', {id: 'Activity_04d6t36', incomingEdgeId: 'Flow_06y94ol',
-    action() {
-      console.info('#### action on Activity_04d6t36');
+    innerAction: {
+      functionToCall() {
+        console.info('#### action on Activity_04d6t36');
+      },
+      getElementIdToResume(_input) {
+        return 'Activity_1oxewnq';
+      },
     },
   }],
   // Activity_1oxewnq review email. Stop here, next step chosen by user
   ['Activity_1oxewnq', {id: 'Activity_1oxewnq', incomingEdgeId: 'Flow_092it75',
-    action() {
-      console.info('#### action on Activity_1oxewnq');
+    innerAction: {
+      functionToCall() {
+        console.info('#### action on Activity_1oxewnq');
+      },
+      getElementIdToResume(input) {
+        return getExecutionStepAfterReviewEmailChoice(input as ReviewEmailDecision);
+      },
     },
   }],
 
@@ -57,15 +67,15 @@ const executionSteps = new Map<string, ExecutionStep>([
   ['Event_07kw4ry', {id: 'Event_07kw4ry', incomingEdgeId: 'Flow_1jay9w3', isLastStep: true}],
 ]);
 
-export type ReviewEmailDecision = 'abort' | 'regenerate' | 'validated';
+export type ReviewEmailDecision = 'abort' | 'generate' | 'validate';
 const reviewEmailChoices = new Map<ReviewEmailDecision, string | ExecutionStep>([
-  ['validated', 'Activity_0tb47yw'],
+  ['validate', 'Activity_0tb47yw'],
   // ExecutionStep to manage the loop, as the gateway has more than one incoming edge
-  ['regenerate', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_1glx5xw', nextExecutionStep: 'Activity_04d6t36'}],
+  ['generate', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_1glx5xw', nextExecutionStep: 'Activity_04d6t36'}],
   ['abort', 'Event_13tn0ty'],
 ]);
 
-export const getExecutionStepAfterReviewEmailChoice = (decision: ReviewEmailDecision): ExecutionStep => {
+const getExecutionStepAfterReviewEmailChoice = (decision: ReviewEmailDecision): ExecutionStep => {
   const nextExecutionStep = reviewEmailChoices.get(decision);
   return {id: 'Gateway_0ng9ln7', incomingEdgeId: 'Flow_0adzt76', nextExecutionStep};
 };
@@ -80,9 +90,18 @@ type ExecutionStep = {
   duration?: number;
   incomingEdgeId?: string;
   nextExecutionStep?: string | ExecutionStep;
-  action?: () => void;
+  innerAction?: {
+    functionToCall: () => void;
+    getElementIdToResume: (input?: string) => string | ExecutionStep;
+  };
   /** If `true`, call the `onEndCase` callback. */
   isLastStep?: boolean;
+};
+
+export type InnerActionParameters = {
+  elementId: string;
+  executionCount: number;
+  resume: (input?: string) => Promise<void>;
 };
 
 const processExecutorWaitTimeBeforeCallingEndCaseCallback = 1500;
@@ -92,7 +111,8 @@ export class ProcessExecutor {
 
   private readonly executionCounts = new Map<string, number>();
 
-  constructor(bpmnVisualization: BpmnVisualization, private readonly endCaseCallBack: () => void, private readonly emailRetrievalOperationsCallBack: (id: string) => void) {
+  // EmailRetrievalOperationsCallBack is passed as we cannot get it from the ExecutionStep defined below for now
+  constructor(bpmnVisualization: BpmnVisualization, private readonly endCaseCallBack: () => void, private readonly emailRetrievalOperationsCallBack: (parameters: InnerActionParameters) => void) {
     this.pathHighlighter = new PathHighlighter(bpmnVisualization);
   }
 
@@ -133,7 +153,8 @@ export class ProcessExecutor {
     // Console.info('register shape promiseMarkAsExecuted execution')
     // mainPromise.then(() =>  markAsExecuted(executionStep.id, false, executionStep.duration ?? executionDurationShapeDefault));
     // console.info('registered shape promiseMarkAsExecuted execution done')
-    const promiseMarkAsExecuted = markAsExecuted(executionStep.id, false, executionStep.duration ?? executionDurationShapeDefault);
+    const elementId = executionStep.id;
+    const promiseMarkAsExecuted = markAsExecuted(elementId, false, executionStep.duration ?? executionDurationShapeDefault);
     console.info('await shape promiseMarkAsExecuted execution');
     await promiseMarkAsExecuted;
     console.info('shape promiseMarkAsExecuted execution done');
@@ -142,14 +163,26 @@ export class ProcessExecutor {
     // await mainPromise;
     // console.info('mainPromise execution done')
 
-    if (executionStep.action) {
+    const innerAction = executionStep.innerAction;
+    if (innerAction) {
       Promise.resolve()
-        .then(() => executionStep.action?.())
         .then(() => {
-          // This is a temp implementation, this should be done with executionStep.action?.()
+          innerAction.functionToCall();
+        })
+        .then(() => {
+          // This is a temp implementation, this should be done with innerAction.functionToCall()
           // but this requires to be able to dynamically set the action function which is not possible for now
           // instead, we hard code the action behavior here as we only have 2 different actions to manage.
-          this.emailRetrievalOperationsCallBack(executionStep.id);
+          const executionCount = this.getExecutionCount(elementId);
+          const parameters: InnerActionParameters = {
+            elementId,
+            executionCount,
+            resume: async (input?: string) => this.execute(innerAction.getElementIdToResume(input))
+              .catch(error => {
+                console.error('Error while resuming from action on element %s', elementId, error);
+              }),
+          };
+          this.emailRetrievalOperationsCallBack(parameters);
         })
         // ignored - to be improved see https://typescript-eslint.io/rules/no-floating-promises/
         .finally(() => {
@@ -191,8 +224,8 @@ export class ProcessExecutor {
     }
   }
 
-  getExecutionCount(elementId: string) {
-    return this.executionCounts.get(elementId);
+  private getExecutionCount(elementId: string): number {
+    return this.executionCounts.get(elementId) ?? 0;
   }
 
   private clear(): void {
@@ -202,7 +235,7 @@ export class ProcessExecutor {
   }
 
   private markAsExecuted(id: string) {
-    const count = this.executionCounts.get(id) ?? 0;
+    const count = this.getExecutionCount(id);
     this.executionCounts.set(id, count + 1);
     return id;
   }
@@ -332,5 +365,7 @@ class PathHighlighter {
       },
     );
     this.executedPath.clear();
+    this.lastExecutedId = undefined;
+    this.pastExecutedId = undefined;
   }
 }
