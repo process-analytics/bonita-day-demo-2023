@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import {type BpmnVisualization, type ShapeStyleUpdate} from 'bpmn-visualization';
+import {type BpmnVisualization, type Overlay, type ShapeStyleUpdate} from 'bpmn-visualization';
 import {delay} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: any[]): void {
@@ -69,7 +69,7 @@ export type ReviewEmailDecision = 'abort' | 'generate' | 'validate';
 const reviewEmailChoices = new Map<ReviewEmailDecision, string | ExecutionStep>([
   ['validate', 'Activity_0tb47yw'],
   // ExecutionStep to manage the loop, as the gateway has more than one incoming edge
-  ['generate', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_1glx5xw', nextExecutionStep: 'Activity_04d6t36'}],
+  ['generate', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_1glx5xw', nextExecutionStep: 'Activity_04d6t36', incomingEdgeDisplayExecutionCount: true}],
   ['abort', 'Event_13tn0ty'],
 ]);
 
@@ -87,6 +87,7 @@ type ExecutionStep = {
   /** In milliseconds, override the default duration set for the shape or the edge. */
   duration?: number;
   incomingEdgeId?: string;
+  incomingEdgeDisplayExecutionCount?: boolean;
   nextExecutionStep?: string | ExecutionStep;
   innerAction?: {
     functionToCall: () => void;
@@ -103,6 +104,17 @@ export type InnerActionParameters = {
 };
 
 const processExecutorWaitTimeBeforeCallingEndCaseCallback = 1500;
+
+type MarkExecutionOptions = PathHighlightMarker & {
+  waitDuration: number;
+};
+
+type PathHighlightMarker = {
+  id: string;
+  isEdge: boolean;
+  displayExecutionCounter?: boolean;
+  executionCount?: number;
+};
 
 export class ProcessExecutor {
   private readonly pathHighlighter: PathHighlighter;
@@ -128,12 +140,15 @@ export class ProcessExecutor {
       return;
     }
 
-    const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
-      .then(id => this.pathHighlighter.markAsExecuted(id, isEdge))
-      .then(id => this.markAsExecuted(id))
-      .then(async () => delay(waitDuration))
+    const markAsExecuted = async (options: MarkExecutionOptions) => Promise.resolve(options)
+      .then(options => this.markAsExecuted(options.id))
       .then(() => {
-        logProcessExecution(`end of wait after ${id} highlight`);
+        options.executionCount = this.getExecutionCount(options.id);
+        this.pathHighlighter.markAsExecuted(options);
+      })
+      .then(async () => delay(options.waitDuration))
+      .then(() => {
+        logProcessExecution(`end of wait after ${options.id} highlight`);
       });
 
     // Const mainPromise = Promise.resolve();
@@ -142,7 +157,12 @@ export class ProcessExecutor {
       // Console.info('register edge promiseMarkAsExecuted execution')
       // mainPromise.then(() => markAsExecuted(incomingEdgeId, true, executionDurationEdge));
       // console.info('registered edge promiseMarkAsExecuted execution')
-      const promiseMarkAsExecuted = markAsExecuted(incomingEdgeId, true, executionDurationEdge);
+      const promiseMarkAsExecuted = markAsExecuted({
+        id: incomingEdgeId,
+        isEdge: true,
+        waitDuration: executionDurationEdge,
+        displayExecutionCounter: executionStep.incomingEdgeDisplayExecutionCount ?? false,
+      });
       console.info('await edge promiseMarkAsExecuted execution');
       await promiseMarkAsExecuted;
       console.info('edge promiseMarkAsExecuted execution done');
@@ -152,7 +172,11 @@ export class ProcessExecutor {
     // mainPromise.then(() =>  markAsExecuted(executionStep.id, false, executionStep.duration ?? executionDurationShapeDefault));
     // console.info('registered shape promiseMarkAsExecuted execution done')
     const elementId = executionStep.id;
-    const promiseMarkAsExecuted = markAsExecuted(elementId, false, executionStep.duration ?? executionDurationShapeDefault);
+    const promiseMarkAsExecuted = markAsExecuted({
+      id: elementId,
+      isEdge: false,
+      waitDuration: executionStep.duration ?? executionDurationShapeDefault,
+    });
     console.info('await shape promiseMarkAsExecuted execution');
     await promiseMarkAsExecuted;
     console.info('shape promiseMarkAsExecuted execution done');
@@ -244,11 +268,13 @@ class PathHighlighter {
 
   private pastExecutedId: string | undefined;
   private lastExecutedId: string | undefined;
+  private readonly executionCounts = new Map<string, number>();
 
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 
-  markAsExecuted(id: string, isEdge = false) {
-    if (isEdge) {
+  markAsExecuted(marker: PathHighlightMarker) {
+    const id = marker.id;
+    if (marker.isEdge) {
       logProcessExecution(`highlighting ${id}`);
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
         font: {opacity: 'default'},
@@ -256,6 +282,17 @@ class PathHighlighter {
         stroke: {color: 'blue', width: 4},
       });
       logProcessExecution(`done highlight of ${id}`);
+
+      if (marker.displayExecutionCounter) {
+        const executionCount = marker.executionCount ?? 0;
+        this.executionCounts.set(id, executionCount);
+
+        // Remove existing overlays
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
+
+        // Add overlay
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(id, createEdgeCounterOverlay(executionCount, 1));
+      }
     } else {
       logProcessExecution(`highlighting shape ${id}`);
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
@@ -280,6 +317,15 @@ class PathHighlighter {
       },
       );
       logProcessExecution(`done highly reduce opacity of ${this.pastExecutedId}`);
+
+      if (this.executionCounts.has(this.pastExecutedId)) {
+        // Remove existing overlays
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
+
+        // Add overlay
+        // execution count: here, we are sure there is a value, and we don't put undefined values
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.pastExecutedId)!, 0.2));
+      }
     }
 
     this.pastExecutedId = this.lastExecutedId;
@@ -287,6 +333,15 @@ class PathHighlighter {
       logProcessExecution(`reducing opacity of ${this.lastExecutedId}`);
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
       logProcessExecution(`done reduce opacity of ${this.lastExecutedId}`);
+
+      if (this.executionCounts.has(this.lastExecutedId)) {
+        // Remove existing overlays
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.lastExecutedId);
+
+        // Add overlay
+        // execution count: here, we are sure there is a value, and we don't put undefined values
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.lastExecutedId)!, 0.5));
+      }
     }
 
     this.lastExecutedId = id;
@@ -294,8 +349,10 @@ class PathHighlighter {
   }
 
   clear(): void {
+    const bpmnElementsRegistry = this.bpmnVisualization.bpmnElementsRegistry;
+
     // Use reset style by property as global reset method isn't available in bpmn-visualization@0.33.0
-    this.bpmnVisualization.bpmnElementsRegistry.updateStyle(Array.from(this.executedPath),
+    bpmnElementsRegistry.updateStyle(Array.from(this.executedPath),
       {
         opacity: 'default',
         fill: {
@@ -313,7 +370,29 @@ class PathHighlighter {
       },
     );
     this.executedPath.clear();
+
+    // Remove overlays
+    for (const elementIdWithOverlay of this.executionCounts.keys()) {
+      bpmnElementsRegistry.removeAllOverlays(elementIdWithOverlay);
+    }
+
+    this.executionCounts.clear();
+
+    // Other cleaning
     this.lastExecutedId = undefined;
     this.pastExecutedId = undefined;
   }
+}
+
+function createEdgeCounterOverlay(count: number, opacity: number): Overlay {
+  const overlay: Overlay = {
+    position: 'middle',
+    label: `${count}`,
+    style: {
+      font: {color: 'white', size: 22},
+      fill: {color: `rgba(0, 0, 255, ${opacity})`},
+      stroke: {color: `rgba(0, 0, 255, ${opacity})`, width: 2},
+    },
+  };
+  return overlay;
 }
