@@ -68,7 +68,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
     // may still exist in the DOM of the subprocess view
     const rows = document.querySelectorAll(`#${instance.popper.id} #popover-resources-available > tbody > tr`);
     for (const [index, row] of rows.entries()) {
-      const assignBtn = document.querySelector(`#${instance.popper.id} #assign${index}`);
+      const assignBtn = document.querySelector(`#${instance.popper.id} #popover-resources-available > tbody > tr #btn-assign-${index}`);
       if (register) {
         row.addEventListener('mouseenter', this.rowMouseEnterListener);
         row.addEventListener('mouseleave', this.rowMouseLeaveListener);
@@ -156,21 +156,21 @@ function getWarningInfoAsHtml() {
                 <td>Maribel</td>
                 <td class="text-center">75%</td>
                 <td class="popover-action">
-                    <button id="assign0" class="btn btn-sm btn-success">Assign</button>
+                    <button id="btn-assign-0" class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
               <tr class="popover-row">
                 <td>Jawad</td>
                 <td class="text-center">38%</td>
                 <td class="popover-action">
-                    <button id="assign1" class="btn btn-sm btn-success">Assign</button>
+                    <button id="btn-assign-1" class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
               <tr class="popover-row">
                 <td>Mei</td>
                 <td class="text-center">82%</td>
                 <td class="popover-action">
-                    <button id="assign2" class="btn btn-sm btn-success">Assign</button>
+                    <button id="btn-assign-2" class="btn btn-sm btn-success">Assign</button>
                 </td>
               </tr>
             </tbody>
