@@ -147,8 +147,11 @@ export class ProcessExecutor {
 
     const markAsExecuted = async (options: MarkExecutionOptions) => Promise.resolve(options)
     // Const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
-      .then(options => this.pathHighlighter.markAsExecuted(options))
-      .then(id => this.markAsExecuted(id))
+      .then(options => this.markAsExecuted(options.id))
+      .then(() => {
+        options.executionCount = this.getExecutionCount(options.id);
+        this.pathHighlighter.markAsExecuted(options)
+      })
       .then(async () => delay(options.waitDuration))
       .then(() => {
         logProcessExecution(`end of wait after ${options.id} highlight`);
@@ -165,7 +168,6 @@ export class ProcessExecutor {
         isEdge: true,
         waitDuration: executionDurationEdge,
         displayExecutionCounter: executionStep.incomingEdgeDisplayExecutionCount ?? false,
-        executionCount: this.getExecutionCount(incomingEdgeId),
       });
       // Const promiseMarkAsExecuted = markAsExecuted(incomingEdgeId, true, executionDurationEdge);
       console.info('await edge promiseMarkAsExecuted execution');
@@ -182,7 +184,6 @@ export class ProcessExecutor {
       isEdge: false,
       waitDuration: executionStep.duration ?? executionDurationShapeDefault,
     });
-    // Const promiseMarkAsExecuted = markAsExecuted(elementId, false, executionStep.duration ?? executionDurationShapeDefault);
     console.info('await shape promiseMarkAsExecuted execution');
     await promiseMarkAsExecuted;
     console.info('shape promiseMarkAsExecuted execution done');
@@ -280,7 +281,6 @@ class PathHighlighter {
 
   markAsExecuted(marker: PathHighlightMarker) {
     const id = marker.id;
-    // MarkAsExecuted(id: string, isEdge = false) {
     if (marker.isEdge) {
       logProcessExecution(`highlighting ${id}`);
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
@@ -291,7 +291,7 @@ class PathHighlighter {
       logProcessExecution(`done highlight of ${id}`);
 
       if (marker.displayExecutionCounter) {
-        const executionCount = (marker.executionCount ?? 0) + 1;
+        const executionCount = marker.executionCount ?? 0;
         this.executionCounterMap.set(id, executionCount);
 
         // Remove existing overlays
