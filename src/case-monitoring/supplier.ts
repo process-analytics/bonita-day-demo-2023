@@ -34,8 +34,8 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     if (bpmnSemantic?.id === 'Activity_04d6t36') {
       return this.getEmailRetrievalContent();
     }
-    // Activity Review and adapt email
 
+    // Activity Review and adapt email
     return this.getEmailReviewContent();
   }
 
@@ -117,15 +117,16 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     const answer = getAnswer();
     let popoverContent = `
         <div class="popover-container">
+          <h4>Review email proposed by ChatGPT</h4>
           <table>
             <tbody>
               <tr>
-                <td>Prompt: </td>
-                <td><textarea cols="30" rows="3">${prompt}</textarea>
-              </tr>       
+                <td>Suggestion</td>
+                <td><textarea cols="30" rows="6">${answer}</textarea>
+              </tr>
               <tr>
-                <td>ChatGPT:</td>
-                <td><textarea cols="30" rows="5">${answer}</textarea>
+                <td>Prompt</td>
+                <td><textarea cols="30" rows="3">${prompt}</textarea>
               </tr>
             </tbody>
           </table>`;
@@ -221,13 +222,19 @@ class SupplierContact {
     this.mainProcessCaseMonitoring?.resume();
   };
 
-  protected addInfo(activityId: string) {
+  private addInfo(activityId: string) {
     const tippyInstance = this.supplierMonitoring.addInfoOnChatGptActivity(activityId);
-    // TippyInstance.setContent('the content to set manually - chatgpt is working');
+    // Activity_04d6t36 chatGPT activity
+    // Activity_1oxewnq review email
+    const isChatGptActivity = activityId === 'Activity_04d6t36';
     tippyInstance.setProps({
+      theme: isChatGptActivity ? 'light' : '',
       trigger: 'manual',
-      arrow: false,
+      arrow: !isChatGptActivity,
+      placement: isChatGptActivity ? 'bottom' : 'top',
       hideOnClick: false,
+      // Default is 350px
+      maxWidth: isChatGptActivity ? '350px' : '450px',
     });
     tippyInstance.show();
     return tippyInstance;
@@ -261,7 +268,7 @@ class SupplierContact {
           .then(tippyInstance => {
             console.info('wait show email retrieval done - part 1');
             // TO DO manage types
-            (tippyInstance as Instance).setContent('Please be patient, ChatGPT is working for you...');
+            (tippyInstance as Instance).setContent(this.getChatGptWaitMessage());
             console.info('content updated');
             delay(secondDelay, tippyInstance)
               .then(tippyInstance => {
@@ -282,6 +289,13 @@ class SupplierContact {
       },
       );
   };
+
+  private getChatGptWaitMessage(): string {
+    return `<div style="display: flex; width: 11rem;">
+    <div class="loading mr-2" style="flex-basis: 1rem;"></div>
+    <div>ChatGPT is working for you...</div>
+  </div>`;
+  }
 }
 
 // =====================================================================================================================
