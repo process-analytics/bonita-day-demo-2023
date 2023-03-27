@@ -340,7 +340,7 @@ class PathHighlighter {
         // Add overlay
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, {
           position: 'middle',
-          label: `${this.executionCounts.get(this.pastExecutedId) ?? 0}`,
+          label: `${this.executionCounts.get(this.pastExecutedId)}`,
           style: {
             font: {color: 'white', size: 22},
             fill: {color: 'rgba(0, 0, 255, 0.2)'},
@@ -363,7 +363,7 @@ class PathHighlighter {
         // Add overlay
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, {
           position: 'middle',
-          label: `${this.executionCounts.get(this.lastExecutedId) ?? 0}`,
+          label: `${this.executionCounts.get(this.lastExecutedId)}`,
           style: {
             font: {color: 'white', size: 22},
             fill: {color: 'rgba(0, 0, 255, 0.5)'},
