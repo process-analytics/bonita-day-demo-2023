@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "bpmn-visualization": "~0.33.0",
+    "notyf": "^3.10.0",
     "spectre.css": "0.5.9",
     "tippy.js": "6.3.7"
   },
