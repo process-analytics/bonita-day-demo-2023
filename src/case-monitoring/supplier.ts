@@ -2,7 +2,7 @@ import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance, type Props, type ReferenceElement} from 'tippy.js';
 import {mainBpmnVisualization as bpmnVisualization, ProcessVisualizer} from '../diagram.js';
 import {delay} from '../utils/shared.js';
-import {disableUseCaseSelectors, enableUseCaseSelectors} from '../use-case-selectors';
+import {disableUseCaseSelectors, enableUseCaseSelectors} from '../use-case-selectors.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 import {type MainProcessCaseMonitoring} from './main-process.js';
 import {type InnerActionParameters, ProcessExecutor, type ReviewEmailDecision} from './supplier-utils.js';
