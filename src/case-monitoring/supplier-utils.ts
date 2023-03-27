@@ -226,7 +226,7 @@ class PathHighlighter {
       });
       logProcessExecution(`done highlight of ${id}`);
 
-      if(id === 'Flow_1glx5xw'){
+      if (id === 'Flow_1glx5xw') {
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
 
@@ -235,13 +235,13 @@ class PathHighlighter {
           position: 'middle',
           label: `${counter}`,
           style: {
-            font: { color: 'white', size: 22 },
-            fill: { color: 'blue' },
-            stroke: { color: 'blue', width: 2 }
-          }
+            font: {color: 'white', size: 22},
+            fill: {color: 'blue'},
+            stroke: {color: 'blue', width: 2},
+          },
         });
 
-        counter ++;
+        counter++;
       }
     } else {
       logProcessExecution(`highlighting shape ${id}`);
@@ -268,7 +268,7 @@ class PathHighlighter {
       );
       logProcessExecution(`done highly reduce opacity of ${this.pastExecutedId}`);
 
-      if(this.pastExecutedId === 'Flow_1glx5xw'){
+      if (this.pastExecutedId === 'Flow_1glx5xw') {
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
 
@@ -277,11 +277,11 @@ class PathHighlighter {
           position: 'middle',
           label: `${counter - 1}`,
           style: {
-            font: { color: 'white', size: 22 },
-            fill: { color: 'rgba(0, 0, 255, 0.2)' },
-            stroke: { color: 'rgba(0, 0, 255, 0.2)', width: 2 }
-          }
-        })
+            font: {color: 'white', size: 22},
+            fill: {color: 'rgba(0, 0, 255, 0.2)'},
+            stroke: {color: 'rgba(0, 0, 255, 0.2)', width: 2},
+          },
+        });
       }
     }
 
@@ -291,7 +291,7 @@ class PathHighlighter {
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
       logProcessExecution(`done reduce opacity of ${this.lastExecutedId}`);
 
-      if(this.pastExecutedId === 'Flow_1glx5xw'){
+      if (this.pastExecutedId === 'Flow_1glx5xw') {
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
 
@@ -300,11 +300,11 @@ class PathHighlighter {
           position: 'middle',
           label: `${counter - 1}`,
           style: {
-            font: { color: 'white', size: 22 },
-            fill: { color: 'rgba(0, 0, 255, 0.5)' },
-            stroke: { color: 'rgba(0, 0, 255, 0.5)', width: 2 }
-          }
-        })
+            font: {color: 'white', size: 22},
+            fill: {color: 'rgba(0, 0, 255, 0.5)'},
+            stroke: {color: 'rgba(0, 0, 255, 0.5)', width: 2},
+          },
+        });
       }
     }
 
