@@ -24,8 +24,6 @@ function logProcessExecution(message: string, ...optionalParameters: any[]): voi
 const executionDurationEdge = 200; // 500;
 const executionDurationShapeDefault = 300; // 1_000;
 
-let counter = 1;
-
 // =====================================================================================================================
 // extract all data code following this line
 // =====================================================================================================================
@@ -276,6 +274,7 @@ class PathHighlighter {
 
   private pastExecutedId: string | undefined;
   private lastExecutedId: string | undefined;
+  private readonly executionCounterMap = new Map<string, number>();
 
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 
@@ -292,9 +291,8 @@ class PathHighlighter {
       logProcessExecution(`done highlight of ${id}`);
 
       if (marker.displayExecutionCounter) {
-        // TODO store the execution counter for the current id
-        // reuse this value when handling in pastExecutedId and lastExecutedId
-        // store the information in a Map: strin id of the element, value number: counter
+        const executionCount = (marker.executionCount ?? 0) + 1;
+        this.executionCounterMap.set(id, executionCount);
 
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
@@ -302,15 +300,13 @@ class PathHighlighter {
         // Add overlay
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(id, {
           position: 'middle',
-          label: `${counter}`,
+          label: `${executionCount}`,
           style: {
             font: {color: 'white', size: 22},
             fill: {color: 'blue'},
             stroke: {color: 'blue', width: 2},
           },
         });
-
-        counter++;
       }
     } else {
       logProcessExecution(`highlighting shape ${id}`);
@@ -337,14 +333,14 @@ class PathHighlighter {
       );
       logProcessExecution(`done highly reduce opacity of ${this.pastExecutedId}`);
 
-      if (this.pastExecutedId === 'Flow_1glx5xw') {
+      if (this.executionCounterMap.has(this.pastExecutedId)) {
         // Remove existing overlays
         this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
 
         // Add overlay
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, {
           position: 'middle',
-          label: `${counter - 1}`,
+          label: `${this.executionCounterMap.get(this.pastExecutedId) ?? 0}`,
           style: {
             font: {color: 'white', size: 22},
             fill: {color: 'rgba(0, 0, 255, 0.2)'},
@@ -360,14 +356,14 @@ class PathHighlighter {
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
       logProcessExecution(`done reduce opacity of ${this.lastExecutedId}`);
 
-      if (this.pastExecutedId === 'Flow_1glx5xw') {
+      if (this.executionCounterMap.has(this.lastExecutedId)) {
         // Remove existing overlays
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.lastExecutedId);
 
         // Add overlay
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, {
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, {
           position: 'middle',
-          label: `${counter - 1}`,
+          label: `${this.executionCounterMap.get(this.lastExecutedId) ?? 0}`,
           style: {
             font: {color: 'white', size: 22},
             fill: {color: 'rgba(0, 0, 255, 0.5)'},
