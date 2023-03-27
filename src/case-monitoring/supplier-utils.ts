@@ -115,6 +115,14 @@ type MarkExecutionOptions = {
   executionCount?: number;
 }
 
+// TODO duplication with MarkExecutionOptions
+type PathHighlightMarker = {
+  id: string;
+  isEdge: boolean;
+  displayExecutionCounter?: boolean;
+  executionCount?: number;
+}
+
 
 export class ProcessExecutor {
   private readonly pathHighlighter: PathHighlighter;
@@ -142,7 +150,7 @@ export class ProcessExecutor {
 
     const markAsExecuted = async (options: MarkExecutionOptions) => Promise.resolve(options)
     // const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
-      .then(options => this.pathHighlighter.markAsExecuted(options.id, options.isEdge))
+      .then(options => this.pathHighlighter.markAsExecuted(options))
       .then(id => this.markAsExecuted(id))
       .then(async () => delay(options.waitDuration))
       .then(() => {
@@ -266,8 +274,10 @@ class PathHighlighter {
 
   constructor(private readonly bpmnVisualization: BpmnVisualization) {}
 
-  markAsExecuted(id: string, isEdge = false) {
-    if (isEdge) {
+  markAsExecuted(marker: PathHighlightMarker) {
+    const id = marker.id;
+  // markAsExecuted(id: string, isEdge = false) {
+    if (marker.isEdge) {
       logProcessExecution(`highlighting ${id}`);
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
         font: {opacity: 'default'},
