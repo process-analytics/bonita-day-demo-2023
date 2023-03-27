@@ -71,7 +71,7 @@ export type ReviewEmailDecision = 'abort' | 'generate' | 'validate';
 const reviewEmailChoices = new Map<ReviewEmailDecision, string | ExecutionStep>([
   ['validate', 'Activity_0tb47yw'],
   // ExecutionStep to manage the loop, as the gateway has more than one incoming edge
-  ['generate', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_1glx5xw', nextExecutionStep: 'Activity_04d6t36'}],
+  ['generate', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_1glx5xw', nextExecutionStep: 'Activity_04d6t36', incomingEdgeDisplayExecutionCount: true}],
   ['abort', 'Event_13tn0ty'],
 ]);
 
@@ -89,6 +89,7 @@ type ExecutionStep = {
   /** In milliseconds, override the default duration set for the shape or the edge. */
   duration?: number;
   incomingEdgeId?: string;
+  incomingEdgeDisplayExecutionCount?: boolean;
   nextExecutionStep?: string | ExecutionStep;
   innerAction?: {
     functionToCall: () => void;
@@ -105,6 +106,15 @@ export type InnerActionParameters = {
 };
 
 const processExecutorWaitTimeBeforeCallingEndCaseCallback = 1500;
+
+type MarkExecutionOptions = {
+  id: string;
+  isEdge: boolean;
+  waitDuration: number;
+  displayExecutionCounter?: boolean;
+  executionCount?: number;
+}
+
 
 export class ProcessExecutor {
   private readonly pathHighlighter: PathHighlighter;
@@ -130,12 +140,13 @@ export class ProcessExecutor {
       return;
     }
 
-    const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
-      .then(id => this.pathHighlighter.markAsExecuted(id, isEdge))
+    const markAsExecuted = async (options: MarkExecutionOptions) => Promise.resolve(options)
+    // const markAsExecuted = async (id: string, isEdge: boolean, waitDuration: number) => Promise.resolve(id)
+      .then(options => this.pathHighlighter.markAsExecuted(options.id, options.isEdge))
       .then(id => this.markAsExecuted(id))
-      .then(async () => delay(waitDuration))
+      .then(async () => delay(options.waitDuration))
       .then(() => {
-        logProcessExecution(`end of wait after ${id} highlight`);
+        logProcessExecution(`end of wait after ${options.id} highlight`);
       });
 
     // Const mainPromise = Promise.resolve();
@@ -144,7 +155,8 @@ export class ProcessExecutor {
       // Console.info('register edge promiseMarkAsExecuted execution')
       // mainPromise.then(() => markAsExecuted(incomingEdgeId, true, executionDurationEdge));
       // console.info('registered edge promiseMarkAsExecuted execution')
-      const promiseMarkAsExecuted = markAsExecuted(incomingEdgeId, true, executionDurationEdge);
+      const promiseMarkAsExecuted = markAsExecuted({id: incomingEdgeId, isEdge: true, waitDuration: executionDurationEdge});
+      // const promiseMarkAsExecuted = markAsExecuted(incomingEdgeId, true, executionDurationEdge);
       console.info('await edge promiseMarkAsExecuted execution');
       await promiseMarkAsExecuted;
       console.info('edge promiseMarkAsExecuted execution done');
@@ -154,7 +166,12 @@ export class ProcessExecutor {
     // mainPromise.then(() =>  markAsExecuted(executionStep.id, false, executionStep.duration ?? executionDurationShapeDefault));
     // console.info('registered shape promiseMarkAsExecuted execution done')
     const elementId = executionStep.id;
-    const promiseMarkAsExecuted = markAsExecuted(elementId, false, executionStep.duration ?? executionDurationShapeDefault);
+    const promiseMarkAsExecuted = markAsExecuted({
+      id: elementId,
+      isEdge: false,
+      waitDuration: executionStep.duration ?? executionDurationShapeDefault,
+    });
+    // const promiseMarkAsExecuted = markAsExecuted(elementId, false, executionStep.duration ?? executionDurationShapeDefault);
     console.info('await shape promiseMarkAsExecuted execution');
     await promiseMarkAsExecuted;
     console.info('shape promiseMarkAsExecuted execution done');
