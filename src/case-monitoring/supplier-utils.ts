@@ -105,15 +105,10 @@ export type InnerActionParameters = {
 
 const processExecutorWaitTimeBeforeCallingEndCaseCallback = 1500;
 
-type MarkExecutionOptions = {
-  id: string;
-  isEdge: boolean;
+type MarkExecutionOptions = PathHighlightMarker & {
   waitDuration: number;
-  displayExecutionCounter?: boolean;
-  executionCount?: number;
 };
 
-// TODO duplication with MarkExecutionOptions
 type PathHighlightMarker = {
   id: string;
   isEdge: boolean;
@@ -150,7 +145,7 @@ export class ProcessExecutor {
       .then(options => this.markAsExecuted(options.id))
       .then(() => {
         options.executionCount = this.getExecutionCount(options.id);
-        this.pathHighlighter.markAsExecuted(options)
+        this.pathHighlighter.markAsExecuted(options);
       })
       .then(async () => delay(options.waitDuration))
       .then(() => {
@@ -340,6 +335,7 @@ class PathHighlighter {
         // Add overlay
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, {
           position: 'middle',
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- here, we are sure there is a value and we don't put undefined values
           label: `${this.executionCounts.get(this.pastExecutedId)}`,
           style: {
             font: {color: 'white', size: 22},
@@ -363,6 +359,7 @@ class PathHighlighter {
         // Add overlay
         this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, {
           position: 'middle',
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- here, we are sure there is a value and we don't put undefined values
           label: `${this.executionCounts.get(this.lastExecutedId)}`,
           style: {
             font: {color: 'white', size: 22},
