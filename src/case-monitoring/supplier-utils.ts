@@ -399,5 +399,6 @@ class PathHighlighter {
     this.executedPath.clear();
     this.lastExecutedId = undefined;
     this.pastExecutedId = undefined;
+    this.executionCounts.clear();
   }
 }
