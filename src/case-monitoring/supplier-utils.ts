@@ -24,6 +24,8 @@ function logProcessExecution(message: string, ...optionalParameters: any[]): voi
 const executionDurationEdge = 200; // 500;
 const executionDurationShapeDefault = 300; // 1_000;
 
+let counter = 1;
+
 // =====================================================================================================================
 // extract all data code following this line
 // =====================================================================================================================
@@ -223,6 +225,24 @@ class PathHighlighter {
         stroke: {color: 'blue', width: 4},
       });
       logProcessExecution(`done highlight of ${id}`);
+
+      if(id === 'Flow_1glx5xw'){
+        // Remove existing overlays
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
+
+        // Add overlay
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(id, {
+          position: 'middle',
+          label: `${counter}`,
+          style: {
+            font: { color: 'white', size: 22 },
+            fill: { color: 'blue' },
+            stroke: { color: 'blue', width: 2 }
+          }
+        });
+
+        counter ++;
+      }
     } else {
       logProcessExecution(`highlighting shape ${id}`);
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
@@ -247,6 +267,22 @@ class PathHighlighter {
       },
       );
       logProcessExecution(`done highly reduce opacity of ${this.pastExecutedId}`);
+
+      if(this.pastExecutedId === 'Flow_1glx5xw'){
+        // Remove existing overlays
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
+
+        // Add overlay
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, {
+          position: 'middle',
+          label: `${counter - 1}`,
+          style: {
+            font: { color: 'white', size: 22 },
+            fill: { color: 'rgba(0, 0, 255, 0.2)' },
+            stroke: { color: 'rgba(0, 0, 255, 0.2)', width: 2 }
+          }
+        })
+      }
     }
 
     this.pastExecutedId = this.lastExecutedId;
@@ -254,6 +290,22 @@ class PathHighlighter {
       logProcessExecution(`reducing opacity of ${this.lastExecutedId}`);
       this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
       logProcessExecution(`done reduce opacity of ${this.lastExecutedId}`);
+
+      if(this.pastExecutedId === 'Flow_1glx5xw'){
+        // Remove existing overlays
+        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
+
+        // Add overlay
+        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, {
+          position: 'middle',
+          label: `${counter - 1}`,
+          style: {
+            font: { color: 'white', size: 22 },
+            fill: { color: 'rgba(0, 0, 255, 0.5)' },
+            stroke: { color: 'rgba(0, 0, 255, 0.5)', width: 2 }
+          }
+        })
+      }
     }
 
     this.lastExecutedId = id;
