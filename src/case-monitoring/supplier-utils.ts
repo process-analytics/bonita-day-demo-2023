@@ -227,7 +227,7 @@ export class ProcessExecutor {
       if (executionStep.id === 'Event_13tn0ty') {
         toast(notyf, 'The email is aborted');
       } else {
-        toast(notyf, 'The email is sent');
+        toast(notyf, 'The email has been sent');
       }
 
       logProcessExecution('registering endCaseCallBack call');
