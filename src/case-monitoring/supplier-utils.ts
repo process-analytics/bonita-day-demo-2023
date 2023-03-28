@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 import {type BpmnVisualization, type Overlay, type ShapeStyleUpdate} from 'bpmn-visualization';
-import {configureToast, delay, NotyfType, toast} from '../utils/shared.js';
+import {delay, Notification, type NotificationType} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: any[]): void {
   console.info(`[EXEC] ${message}`, ...optionalParameters);
@@ -58,11 +58,25 @@ const executionSteps = new Map<string, ExecutionStep>([
 
   // After email review
   // Event_13tn0ty abort
-  ['Event_13tn0ty', {id: 'Event_13tn0ty', incomingEdgeId: 'Flow_1b13tzq', isLastStep: true}],
+  ['Event_13tn0ty', {
+    id: 'Event_13tn0ty', incomingEdgeId: 'Flow_1b13tzq', isLastStep: true,
+    notify: {
+      type: 'warning',
+      message: 'The email has been discarded',
+    },
+  }],
   // Activity_0tb47yw "Send email to client"
   ['Activity_0tb47yw', {id: 'Activity_0tb47yw', incomingEdgeId: 'Flow_1b8bdo1', nextExecutionStep: 'Event_07kw4ry'}],
   // Event_07kw4ry email sent
-  ['Event_07kw4ry', {id: 'Event_07kw4ry', incomingEdgeId: 'Flow_1jay9w3', isLastStep: true}],
+  ['Event_07kw4ry', {
+    id: 'Event_07kw4ry',
+    incomingEdgeId: 'Flow_1jay9w3',
+    isLastStep: true,
+    notify: {
+      type: 'success',
+      message: 'The email has been sent',
+    },
+  }],
 ]);
 
 export type ReviewEmailDecision = 'abort' | 'generate' | 'validate';
@@ -95,6 +109,11 @@ type ExecutionStep = {
   };
   /** If `true`, call the `onEndCase` callback. */
   isLastStep?: boolean;
+  /** Generate a notification if {@link isLastStep} is `true`. */
+  notify?: {
+    type: NotificationType;
+    message: string;
+  };
 };
 
 export type InnerActionParameters = {
@@ -115,6 +134,8 @@ type PathHighlightMarker = {
   displayExecutionCounter?: boolean;
   executionCount?: number;
 };
+
+const notification = new Notification(3000);
 
 export class ProcessExecutor {
   private readonly pathHighlighter: PathHighlighter;
@@ -221,13 +242,9 @@ export class ProcessExecutor {
         });
       logProcessExecution('DONE call execution of next step', executionStep.nextExecutionStep);
     } else if (executionStep.isLastStep) {
-      // Display notification
-      const notyf = configureToast(3000);
-      // Event_13tn0ty is the abort event
-      if (executionStep.id === 'Event_13tn0ty') {
-        toast(notyf, NotyfType.Warning, 'The email has been discarded');
-      } else {
-        toast(notyf, NotyfType.Success, 'The email has been sent');
+      const notify = executionStep.notify;
+      if (notify) {
+        notification.toast(notify.type, notify.message);
       }
 
       logProcessExecution('registering endCaseCallBack call');

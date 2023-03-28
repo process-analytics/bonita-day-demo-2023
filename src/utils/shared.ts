@@ -22,37 +22,36 @@ export const delay = async (ms: number, args?: any) =>
   new Promise(timeup => setTimeout(timeup, ms, args));
 
 // Notification configuration
+export type NotificationType = 'success' | 'warning';
 
-export enum NotyfType {
-  Success = 'success',
-  Warning = 'warning',
-}
+export class Notification {
+  private readonly notyf: Notyf;
 
-export function configureToast(notyfDuration: number) {
-  return new Notyf({
-    position: {
-      x: 'center',
-      y: 'top',
-    },
-    types: [
-      {
-        type: NotyfType.Success,
-        duration: notyfDuration,
+  constructor(duration: number) {
+    this.notyf = new Notyf({
+      position: {
+        x: 'center',
+        y: 'top',
       },
-      {
-        type: NotyfType.Warning,
-        duration: notyfDuration,
-        background: '#ff8c00',
-        icon: false,
-      },
-    ],
-  });
-}
+      types: [
+        {
+          type: 'success' as NotificationType,
+          duration,
+        },
+        {
+          type: 'warning' as NotificationType,
+          duration,
+          background: '#ff8c00',
+          icon: false,
+        },
+      ],
+    });
+  }
 
-export function toast(notyf: Notyf, type: string, htmlMessage: string) {
-  notyf.open({
-    type,
-    message: htmlMessage,
-  });
+  toast(type: NotificationType, htmlMessage: string) {
+    this.notyf.open({
+      type,
+      message: htmlMessage,
+    });
+  }
 }
-

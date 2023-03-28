@@ -17,12 +17,10 @@ limitations under the License.
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance} from 'tippy.js';
 import {displayView, isSubProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisualization, subProcessViewName} from '../diagram.js';
-import {configureToast, NotyfType, toast} from '../utils/shared.js';
+import {Notification} from '../utils/shared.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
-import 'notyf/notyf.min.css';
 
-const notyfDuration = 3000;
-const notyf = configureToast(notyfDuration);
+const notification = new Notification(3000);
 
 class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization, tippySupport: SubProcessTippySupport) {
@@ -103,7 +101,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
     const button = event.currentTarget as HTMLButtonElement;
     const row = button.closest('tr')!;
     const toastMessage = `The task has been assigned to <b>${row.cells[0].textContent ?? ''}</b>`;
-    toast(notyf, NotyfType.Success, toastMessage);
+    notification.toast('success', toastMessage);
   };
 
   // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
