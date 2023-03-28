@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 import {type BpmnVisualization, type Overlay, type ShapeStyleUpdate} from 'bpmn-visualization';
-import {delay} from '../utils/shared.js';
+import {configureToast, delay, NotyfType, toast} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: any[]): void {
   console.info(`[EXEC] ${message}`, ...optionalParameters);
@@ -221,6 +221,15 @@ export class ProcessExecutor {
         });
       logProcessExecution('DONE call execution of next step', executionStep.nextExecutionStep);
     } else if (executionStep.isLastStep) {
+      // Display notification
+      const notyf = configureToast(3000);
+      // Event_13tn0ty is the abort event
+      if (executionStep.id === 'Event_13tn0ty') {
+        toast(notyf, NotyfType.Warning, 'The email has been discarded');
+      } else {
+        toast(notyf, NotyfType.Success, 'The email has been sent');
+      }
+
       logProcessExecution('registering endCaseCallBack call');
       delay(processExecutorWaitTimeBeforeCallingEndCaseCallback)
         .then(() => {
