@@ -14,8 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import {Notyf} from 'notyf';
+
 // To improve, we may use existing libraries like the ones listed in https://geshan.com.np/blog/2022/08/javascript-wait-1-second/
 export const delay = async (ms: number, args?: any) =>
 // eslint-disable-next-line no-promise-executor-return -- cannot be managed now
   new Promise(timeup => setTimeout(timeup, ms, args));
+
+// Notification configuration
+export function configureToast(notyfDuration: number) {
+  return new Notyf({
+    position: {
+      x: 'center',
+      y: 'top',
+    },
+    types: [
+      {
+        type: 'success',
+        duration: notyfDuration,
+      },
+    ],
+  });
+}
+
+export function toast(notyf: Notyf, htmlMessage: string) {
+  notyf.success(htmlMessage);
+}
 
