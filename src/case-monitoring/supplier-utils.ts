@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 import {type BpmnVisualization, type Overlay, type ShapeStyleUpdate} from 'bpmn-visualization';
-import {configureToast, delay, toast} from '../utils/shared.js';
+import {configureToast, delay, NotyfType, toast} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: any[]): void {
   console.info(`[EXEC] ${message}`, ...optionalParameters);
@@ -225,9 +225,9 @@ export class ProcessExecutor {
       const notyf = configureToast(3000);
       // Event_13tn0ty is the abort event
       if (executionStep.id === 'Event_13tn0ty') {
-        toast(notyf, 'The email is aborted');
+        toast(notyf, NotyfType.Warning, 'The email has been discarded');
       } else {
-        toast(notyf, 'The email has been sent');
+        toast(notyf, NotyfType.Success, 'The email has been sent');
       }
 
       logProcessExecution('registering endCaseCallBack call');
