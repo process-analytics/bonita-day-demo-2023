@@ -16,8 +16,13 @@ limitations under the License.
 
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance} from 'tippy.js';
+import {Notyf} from 'notyf';
 import {displayView, isSubProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisualization, subProcessViewName} from '../diagram.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
+import 'notyf/notyf.min.css';
+
+const notyfDuration = 3000;
+const notyf = configureToast(notyfDuration);
 
 class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
   constructor(bpmnVisualization: BpmnVisualization, tippySupport: SubProcessTippySupport) {
@@ -90,8 +95,15 @@ class SubProcessTippySupport extends AbstractTippySupport {
     }
   }
 
-  private readonly assignResource = (_event: Event) => {
+  private readonly assignResource = (event: Event) => {
+    // Return to main process
     displayView('main');
+
+    // Show notification
+    const button = event.currentTarget as HTMLButtonElement;
+    const row = button.closest('tr')!;
+    const toastMessage = `The task has been assigned to <b>${row.cells[0].textContent ?? ''}</b>`;
+    toast(toastMessage);
   };
 
   // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
@@ -213,4 +225,23 @@ export function showResourceAllocationAction() {
   // This should be managed by SubProcessNavigator
   displayView(subProcessViewName);
   subProcessCaseMonitoring.showData();
+}
+
+function configureToast(notyfDuration: number) {
+  return new Notyf({
+    position: {
+      x: 'center',
+      y: 'top',
+    },
+    types: [
+      {
+        type: 'success',
+        duration: notyfDuration,
+      },
+    ],
+  });
+}
+
+function toast(htmlMessage: string) {
+  notyf.success(htmlMessage);
 }
