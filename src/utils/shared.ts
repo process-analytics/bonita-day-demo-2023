@@ -22,6 +22,12 @@ export const delay = async (ms: number, args?: any) =>
   new Promise(timeup => setTimeout(timeup, ms, args));
 
 // Notification configuration
+
+export enum NotyfType {
+  Success = 'success',
+  Warning = 'warning',
+}
+
 export function configureToast(notyfDuration: number) {
   return new Notyf({
     position: {
@@ -30,14 +36,23 @@ export function configureToast(notyfDuration: number) {
     },
     types: [
       {
-        type: 'success',
+        type: NotyfType.Success,
         duration: notyfDuration,
+      },
+      {
+        type: NotyfType.Warning,
+        duration: notyfDuration,
+        background: '#ff8c00',
+        icon: false,
       },
     ],
   });
 }
 
-export function toast(notyf: Notyf, htmlMessage: string) {
-  notyf.success(htmlMessage);
+export function toast(notyf: Notyf, type: string, htmlMessage: string) {
+  notyf.open({
+    type,
+    message: htmlMessage,
+  });
 }
 
