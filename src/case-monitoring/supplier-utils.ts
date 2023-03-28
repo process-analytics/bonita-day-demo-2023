@@ -224,10 +224,9 @@ export class ProcessExecutor {
       // Display notification
       const notyf = configureToast(3000);
       // Event_13tn0ty is the abort event
-      if(executionStep.id === 'Event_13tn0ty'){
-        toast(notyf, 'The email is aborted')
-      }
-      else{
+      if (executionStep.id === 'Event_13tn0ty') {
+        toast(notyf, 'The email is aborted');
+      } else {
         toast(notyf, 'The email is sent');
       }
 
