@@ -14,7 +14,7 @@ Content:
 - apply CSS and overlays (process-monitoring, case-monitoring sub-process and "Supplier Contact")
 - style elements with the `Update Style` API (case-monitoring "Supplier Contact")
 
-Technic stack:
+**🔥 Stack**:
 - TypeScript and [Vite](https://vitejs.dev/)
 - Notifications toast: [Notyf](https://carlosroso.com/notyf/)
 - Popovers: [tippy.js](https://atomiks.github.io/tippyjs/)
