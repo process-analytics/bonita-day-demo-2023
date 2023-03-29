@@ -28,7 +28,7 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
   }
 
   protected highlightRunningElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
     this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
   }
 
@@ -130,8 +130,8 @@ class SubProcessTippySupport extends AbstractTippySupport {
         label: `${nbExec}`,
         style: {
           font: {color: '#fff', size: 16},
-          fill: {color: 'blueviolet'},
-          stroke: {color: 'blueviolet', width: 2},
+          fill: {color: 'blue'},
+          stroke: {color: 'blue', width: 2},
         },
       });
     }

@@ -343,6 +343,6 @@ td.popover-action {
 /* highlight activity already managed by user */
 .bpmn-type-activity.already-completed-by-user > rect {
 /*TODO use constant for highlight color */
-  stroke: blueviolet;
-  filter: drop-shadow(0 0 0.75rem blueviolet);
+  stroke: rgba(0, 0, 255, 0.7);
+  filter: drop-shadow(0 0 0.75rem rgba(0, 0, 255, 0.7));
 }
