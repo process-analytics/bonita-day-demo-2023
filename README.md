@@ -14,7 +14,7 @@ Content:
 - apply CSS and overlays (process-monitoring, case-monitoring sub-process and "Supplier Contact")
 - style elements with the `Update Style` API (case-monitoring "Supplier Contact")
 
-Technic stack:
+**🔥 Stack**:
 - TypeScript and [Vite](https://vitejs.dev/)
 - Notifications toast: [Notyf](https://carlosroso.com/notyf/)
 - Popovers: [tippy.js](https://atomiks.github.io/tippyjs/)
@@ -57,6 +57,40 @@ The code should be linted with [xo](https://github.com/xojs/xo). To have support
 
 To lint the code, run `npm run lint`.
 
+
+### Run as a Docker container
+
+Build the demo:
+```shell
+npm install
+npm run build
+```
+
+Build the Docker image
+```shell
+docker build -t process-analytics:bonita-day-demo-2023 .
+```
+
+Start a container (adapt the `3617` value to use another port)
+```shell
+docker run --name pa-bonita-day-demo-2023 -d -p 3617:80 process-analytics:bonita-day-demo-2023
+```
+Then you can hit http://localhost:3617 or http://host-ip:3617 in your browser.
+
+For reuse on another machine that doesn't have access to Internet (for instance, for a backup machine in a conference)
+- save the image from the source machine (which built the image)
+```shell
+docker save --output pa-bonita-day-demo-2023.tar process-analytics:bonita-day-demo-2023
+```
+- load it into the target machine
+```shell
+docker load --input pa-bonita-day-demo-2023.tar
+```
+
+**NOTE**: to reduce the size of the archive, you can gzip it
+```shell
+gzip -k pa-bonita-day-demo-2023.tar
+```
 
 ## 📃 License
 
