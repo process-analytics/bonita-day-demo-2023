@@ -1,11 +1,44 @@
 # bonita-day-demo-2023
 
-TODO explain
+This demo application was created as part of a presentation made during Bonita Day Paris 2023.
+
+Content:
+- `none`/`home`: display the BPMN processes used in this demo and navigate to the sub-process which is also part of the demo
+- `process-monitoring`: show the happy path of a process, animate the path
+- `case-monitoring`:
+  - assign a new actor to a task of the sub-process that is late: display the past activities of the actors proposed for replacement (highlight activities and frequency)
+  - show the live execution of a "supplier contact" process: highlight running paths and activities, let choose to send email or abort 
+
+`bpmn-visualization` features used in this demo:
+- get BPMN elements and register interactions: popovers on both case-monitoring and process-monitoring
+- apply CSS and overlays (process-monitoring, case-monitoring sub-process and "Supplier Contact")
+- style elements with the `Update Style` API (case-monitoring "Supplier Contact")
+
+Technic stack:
+- TypeScript and [Vite](https://vitejs.dev/)
+- Notifications toast: [Notyf](https://carlosroso.com/notyf/)
+- Popovers: [tippy.js](https://atomiks.github.io/tippyjs/)
+- CSS framework: [Spectre.css](https://picturepan2.github.io/spectre/)
+- Generated from https://github.com/process-analytics/bpmn-visualization-demo-template 
+
+**DISCLAIMER**
+- this demo has been created for the sole purpose of showing some `bpmn-visualization` features in action
+- this application is not production-ready, in particular, it does not handle asynchronous code and promises in an appropriate way
+- if you create derivative works, be aware that you do so at your own risk. No support will be provided.
 
 
 ## 🎮 Live demo
 
 The live demo is available at ⏩ https://process-analytics.github.io/bonita-day-demo-2023/
+
+It is possible to directly access to a specific use case by providing a query parameter.
+- Parameter name: use-case
+- Possible values:
+  - case-monitoring
+  - process-monitoring
+  - other values or unset: use the "none" use case
+
+Example using the live demo: ⏩ https://process-analytics.github.io/bonita-day-demo-2023/?use-case=case-monitoring
 
 
 ## ⚒️ Development Setup
