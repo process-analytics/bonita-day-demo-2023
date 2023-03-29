@@ -25,6 +25,26 @@ The code should be linted with [xo](https://github.com/xojs/xo). To have support
 To lint the code, run `npm run lint`.
 
 
+### Run as a Docker container
+
+Build the demo:
+```shell
+npm install
+npm run build
+```
+
+Build the Docker image
+```shell
+docker build -t process-analytics:bonita-day-demo-2023 .
+```
+
+Start a container (adapt the `3617` value to use another port)
+```shell
+docker run --name pa-bonita-day-demo-2023 -d -p 3617:80 process-analytics:bonita-day-demo-2023
+```
+Then you can hit http://localhost:3617 or http://host-ip:3617 in your browser.
+
+
 ## 📃 License
 
 The code of this demo is released under the [Apache 2.0](LICENSE) license.
