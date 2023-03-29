@@ -193,7 +193,7 @@ header {
 :root {
   --color-default-fill: white;
   --color-path-executed: #aea3a3;
-  --color-state-running-late: orange;
+  --color-state-running-late: #f9b842;
   --color-state-enabled: #d3d3d3;
 }
 
