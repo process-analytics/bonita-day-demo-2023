@@ -133,7 +133,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     const prompt = getPrompt();
     const answer = getAnswer(parameters.executionCount);
     return `<div class="popover-container">
-          <h4>Review email proposed by ChatGPT</h4>
+          <h4>Email proposed by ChatGPT</h4>
           <table>
             <tbody>
               <tr>
@@ -146,7 +146,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
               </tr>
             </tbody>
           </table>
-        <div class="mt-2 columns">
+        <div class="p-1 mt-2 columns">
           <div class="column col-4 text-left"><button id="abort" class="btn btn-sm btn-error">Abort</button></div>
           <div class="column col-4 text-center"><button id="generate" class="btn btn-sm btn-success">Generate</button></div>
           <div class="column col-4 text-right"><button id="validate" class="btn btn-sm btn-success">Validate</button></div>
