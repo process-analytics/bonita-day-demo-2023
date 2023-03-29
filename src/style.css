@@ -326,6 +326,16 @@ tr.popover-row:hover {
   color: black;
 }
 
+.btn-success:hover {
+  background-color: #3D8B37;
+  box-shadow: 0px 0px 2px 2px #74c56e;
+}
+
+.btn-error:hover {
+  background-color: #FF7373;
+  box-shadow: 0px 0px 2px 2px #FF7373;
+}
+
 td.popover-key {
   font-weight: bold;
   width: 30%;
