@@ -44,6 +44,20 @@ docker run --name pa-bonita-day-demo-2023 -d -p 3617:80 process-analytics:bonita
 ```
 Then you can hit http://localhost:3617 or http://host-ip:3617 in your browser.
 
+For reuse on another machine that doesn't have access to Internet (for instance, for a backup machine in a conference)
+- save the image from the source machine (which built the image)
+```shell
+docker save --output pa-bonita-day-demo-2023.tar process-analytics:bonita-day-demo-2023
+```
+- load it into the target machine
+```shell
+docker load --input pa-bonita-day-demo-2023.tar
+```
+
+**NOTE**: to reduce the size of the archive, you can gzip it
+```shell
+gzip -k pa-bonita-day-demo-2023.tar
+```
 
 ## 📃 License
 
