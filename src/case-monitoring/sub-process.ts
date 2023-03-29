@@ -130,8 +130,8 @@ class SubProcessTippySupport extends AbstractTippySupport {
         label: `${nbExec}`,
         style: {
           font: {color: '#fff', size: 16},
-          fill: {color: 'blue'},
-          stroke: {color: 'blue', width: 2},
+          fill: {color: 'blueviolet'},
+          stroke: {color: 'blueviolet', width: 2},
         },
       });
     }
