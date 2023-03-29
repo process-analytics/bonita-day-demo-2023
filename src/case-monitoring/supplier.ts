@@ -142,11 +142,11 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
               </tr>
               <tr>
                 <td>Prompt</td>
-                <td><textarea cols="30" rows="3">${prompt}</textarea>
+                <td><textarea cols="50" rows="3">${prompt}</textarea>
               </tr>
             </tbody>
           </table>
-        <div class="p-1 mt-2 columns">
+        <div class="p-2 columns">
           <div class="column col-4 text-left"><button id="abort" class="btn btn-sm btn-error">Abort</button></div>
           <div class="column col-4 text-center"><button id="generate" class="btn btn-sm btn-success">Generate</button></div>
           <div class="column col-4 text-right"><button id="validate" class="btn btn-sm btn-success">Validate</button></div>
