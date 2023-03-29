@@ -317,6 +317,15 @@ thead.popover-title tr {
   font-size: .8rem;
 }
 
+tr {
+  border-top: .2rem solid transparent;
+  border-bottom: .2rem solid transparent;
+}
+
+td {
+  padding: 5px;
+}
+
 tr.popover-row:hover {
   background-color: lightgray;
   color: black;
@@ -324,17 +333,14 @@ tr.popover-row:hover {
 
 td.popover-key {
   font-weight: bold;
-  padding: 5px;
   width: 30%;
 }
 
 td.popover-value {
-  padding: 5px;
   width: 50%;
 }
 
 td.popover-action {
-  padding: 5px;
   width: 20%;
 }
 
