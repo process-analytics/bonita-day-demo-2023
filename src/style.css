@@ -245,6 +245,10 @@ header {
   animation: pulse-animation 0.8s infinite alternate;
 }
 
+.bpmn-type-activity.state-waiting > rect {
+  fill: var(--color-state-running-late);
+}
+
 @keyframes pulse-animation {
   0% {
       fill-opacity: 100%;
