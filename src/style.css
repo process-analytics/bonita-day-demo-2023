@@ -317,12 +317,7 @@ thead.popover-title tr {
   font-size: .8rem;
 }
 
-tr {
-  border-top: .2rem solid transparent;
-  border-bottom: .2rem solid transparent;
-}
-
-td {
+th, td {
   padding: 5px;
 }
 
