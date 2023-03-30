@@ -28,7 +28,7 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
   }
 
   protected highlightRunningElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-waiting');
     this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
   }
 
