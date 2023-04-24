@@ -16,7 +16,7 @@ limitations under the License.
 
 import {type BpmnVisualization} from 'bpmn-visualization';
 import {type Instance} from 'tippy.js';
-import {displayView, isSubProcessBpmnDiagramIsAlreadyLoad, subProcessBpmnVisualization, subProcessViewName} from '../diagram.js';
+import {displayView, subProcessBpmnVisualization, subProcessViewName} from '../diagram.js';
 import {Notification} from '../utils/shared.js';
 import {AbstractCaseMonitoring, AbstractTippySupport} from './abstract.js';
 
@@ -192,29 +192,7 @@ function getWarningInfoAsHtml() {
 const subProcessCaseMonitoring = new SubProcessCaseMonitoring(subProcessBpmnVisualization, new SubProcessTippySupport(subProcessBpmnVisualization));
 
 export function hideSubProcessCaseMonitoringData() {
-  // Currently mandatory, if the diagram is not loaded error, this seems to be a bug in bpmn-visualization
-  // calling getElementsByIds when the diagram is not loaded generates an error. It should respond without errors.
-  // seen with bpmn-visualization@0.32.0
-  // 15:40:09,653 Uncaught TypeError: this.searchableModel is undefined
-  //     getBpmnSemantic bpmn-visualization.esm.js:6067
-  //     getElementsByIds bpmn-visualization.esm.js:5742
-  //     getElementsByIds bpmn-visualization.esm.js:5742
-  //     getVisitedEdges paths.ts:30
-  //     fetchCaseMonitoringData data-case.ts:120
-  //     getCaseMonitoringData abstract.ts:32
-  //     restoreVisibilityOfAlreadyExecutedElements abstract.ts:67
-  //     hideData abstract.ts:25
-  //     hideSubProcessCaseMonitoringData case-monitoring.ts:262
-  //     configureUseCaseSelectors use-case-management.ts:36
-  //     unselect use-case-management.ts:69
-  //     UseCaseSelector use-case-management.ts:53
-  //     UseCaseSelector use-case-management.ts:51
-  //     configureUseCaseSelectors use-case-management.ts:38
-  //     <anonymous> index.ts:37
-  // bpmn-visualization.esm.js:6067:24
-  if (isSubProcessBpmnDiagramIsAlreadyLoad()) {
-    subProcessCaseMonitoring.hideData();
-  }
+  subProcessCaseMonitoring.hideData();
 }
 
 // eslint-disable-next-line no-warning-comments -- cannot be managed now
