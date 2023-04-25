@@ -26,8 +26,12 @@ export class PathResolver {
 
   getVisitedEdges(shapeIds: string[]): string[] {
     const edgeIds = new Set<string>();
-    for (const shape of shapeIds) {
-      const shapeElt = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(shape)[0];
+    for (const shapeId of shapeIds) {
+      const shapeElt = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(shapeId)[0];
+      if (!shapeElt) {
+        continue;
+      }
+
       const bpmnSemantic = shapeElt.bpmnSemantic as ShapeBpmnSemantic;
       const incomingEdges = bpmnSemantic.incomingIds;
       const outgoingEdges = bpmnSemantic.outgoingIds;

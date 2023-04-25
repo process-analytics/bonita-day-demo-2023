@@ -42,10 +42,6 @@ class DiagramLoadManager {
 const mainProcessDiagramLoadManager = new DiagramLoadManager(mainBpmnVisualization, mainDiagram);
 const subProcessDiagramLoadManager = new DiagramLoadManager(subProcessBpmnVisualization, subDiagram);
 
-// eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO do not leak internal state
-export const isSubProcessBpmnDiagramIsAlreadyLoad = () => subProcessDiagramLoadManager.isAlreadyLoad();
-
 export function displayView(view: View): void {
   if (currentView === view) {
     return;
