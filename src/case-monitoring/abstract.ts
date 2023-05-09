@@ -37,7 +37,7 @@ export abstract class AbstractCaseMonitoring {
 
   protected resetRunningElements() {
     const bpmnElementIds = this.getCaseMonitoringData().runningShapes;
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementIds, ['state-running-late', 'state-enabled', 'state-waiting']);
+    this.bpmnVisualization.bpmnElementsRegistry.removeAllCssClasses(bpmnElementIds);
     for (const bpmnElementId of bpmnElementIds) {
       this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
     }
