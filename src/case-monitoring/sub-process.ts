@@ -104,7 +104,7 @@ class SubProcessTippySupport extends AbstractTippySupport {
     notification.toast('success', toastMessage);
   };
 
-  // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
+  // Inspired from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
   private readonly rowMouseEnterListener = (event: Event) => {
     const rowIndex = (event.target as HTMLTableRowElement).sectionRowIndex;
     const data = subProcessUserData[rowIndex];
