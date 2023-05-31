@@ -128,17 +128,7 @@ export class ProcessMonitoring {
   }
 
   private hideHappyPath() {
-    this.bpmnElementsRegistry.removeCssClasses(happyPath, [
-      'highlight-happy-path',
-      'pulse-happy',
-      'gateway-happy',
-      'growing-happy',
-      ...happyPath.map(elementId => {
-        const styleOfElement = document.querySelector(`#${elementId}`);
-        styleOfElement?.parentNode?.removeChild(styleOfElement);
-        return `animate-${elementId}`;
-      }),
-    ]);
+    this.bpmnElementsRegistry.removeAllCssClasses(happyPath);
 
     // Remove popover
     this.removePopover(happyPathElementWithPopover);
