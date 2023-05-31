@@ -65,7 +65,7 @@ const executionSteps = new Map<string, ExecutionStep>([
       message: 'The email has been discarded',
     },
   }],
-  // Activity_0tb47yw "Send email to client"
+  // Activity_0tb47yw "Send email"
   ['Activity_0tb47yw', {id: 'Activity_0tb47yw', incomingEdgeId: 'Flow_1b8bdo1', nextExecutionStep: 'Event_07kw4ry'}],
   // Event_07kw4ry email sent
   ['Event_07kw4ry', {

@@ -132,7 +132,7 @@
       <incoming>Flow_1glx5xw</incoming>
       <outgoing>Flow_06y94ol</outgoing>
     </exclusiveGateway>
-    <serviceTask id="Activity_0tb47yw" name="Send email to client">
+    <serviceTask id="Activity_0tb47yw" name="Send email">
       <incoming>Flow_1b8bdo1</incoming>
       <outgoing>Flow_1jay9w3</outgoing>
     </serviceTask>

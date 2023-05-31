@@ -88,16 +88,14 @@ class MainProcessTippySupport extends AbstractTippySupport {
     this.manageEventListeners(instance, false);
   }
 
-  // Hack from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
-  private readonly contactClientBtnListener = () => {
-    console.info('called contactClientBtnListener');
+  // Inspired from https://stackoverflow.com/questions/56079864/how-to-remove-an-event-listener-within-a-class
+  private readonly contactSupplierBtnListener = () => {
     showContactSupplierAction(this.mainProcessCaseMonitoring!).then(() => {
-      console.info('Contact client action complete!');
+      console.info('Contact supplier action complete!');
     })
       .catch(error => {
-        console.error('Error in contact client action:', error);
+        console.error('Error in contact supplier action:', error);
       });
-    console.info('contactClientBtnListener: showContactSupplierAction called');
   };
 
   private manageEventListeners(instance: Instance, register: boolean): void {
@@ -120,9 +118,9 @@ class MainProcessTippySupport extends AbstractTippySupport {
     const contactSupplierBtn = document.querySelector(`#${instance.popper.id} #contact-supplier`);
     if (contactSupplierBtn) {
       if (register) {
-        contactSupplierBtn.addEventListener('click', this.contactClientBtnListener);
+        contactSupplierBtn.addEventListener('click', this.contactSupplierBtnListener);
       } else {
-        contactSupplierBtn.removeEventListener('click', this.contactClientBtnListener);
+        contactSupplierBtn.removeEventListener('click', this.contactSupplierBtnListener);
       }
     } else {
       console.warn('NO "supplier contact" btn');
