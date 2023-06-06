@@ -6,13 +6,11 @@ export const configureBreadcrumb = (): void => {
   });
 };
 
-// Remove section of secondary diagram in Breadcrumb
 export function removeSectionInBreadcrumb(): void {
-  const secondaryDiagramElt = document.querySelectorAll('.breadcrumb > #secondary-diagram').item(0);
-  secondaryDiagramElt?.remove();
+  const breadcrumbElt = document.querySelectorAll('.breadcrumb > #sub-process-diagram').item(0);
+  breadcrumbElt?.remove();
 }
 
-// Add section of secondary diagram in Breadcrumb
 export function addSectionInBreadcrumb(): void {
   const breadcrumbElt = document.querySelectorAll('.breadcrumb').item(0);
   if (!breadcrumbElt) {
@@ -24,7 +22,7 @@ export function addSectionInBreadcrumb(): void {
   aElt.append(document.createTextNode('SRM subprocess'));
 
   const liElt = document.createElement('li');
-  liElt.setAttribute('id', 'secondary-diagram');
+  liElt.setAttribute('id', 'sub-process-diagram');
   liElt.setAttribute('class', 'breadcrumb-item');
   liElt.append(aElt);
 
