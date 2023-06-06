@@ -114,7 +114,7 @@ Create a new GitHub release by following the [GitHub help](https://help.github.c
 
 ## ⚡ Powered by
 
-<img src="public/github-logo.svg" alt="GitHub logo" title="GitHub Pages" width="110"/>
+<img src="docs/github-logo.svg" alt="GitHub logo" title="GitHub Pages" width="110"/>
 
 **[GitHub Pages](https://pages.github.com/)** (<kbd>demo</kbd> live environment)
 
