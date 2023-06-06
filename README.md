@@ -110,3 +110,14 @@ Create a new GitHub release by following the [GitHub help](https://help.github.c
 - Description
     - briefly explain the contents of the new version
     - make GitHub generates the [release notes automatically](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes)
+
+
+## ⚡ Powered by
+
+<img src="public/github-logo.svg" alt="GitHub logo" title="GitHub Pages" width="110"/>
+
+**[GitHub Pages](https://pages.github.com/)** (<kbd>demo</kbd> live environment)
+
+<img src="https://surge.sh/images/logos/svg/surge-logo.svg" alt="surge.sh logo" title="surge.sh" width="110"/>
+
+**[surge.sh](https://surge.sh)** (<kbd>demo</kbd> preview environment)
