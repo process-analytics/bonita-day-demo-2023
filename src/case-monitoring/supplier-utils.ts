@@ -17,7 +17,7 @@ limitations under the License.
 import {type BpmnVisualization, type Overlay, type ShapeStyleUpdate} from 'bpmn-visualization';
 import {delay, Notification, type NotificationType} from '../utils/shared.js';
 
-function logProcessExecution(message: string, ...optionalParameters: any[]): void {
+function logProcessExecution(message: string, ...optionalParameters: unknown[]): void {
   console.info(`[EXEC] ${message}`, ...optionalParameters);
 }
 

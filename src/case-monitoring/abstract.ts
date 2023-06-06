@@ -58,7 +58,7 @@ export abstract class AbstractCaseMonitoring {
 export abstract class AbstractTippySupport {
   protected registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
-  private tippyInstances: Instance[] = [];
+  private readonly tippyInstances: Instance[] = [];
 
   constructor(protected readonly bpmnVisualization: BpmnVisualization) {}
 
