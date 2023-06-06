@@ -11,14 +11,12 @@ export const sharedLoadOptions: LoadOptions = {fit: sharedFitOptions};
 
 let currentView: View | undefined;
 
-// eslint-disable-next-line no-warning-comments -- cannot be managed now
-// TODO change the view/processId value. secondary is for the subprocess!! This impacts HTML elements
-export const subProcessViewName = 'secondary';
+export const subProcessViewName = 'sub-process';
 
-type View = 'main' | 'secondary';
+type View = 'main' | 'sub-process';
 
 export const mainBpmnVisualization = new BpmnVisualization({container: 'main-bpmn-container'});
-export const subProcessBpmnVisualization = new BpmnVisualization({container: 'secondary-bpmn-container'});
+export const subProcessBpmnVisualization = new BpmnVisualization({container: 'sub-process-bpmn-container'});
 
 class DiagramLoadManager {
   private bpmnDiagramIsAlreadyLoad = false;
@@ -48,7 +46,7 @@ export function displayView(view: View): void {
   }
 
   const mainBpmnContainerElt = document.querySelector('#main-bpmn-container')!;
-  const subProcessBpmnContainerElt = document.querySelector('#secondary-bpmn-container')!;
+  const subProcessBpmnContainerElt = document.querySelector('#sub-process-bpmn-container')!;
 
   switch (view) {
     // Go from main process to subprocess
