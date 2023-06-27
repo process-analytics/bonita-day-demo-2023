@@ -377,24 +377,8 @@ class PathHighlighter {
   clear(): void {
     const bpmnElementsRegistry = this.bpmnVisualization.bpmnElementsRegistry;
 
-    // Use reset style by property as global reset method isn't available in bpmn-visualization@0.33.0
-    bpmnElementsRegistry.updateStyle(Array.from(this.executedPath),
-      {
-        opacity: 'default',
-        fill: {
-          color: 'default',
-          opacity: 'default',
-        },
-        font: {
-          opacity: 'default',
-        },
-        stroke: {
-          color: 'default',
-          opacity: 'default',
-          width: 'default',
-        },
-      },
-    );
+    // Clear path
+    bpmnElementsRegistry.resetStyle(Array.from(this.executedPath));
     this.executedPath.clear();
 
     // Remove overlays
