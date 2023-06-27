@@ -17,7 +17,6 @@ limitations under the License.
 import {
   type BpmnElementsRegistry,
   type BpmnSemantic,
-  type BpmnVisualization,
   ShapeBpmnElementKind,
   ShapeUtil,
 } from 'bpmn-visualization';
@@ -26,11 +25,7 @@ import {
  * Provides workarounds for {@link https://github.com/process-analytics/bpmn-visualization-js/issues/2453}.
  */
 export class BpmnElementsSearcher {
-  private readonly bpmnElementsRegistry: BpmnElementsRegistry;
-
-  constructor(bpmnVisualization: BpmnVisualization) {
-    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
-  }
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   getElementIdByName(name: string): string | undefined {
     return this.getElementByName(name)?.id;
@@ -60,11 +55,7 @@ export class BpmnElementsSearcher {
 }
 
 export class BpmnElementsIdentifier {
-  private readonly bpmnElementsRegistry: BpmnElementsRegistry;
-
-  constructor(bpmnVisualization: BpmnVisualization) {
-    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
-  }
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   isActivity(elementId: string): boolean {
     return this.isInCategory(ShapeUtil.isActivity, elementId);

@@ -155,8 +155,8 @@ class SupplierContact {
   private readonly processExecutor: ProcessExecutor;
   private mainProcessCaseMonitoring?: MainProcessCaseMonitoring;
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
-    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase, this.emailRetrievalOperations);
+  constructor(bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
+    this.processExecutor = new ProcessExecutor(bpmnVisualization.bpmnElementsRegistry, this.onEndCase, this.emailRetrievalOperations);
   }
 
   setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring) {

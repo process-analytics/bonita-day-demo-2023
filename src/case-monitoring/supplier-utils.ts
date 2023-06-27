@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import type {BpmnElementsRegistry, BpmnVisualization, Overlay, ShapeStyleUpdate} from 'bpmn-visualization';
+import type {BpmnElementsRegistry, Overlay, ShapeStyleUpdate} from 'bpmn-visualization';
 import {delay, Notification, type NotificationType} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: unknown[]): void {
@@ -143,8 +143,8 @@ export class ProcessExecutor {
   private readonly executionCounts = new Map<string, number>();
 
   // EmailRetrievalOperationsCallBack is passed as we cannot get it from the ExecutionStep defined below for now
-  constructor(bpmnVisualization: BpmnVisualization, private readonly endCaseCallBack: () => void, private readonly emailRetrievalOperationsCallBack: (parameters: InnerActionParameters) => void) {
-    this.pathHighlighter = new PathHighlighter(bpmnVisualization);
+  constructor(bpmnElementsRegistry: BpmnElementsRegistry, private readonly endCaseCallBack: () => void, private readonly emailRetrievalOperationsCallBack: (parameters: InnerActionParameters) => void) {
+    this.pathHighlighter = new PathHighlighter(bpmnElementsRegistry);
   }
 
   async start() {
@@ -290,17 +290,13 @@ export class ProcessExecutor {
 }
 
 class PathHighlighter {
-  private readonly bpmnElementsRegistry: BpmnElementsRegistry;
-
   private readonly executedPath = new Set<string>();
 
   private pastExecutedId: string | undefined;
   private lastExecutedId: string | undefined;
   private readonly executionCounts = new Map<string, number>();
 
-  constructor(bpmnVisualization: BpmnVisualization) {
-    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
-  }
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   markAsExecuted(marker: PathHighlightMarker) {
     const id = marker.id;

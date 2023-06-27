@@ -117,12 +117,9 @@ const doSubProcessNavigation = () => {
 };
 
 export class SubProcessNavigator {
-  private readonly bpmnElementsRegistry: BpmnElementsRegistry;
   private subProcessHtmlElement: HTMLElement | undefined;
 
-  constructor(bpmnVisualization: BpmnVisualization) {
-    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
-  }
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   enable() {
     this.getSubProcessHtmlElement().addEventListener('click', doSubProcessNavigation);

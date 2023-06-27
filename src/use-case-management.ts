@@ -1,9 +1,9 @@
 import {newMainProcessCaseMonitoring} from './case-monitoring/main-process.js';
 import {
+  displayView,
   mainBpmnVisualization as bpmnVisualization,
   ProcessVisualizer,
   SubProcessNavigator,
-  displayView,
 } from './diagram.js';
 import {ProcessMonitoring} from './process-monitoring.js';
 
@@ -15,7 +15,7 @@ export const defaultUseCase = 'reset-all';
 
 export function configureUseCaseSelectors(selectedUseCase: string) {
   const processVisualizer = new ProcessVisualizer(bpmnVisualization);
-  const subProcessNavigator = new SubProcessNavigator(bpmnVisualization);
+  const subProcessNavigator = new SubProcessNavigator(bpmnVisualization.bpmnElementsRegistry);
 
   const processMonitoring = new ProcessMonitoring(bpmnVisualization);
   const mainProcessCaseMonitoring = newMainProcessCaseMonitoring(bpmnVisualization);

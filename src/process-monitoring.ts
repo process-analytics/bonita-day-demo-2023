@@ -74,7 +74,7 @@ export class ProcessMonitoring {
   private readonly bpmnElementsIdentifier: BpmnElementsIdentifier;
   constructor(private readonly bpmnVisualization: BpmnVisualization) {
     this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
-    this.bpmnElementsIdentifier = new BpmnElementsIdentifier(bpmnVisualization);
+    this.bpmnElementsIdentifier = new BpmnElementsIdentifier(this.bpmnElementsRegistry);
   }
 
   start() {

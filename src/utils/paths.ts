@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import type {BpmnElementsRegistry, BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
+import type {BpmnElementsRegistry, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
 
 /**
  * Experimental implementation for
@@ -22,11 +22,7 @@ import type {BpmnElementsRegistry, BpmnVisualization, EdgeBpmnSemantic, ShapeBpm
  * - {@link https://github.com/process-analytics/bpmn-visualization-js/issues/2402}
  */
 export class PathResolver {
-  private readonly bpmnElementsRegistry: BpmnElementsRegistry;
-
-  constructor(bpmnVisualization: BpmnVisualization) {
-    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
-  }
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   getVisitedEdges(shapeIds: string[]): string[] {
     const edgeIds = new Set<string>();
