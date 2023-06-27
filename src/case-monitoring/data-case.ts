@@ -16,7 +16,7 @@ abstract class AbstractCaseMonitoringDataProvider {
   protected readonly bpmnElementsSearcher: BpmnElementsSearcher;
   private readonly pathResolver: PathResolver;
 
-  protected constructor(protected readonly bpmnVisualization: BpmnVisualization) {
+  constructor(bpmnVisualization: BpmnVisualization) {
     this.bpmnElementsSearcher = new BpmnElementsSearcher(bpmnVisualization);
     this.pathResolver = new PathResolver(bpmnVisualization);
   }
@@ -46,10 +46,6 @@ abstract class AbstractCaseMonitoringDataProvider {
 }
 
 class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization);
-  }
-
   getExecutedShapes(): string[] {
     const shapes: string[] = [];
     addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('New POI needed')); // Start event
@@ -73,10 +69,6 @@ class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPr
 }
 
 class SubProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization);
-  }
-
   getExecutedShapes(): string[] {
     const shapes: string[] = [];
     addNonNullElement(shapes, 'Event_1dnxra5'); // Start event

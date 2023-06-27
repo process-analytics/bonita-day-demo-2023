@@ -25,10 +25,6 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
 }
 
 class SupplierProcessTippySupport extends AbstractTippySupport {
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization);
-  }
-
   // For ChatGPT popovers, we cannot only rely on the super.addPopover method
   // We manage 2 popovers, that don't have the same design
   // We need specific methods to add/remove listeners on "review email" buttons

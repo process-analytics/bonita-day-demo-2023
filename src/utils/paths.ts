@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import type {BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
+import type {BpmnElementsRegistry, BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-visualization';
 
 /**
  * Experimental implementation for
@@ -22,12 +22,16 @@ import type {BpmnVisualization, EdgeBpmnSemantic, ShapeBpmnSemantic} from 'bpmn-
  * - {@link https://github.com/process-analytics/bpmn-visualization-js/issues/2402}
  */
 export class PathResolver {
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+  private readonly bpmnElementsRegistry: BpmnElementsRegistry;
+
+  constructor(bpmnVisualization: BpmnVisualization) {
+    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
+  }
 
   getVisitedEdges(shapeIds: string[]): string[] {
     const edgeIds = new Set<string>();
     for (const shapeId of shapeIds) {
-      const shapeElt = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(shapeId)[0];
+      const shapeElt = this.bpmnElementsRegistry.getElementsByIds(shapeId)[0];
       if (!shapeElt) {
         continue;
       }
@@ -36,7 +40,7 @@ export class PathResolver {
       const incomingEdges = bpmnSemantic.incomingIds;
       const outgoingEdges = bpmnSemantic.outgoingIds;
       for (const edgeId of incomingEdges) {
-        const edgeElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
+        const edgeElement = this.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
         const sourceRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).sourceRefId;
         if (shapeIds.includes(sourceRef)) {
           edgeIds.add(edgeId);
@@ -44,7 +48,7 @@ export class PathResolver {
       }
 
       for (const edgeId of outgoingEdges) {
-        const edgeElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
+        const edgeElement = this.bpmnElementsRegistry.getElementsByIds(edgeId)[0];
         const targetRef = (edgeElement.bpmnSemantic as EdgeBpmnSemantic).targetRefId;
         if (shapeIds.includes(targetRef)) {
           edgeIds.add(edgeId);

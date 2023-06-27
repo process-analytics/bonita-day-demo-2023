@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import {type BpmnVisualization, type Overlay, type ShapeStyleUpdate} from 'bpmn-visualization';
+import type {BpmnElementsRegistry, BpmnVisualization, Overlay, ShapeStyleUpdate} from 'bpmn-visualization';
 import {delay, Notification, type NotificationType} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: unknown[]): void {
@@ -290,19 +290,23 @@ export class ProcessExecutor {
 }
 
 class PathHighlighter {
+  private readonly bpmnElementsRegistry: BpmnElementsRegistry;
+
   private readonly executedPath = new Set<string>();
 
   private pastExecutedId: string | undefined;
   private lastExecutedId: string | undefined;
   private readonly executionCounts = new Map<string, number>();
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+  constructor(bpmnVisualization: BpmnVisualization) {
+    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
+  }
 
   markAsExecuted(marker: PathHighlightMarker) {
     const id = marker.id;
     if (marker.isEdge) {
       logProcessExecution(`highlighting ${id}`);
-      this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
+      this.bpmnElementsRegistry.updateStyle(id, {
         font: {opacity: 'default'},
         opacity: 'default',
         stroke: {color: 'blue', width: 4},
@@ -314,14 +318,14 @@ class PathHighlighter {
         this.executionCounts.set(id, executionCount);
 
         // Remove existing overlays
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
+        this.bpmnElementsRegistry.removeAllOverlays(id);
 
         // Add overlay
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(id, createEdgeCounterOverlay(executionCount, 1));
+        this.bpmnElementsRegistry.addOverlays(id, createEdgeCounterOverlay(executionCount, 1));
       }
     } else {
       logProcessExecution(`highlighting shape ${id}`);
-      this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
+      this.bpmnElementsRegistry.updateStyle(id, {
         fill: {color: 'blue', opacity: 10},
         font: {opacity: 'default'},
         opacity: 'default',
@@ -335,7 +339,7 @@ class PathHighlighter {
     // Progressively decrease opacity
     if (this.pastExecutedId) {
       logProcessExecution(`highly reducing opacity of ${this.pastExecutedId}`);
-      this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.pastExecutedId, {
+      this.bpmnElementsRegistry.updateStyle(this.pastExecutedId, {
         font: {
           opacity: 15, // The global opacity doesn't affect the font opacity, so we must redefine it here :-(
         },
@@ -346,27 +350,27 @@ class PathHighlighter {
 
       if (this.executionCounts.has(this.pastExecutedId)) {
         // Remove existing overlays
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
+        this.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
 
         // Add overlay
         // execution count: here, we are sure there is a value, and we don't put undefined values
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.pastExecutedId)!, 0.2));
+        this.bpmnElementsRegistry.addOverlays(this.pastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.pastExecutedId)!, 0.2));
       }
     }
 
     this.pastExecutedId = this.lastExecutedId;
     if (this.lastExecutedId) {
       logProcessExecution(`reducing opacity of ${this.lastExecutedId}`);
-      this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
+      this.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
       logProcessExecution(`done reduce opacity of ${this.lastExecutedId}`);
 
       if (this.executionCounts.has(this.lastExecutedId)) {
         // Remove existing overlays
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.lastExecutedId);
+        this.bpmnElementsRegistry.removeAllOverlays(this.lastExecutedId);
 
         // Add overlay
         // execution count: here, we are sure there is a value, and we don't put undefined values
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.lastExecutedId)!, 0.5));
+        this.bpmnElementsRegistry.addOverlays(this.lastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.lastExecutedId)!, 0.5));
       }
     }
 
@@ -375,10 +379,8 @@ class PathHighlighter {
   }
 
   clear(): void {
-    const bpmnElementsRegistry = this.bpmnVisualization.bpmnElementsRegistry;
-
     // Use reset style by property as global reset method isn't available in bpmn-visualization@0.33.0
-    bpmnElementsRegistry.updateStyle(Array.from(this.executedPath),
+    this.bpmnElementsRegistry.updateStyle(Array.from(this.executedPath),
       {
         opacity: 'default',
         fill: {
@@ -399,7 +401,7 @@ class PathHighlighter {
 
     // Remove overlays
     for (const elementIdWithOverlay of this.executionCounts.keys()) {
-      bpmnElementsRegistry.removeAllOverlays(elementIdWithOverlay);
+      this.bpmnElementsRegistry.removeAllOverlays(elementIdWithOverlay);
     }
 
     this.executionCounts.clear();
