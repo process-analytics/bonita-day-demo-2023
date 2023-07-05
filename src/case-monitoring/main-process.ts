@@ -43,17 +43,17 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
   // pause: on main activity, remove popover, remove overlays, remove CSS + add CSS like in subprocess
   pause(): void {
     this.resetRunningElements();
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+    this.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
   }
 
   // Resume
   resume(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
+    this.bpmnElementsRegistry.removeCssClasses(this.getCaseMonitoringData().runningShapes, 'state-enabled');
     this.highlightRunningElements();
   }
 
   protected highlightRunningElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
+    this.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-running-late');
     this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
   }
 
@@ -67,10 +67,6 @@ export class MainProcessCaseMonitoring extends AbstractCaseMonitoring {
 
 class MainProcessTippySupport extends AbstractTippySupport {
   private mainProcessCaseMonitoring?: MainProcessCaseMonitoring;
-
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization);
-  }
 
   setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring) {
     this.mainProcessCaseMonitoring = mainProcessCaseMonitoring;

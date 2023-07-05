@@ -1,12 +1,14 @@
-import {type BpmnElement, type BpmnSemantic, type BpmnVisualization} from 'bpmn-visualization/*';
+import type {BpmnElement, BpmnElementsRegistry, BpmnSemantic, BpmnVisualization} from 'bpmn-visualization';
 import tippy, {type Instance, type Props, type ReferenceElement} from 'tippy.js';
 import {type CaseMonitoringData, fetchCaseMonitoringData} from './data-case.js';
 
 export abstract class AbstractCaseMonitoring {
+  protected readonly bpmnElementsRegistry: BpmnElementsRegistry;
   protected caseMonitoringData: CaseMonitoringData | undefined;
 
   protected constructor(protected readonly bpmnVisualization: BpmnVisualization, private readonly processId: string, protected tippySupport: AbstractTippySupport) {
     console.info('Initialized AbstractCaseMonitoring, processId: %s / bpmn-container: %s', processId, bpmnVisualization.graph.container.id);
+    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
   }
 
   showData(): void {
@@ -37,9 +39,9 @@ export abstract class AbstractCaseMonitoring {
 
   protected resetRunningElements() {
     const bpmnElementIds = this.getCaseMonitoringData().runningShapes;
-    this.bpmnVisualization.bpmnElementsRegistry.removeAllCssClasses(bpmnElementIds);
+    this.bpmnElementsRegistry.removeAllCssClasses(bpmnElementIds);
     for (const bpmnElementId of bpmnElementIds) {
-      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
+      this.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
     }
 
     this.tippySupport.removeAllPopovers();
@@ -50,24 +52,27 @@ export abstract class AbstractCaseMonitoring {
   }
 
   private reduceVisibilityOfAlreadyExecutedElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
+    this.bpmnElementsRegistry.addCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 
   private restoreVisibilityOfAlreadyExecutedElements() {
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
+    this.bpmnElementsRegistry.removeCssClasses([...this.getCaseMonitoringData().executedShapes, ...this.getCaseMonitoringData().visitedEdges], 'state-already-executed');
   }
 }
 
 // May change in the future to favor composition over inheritance.
 export abstract class AbstractTippySupport {
+  protected readonly bpmnElementsRegistry: BpmnElementsRegistry;
   protected registeredBpmnElements = new Map<Element, BpmnSemantic>();
 
   private readonly tippyInstances: Instance[] = [];
 
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {}
+  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
+    this.bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
+  }
 
   addPopover(bpmnElementId: string) {
-    const bpmnElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
+    const bpmnElement = this.bpmnElementsRegistry.getElementsByIds(bpmnElementId)[0];
     this.registerBpmnElement(bpmnElement);
 
     // eslint-disable-next-line no-warning-comments -- cannot be managed now
