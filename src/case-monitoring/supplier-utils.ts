@@ -411,7 +411,7 @@ class PathHighlighter {
 }
 
 function createEdgeCounterOverlay(count: number, opacity: number): Overlay {
-  const overlay: Overlay = {
+  return {
     position: 'middle',
     label: `${count}`,
     style: {
@@ -420,5 +420,4 @@ function createEdgeCounterOverlay(count: number, opacity: number): Overlay {
       stroke: {color: `rgba(0, 0, 255, ${opacity})`, width: 2},
     },
   };
-  return overlay;
 }
