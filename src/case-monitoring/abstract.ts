@@ -12,17 +12,17 @@ export abstract class AbstractCaseMonitoring {
   }
 
   showData(): void {
-    console.info('start showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
+    console.info('start showData / bpmn-container: %s', this.getGraphContainerId());
     this.reduceVisibilityOfAlreadyExecutedElements();
     this.highlightRunningElements();
-    console.info('end showData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
+    console.info('end showData / bpmn-container: %s', this.getGraphContainerId());
   }
 
   hideData(): void {
-    console.info('start hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
+    console.info('start hideData / bpmn-container: %s', this.getGraphContainerId());
     this.restoreVisibilityOfAlreadyExecutedElements();
     this.resetRunningElements();
-    console.info('end hideData / bpmn-container: %s', this.bpmnVisualization.graph.container.id);
+    console.info('end hideData / bpmn-container: %s', this.getGraphContainerId());
   }
 
   protected getCaseMonitoringData() {
@@ -45,6 +45,10 @@ export abstract class AbstractCaseMonitoring {
     }
 
     this.tippySupport.removeAllPopovers();
+  }
+
+  private getGraphContainerId(): string {
+    return this.bpmnVisualization.graph.container.id;
   }
 
   private reduceVisibilityOfAlreadyExecutedElements(): void {

@@ -88,7 +88,7 @@ export class ProcessMonitoring {
   }
 
   private configureResetButton(enable = true) {
-    const btnElement = document.querySelector<HTMLButtonElement>('#' + this.bpmnVisualization.graph.container.id + ' #btn-reset');
+    const btnElement = document.querySelector<HTMLButtonElement>('#' + this.getGraphContainer().id + ' #btn-reset');
     if (btnElement) {
       if (enable) {
         btnElement.classList.remove('d-hide');
@@ -98,6 +98,10 @@ export class ProcessMonitoring {
         btnElement.removeEventListener('click', this.resetHappyPath);
       }
     }
+  }
+
+  private getGraphContainer() {
+    return this.bpmnVisualization.graph.container;
   }
 
   private showHappyPath() {
@@ -178,7 +182,7 @@ export class ProcessMonitoring {
     return tippy(bpmnElement.htmlElement, {
       placement: 'top',
       animation: 'scale',
-      appendTo: this.bpmnVisualization.graph.container,
+      appendTo: this.getGraphContainer(),
       content: '913 cases (86.36%) <br/> ⏳ 2.08 months',
       arrow: true,
       interactive: true,
