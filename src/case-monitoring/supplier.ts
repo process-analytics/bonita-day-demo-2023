@@ -25,10 +25,6 @@ class SupplierProcessCaseMonitoring extends AbstractCaseMonitoring {
 }
 
 class SupplierProcessTippySupport extends AbstractTippySupport {
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization);
-  }
-
   // For ChatGPT popovers, we cannot only rely on the super.addPopover method
   // We manage 2 popovers, that don't have the same design
   // We need specific methods to add/remove listeners on "review email" buttons
@@ -159,8 +155,8 @@ class SupplierContact {
   private readonly processExecutor: ProcessExecutor;
   private mainProcessCaseMonitoring?: MainProcessCaseMonitoring;
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
-    this.processExecutor = new ProcessExecutor(this.bpmnVisualization, this.onEndCase, this.emailRetrievalOperations);
+  constructor(bpmnVisualization: BpmnVisualization, readonly supplierMonitoring: SupplierProcessCaseMonitoring) {
+    this.processExecutor = new ProcessExecutor(bpmnVisualization.bpmnElementsRegistry, this.onEndCase, this.emailRetrievalOperations);
   }
 
   setMainProcessCaseMonitoring(mainProcessCaseMonitoring: MainProcessCaseMonitoring) {

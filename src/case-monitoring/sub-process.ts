@@ -28,7 +28,7 @@ class SubProcessCaseMonitoring extends AbstractCaseMonitoring {
   }
 
   protected highlightRunningElements(): void {
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-waiting');
+    this.bpmnElementsRegistry.addCssClasses(this.getCaseMonitoringData().runningShapes, 'state-waiting');
     this.addInfoOnRunningElements(this.getCaseMonitoringData().runningShapes);
   }
 
@@ -124,8 +124,8 @@ class SubProcessTippySupport extends AbstractTippySupport {
   // Highlight activities that have already been managed by the current resource
   private highlightBpmnElements(data: Map<string, number>): void {
     for (const [bpmnElementId, nbExec] of data) {
-      this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(bpmnElementId, 'already-completed-by-user');
-      this.bpmnVisualization.bpmnElementsRegistry.addOverlays(bpmnElementId, {
+      this.bpmnElementsRegistry.addCssClasses(bpmnElementId, 'already-completed-by-user');
+      this.bpmnElementsRegistry.addOverlays(bpmnElementId, {
         position: 'top-center',
         label: `${nbExec}`,
         style: {
@@ -139,8 +139,8 @@ class SubProcessTippySupport extends AbstractTippySupport {
 
   private resetStyleOfBpmnElements(bpmnElementIds: string[]): void {
     for (const bpmnElementId of bpmnElementIds) {
-      this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(bpmnElementId, 'already-completed-by-user');
-      this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
+      this.bpmnElementsRegistry.removeCssClasses(bpmnElementId, 'already-completed-by-user');
+      this.bpmnElementsRegistry.removeAllOverlays(bpmnElementId);
     }
   }
 }

@@ -1,4 +1,4 @@
-import {type BpmnVisualization} from 'bpmn-visualization';
+import type {BpmnElementsRegistry, BpmnVisualization} from 'bpmn-visualization';
 import {BpmnElementsSearcher} from '../utils/bpmn-elements.js';
 import {PathResolver} from '../utils/paths.js';
 
@@ -16,9 +16,9 @@ abstract class AbstractCaseMonitoringDataProvider {
   protected readonly bpmnElementsSearcher: BpmnElementsSearcher;
   private readonly pathResolver: PathResolver;
 
-  protected constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    this.bpmnElementsSearcher = new BpmnElementsSearcher(bpmnVisualization);
-    this.pathResolver = new PathResolver(bpmnVisualization);
+  constructor(bpmnElementsRegistry: BpmnElementsRegistry) {
+    this.bpmnElementsSearcher = new BpmnElementsSearcher(bpmnElementsRegistry);
+    this.pathResolver = new PathResolver(bpmnElementsRegistry);
   }
 
   /**
@@ -46,10 +46,6 @@ abstract class AbstractCaseMonitoringDataProvider {
 }
 
 class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization);
-  }
-
   getExecutedShapes(): string[] {
     const shapes: string[] = [];
     addNonNullElement(shapes, this.bpmnElementsSearcher.getElementIdByName('New POI needed')); // Start event
@@ -73,10 +69,6 @@ class MainProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPr
 }
 
 class SubProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataProvider {
-  constructor(protected readonly bpmnVisualization: BpmnVisualization) {
-    super(bpmnVisualization);
-  }
-
   getExecutedShapes(): string[] {
     const shapes: string[] = [];
     addNonNullElement(shapes, 'Event_1dnxra5'); // Start event
@@ -97,13 +89,14 @@ class SubProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPro
 }
 
 export function fetchCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization): CaseMonitoringData {
-  const caseMonitoringDataProvider = processId === 'main' ? new MainProcessCaseMonitoringDataProvider(bpmnVisualization) : new SubProcessCaseMonitoringDataProvider(bpmnVisualization);
+  const bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
+  const caseMonitoringDataProvider = processId === 'main' ? new MainProcessCaseMonitoringDataProvider(bpmnElementsRegistry) : new SubProcessCaseMonitoringDataProvider(bpmnElementsRegistry);
 
   const executedShapes = caseMonitoringDataProvider.getExecutedShapes();
   const runningShapes = caseMonitoringDataProvider.getRunningShapes();
   const pendingShapes = caseMonitoringDataProvider.getPendingShapes();
 
-  const visitedEdges = new PathResolver(bpmnVisualization).getVisitedEdges([...executedShapes, ...runningShapes, ...pendingShapes]);
+  const visitedEdges = new PathResolver(bpmnElementsRegistry).getVisitedEdges([...executedShapes, ...runningShapes, ...pendingShapes]);
   return {
     executedShapes,
     pendingShapes,

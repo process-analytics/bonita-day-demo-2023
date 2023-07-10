@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import {type BpmnVisualization, type Overlay, type ShapeStyleUpdate} from 'bpmn-visualization';
+import type {BpmnElementsRegistry, Overlay, ShapeStyleUpdate} from 'bpmn-visualization';
 import {delay, Notification, type NotificationType} from '../utils/shared.js';
 
 function logProcessExecution(message: string, ...optionalParameters: unknown[]): void {
@@ -143,8 +143,8 @@ export class ProcessExecutor {
   private readonly executionCounts = new Map<string, number>();
 
   // EmailRetrievalOperationsCallBack is passed as we cannot get it from the ExecutionStep defined below for now
-  constructor(bpmnVisualization: BpmnVisualization, private readonly endCaseCallBack: () => void, private readonly emailRetrievalOperationsCallBack: (parameters: InnerActionParameters) => void) {
-    this.pathHighlighter = new PathHighlighter(bpmnVisualization);
+  constructor(bpmnElementsRegistry: BpmnElementsRegistry, private readonly endCaseCallBack: () => void, private readonly emailRetrievalOperationsCallBack: (parameters: InnerActionParameters) => void) {
+    this.pathHighlighter = new PathHighlighter(bpmnElementsRegistry);
   }
 
   async start() {
@@ -296,13 +296,13 @@ class PathHighlighter {
   private lastExecutedId: string | undefined;
   private readonly executionCounts = new Map<string, number>();
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   markAsExecuted(marker: PathHighlightMarker) {
     const id = marker.id;
     if (marker.isEdge) {
       logProcessExecution(`highlighting ${id}`);
-      this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
+      this.bpmnElementsRegistry.updateStyle(id, {
         font: {opacity: 'default'},
         opacity: 'default',
         stroke: {color: 'blue', width: 4},
@@ -314,14 +314,14 @@ class PathHighlighter {
         this.executionCounts.set(id, executionCount);
 
         // Remove existing overlays
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(id);
+        this.bpmnElementsRegistry.removeAllOverlays(id);
 
         // Add overlay
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(id, createEdgeCounterOverlay(executionCount, 1));
+        this.bpmnElementsRegistry.addOverlays(id, createEdgeCounterOverlay(executionCount, 1));
       }
     } else {
       logProcessExecution(`highlighting shape ${id}`);
-      this.bpmnVisualization.bpmnElementsRegistry.updateStyle(id, {
+      this.bpmnElementsRegistry.updateStyle(id, {
         fill: {color: 'blue', opacity: 10},
         font: {opacity: 'default'},
         opacity: 'default',
@@ -335,7 +335,7 @@ class PathHighlighter {
     // Progressively decrease opacity
     if (this.pastExecutedId) {
       logProcessExecution(`highly reducing opacity of ${this.pastExecutedId}`);
-      this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.pastExecutedId, {
+      this.bpmnElementsRegistry.updateStyle(this.pastExecutedId, {
         font: {
           opacity: 15, // The global opacity doesn't affect the font opacity, so we must redefine it here :-(
         },
@@ -346,27 +346,27 @@ class PathHighlighter {
 
       if (this.executionCounts.has(this.pastExecutedId)) {
         // Remove existing overlays
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
+        this.bpmnElementsRegistry.removeAllOverlays(this.pastExecutedId);
 
         // Add overlay
         // execution count: here, we are sure there is a value, and we don't put undefined values
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.pastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.pastExecutedId)!, 0.2));
+        this.bpmnElementsRegistry.addOverlays(this.pastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.pastExecutedId)!, 0.2));
       }
     }
 
     this.pastExecutedId = this.lastExecutedId;
     if (this.lastExecutedId) {
       logProcessExecution(`reducing opacity of ${this.lastExecutedId}`);
-      this.bpmnVisualization.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
+      this.bpmnElementsRegistry.updateStyle(this.lastExecutedId, {opacity: 50});
       logProcessExecution(`done reduce opacity of ${this.lastExecutedId}`);
 
       if (this.executionCounts.has(this.lastExecutedId)) {
         // Remove existing overlays
-        this.bpmnVisualization.bpmnElementsRegistry.removeAllOverlays(this.lastExecutedId);
+        this.bpmnElementsRegistry.removeAllOverlays(this.lastExecutedId);
 
         // Add overlay
         // execution count: here, we are sure there is a value, and we don't put undefined values
-        this.bpmnVisualization.bpmnElementsRegistry.addOverlays(this.lastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.lastExecutedId)!, 0.5));
+        this.bpmnElementsRegistry.addOverlays(this.lastExecutedId, createEdgeCounterOverlay(this.executionCounts.get(this.lastExecutedId)!, 0.5));
       }
     }
 
@@ -375,15 +375,13 @@ class PathHighlighter {
   }
 
   clear(): void {
-    const bpmnElementsRegistry = this.bpmnVisualization.bpmnElementsRegistry;
-
     // Clear path
-    bpmnElementsRegistry.resetStyle(Array.from(this.executedPath));
+    this.bpmnElementsRegistry.resetStyle(Array.from(this.executedPath));
     this.executedPath.clear();
 
     // Remove overlays
     for (const elementIdWithOverlay of this.executionCounts.keys()) {
-      bpmnElementsRegistry.removeAllOverlays(elementIdWithOverlay);
+      this.bpmnElementsRegistry.removeAllOverlays(elementIdWithOverlay);
     }
 
     this.executionCounts.clear();
@@ -395,7 +393,7 @@ class PathHighlighter {
 }
 
 function createEdgeCounterOverlay(count: number, opacity: number): Overlay {
-  const overlay: Overlay = {
+  return {
     position: 'middle',
     label: `${count}`,
     style: {
@@ -404,5 +402,4 @@ function createEdgeCounterOverlay(count: number, opacity: number): Overlay {
       stroke: {color: `rgba(0, 0, 255, ${opacity})`, width: 2},
     },
   };
-  return overlay;
 }

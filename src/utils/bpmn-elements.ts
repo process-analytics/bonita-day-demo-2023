@@ -14,13 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import {type BpmnSemantic, type BpmnVisualization, ShapeBpmnElementKind, ShapeUtil} from 'bpmn-visualization';
+import {
+  type BpmnElementsRegistry,
+  type BpmnSemantic,
+  ShapeBpmnElementKind,
+  ShapeUtil,
+} from 'bpmn-visualization';
 
 /**
  * Provides workarounds for {@link https://github.com/process-analytics/bpmn-visualization-js/issues/2453}.
  */
 export class BpmnElementsSearcher {
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   getElementIdByName(name: string): string | undefined {
     return this.getElementByName(name)?.id;
@@ -32,7 +37,7 @@ export class BpmnElementsSearcher {
     const kinds = Object.values(ShapeBpmnElementKind);
     // Split query by kind to avoid returning a big chunk of data
     for (const kind of kinds) {
-      const bpmnSemantics = this.bpmnVisualization.bpmnElementsRegistry.getElementsByKinds(kind)
+      const bpmnSemantics = this.bpmnElementsRegistry.getElementsByKinds(kind)
         .map(elt => elt.bpmnSemantic)
         .filter(Boolean);
 
@@ -50,7 +55,7 @@ export class BpmnElementsSearcher {
 }
 
 export class BpmnElementsIdentifier {
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   isActivity(elementId: string): boolean {
     return this.isInCategory(ShapeUtil.isActivity, elementId);
@@ -65,7 +70,7 @@ export class BpmnElementsIdentifier {
   }
 
   private isInCategory(categorizeFunction: (value: string) => boolean, elementId: string): boolean {
-    const elements = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(elementId);
+    const elements = this.bpmnElementsRegistry.getElementsByIds(elementId);
     if (elements.length > 0) {
       const kind = elements[0].bpmnSemantic.kind;
       return categorizeFunction(kind);

@@ -1,4 +1,4 @@
-import {BpmnVisualization, FitType, type LoadOptions} from 'bpmn-visualization';
+import {type BpmnElementsRegistry, BpmnVisualization, FitType, type LoadOptions} from 'bpmn-visualization';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import mainDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
 // eslint-disable-next-line n/file-extension-in-import -- Vite syntax
@@ -119,21 +119,21 @@ const doSubProcessNavigation = () => {
 export class SubProcessNavigator {
   private subProcessHtmlElement: HTMLElement | undefined;
 
-  constructor(private readonly bpmnVisualization: BpmnVisualization) {}
+  constructor(private readonly bpmnElementsRegistry: BpmnElementsRegistry) {}
 
   enable() {
     this.getSubProcessHtmlElement().addEventListener('click', doSubProcessNavigation);
-    this.bpmnVisualization.bpmnElementsRegistry.addCssClasses(subProcessId, 'c-hand');
+    this.bpmnElementsRegistry.addCssClasses(subProcessId, 'c-hand');
   }
 
   disable() {
     this.getSubProcessHtmlElement().removeEventListener('click', doSubProcessNavigation);
-    this.bpmnVisualization.bpmnElementsRegistry.removeCssClasses(subProcessId, 'c-hand');
+    this.bpmnElementsRegistry.removeCssClasses(subProcessId, 'c-hand');
   }
 
   private getSubProcessHtmlElement() {
     if (!this.subProcessHtmlElement) {
-      this.subProcessHtmlElement = this.bpmnVisualization.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement;
+      this.subProcessHtmlElement = this.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement;
     }
 
     return this.subProcessHtmlElement;
