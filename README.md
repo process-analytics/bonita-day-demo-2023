@@ -51,14 +51,14 @@ Start the dev server: `npm run dev`
 
 The demo is accessible at http://localhost:5173/
 
-### Code linter
+### 🎨 Code linter
 
 The code should be linted with [xo](https://github.com/xojs/xo). To have support in your favorite IDE, see the [how-to used in IDE](https://github.com/xojs/xo#editor-plugins) documentation. 
 
 To lint the code, run `npm run lint`.
 
 
-### Run as a Docker container
+### 📦 Run as a Docker container
 
 Build the demo:
 ```shell
@@ -97,7 +97,7 @@ gzip -k pa-bonita-day-demo-2023.tar
 The code of this demo is released under the [Apache 2.0](LICENSE) license.
 
 
-## Release how-to
+## 🚀 Release how-to
 
 When all updates have been completed, you are ready to publish a new release.
 
