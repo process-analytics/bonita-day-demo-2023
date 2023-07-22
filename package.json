@@ -1,7 +1,6 @@
 {
   "name": "bpmn-visualization-demo-vitejs-template",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +11,7 @@
     "tsc": "tsc"
   },
   "dependencies": {
+    "@process-analytics/bv-experimental-add-ons": "~0.1.1",
     "bpmn-visualization": "~0.37.0",
     "notyf": "~3.10.0",
     "spectre.css": "~0.5.9",

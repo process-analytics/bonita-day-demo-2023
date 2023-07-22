@@ -3,7 +3,7 @@
 import {type BpmnElementsRegistry, type BpmnVisualization} from 'bpmn-visualization';
 import tippy, {type Instance, type Props} from 'tippy.js';
 import 'tippy.js/animations/scale.css';
-import {BpmnElementsIdentifier} from './utils/bpmn-elements.js';
+import {BpmnElementsIdentifier} from '@process-analytics/bv-experimental-add-ons';
 import {delay} from './utils/shared.js';
 
 /* Start event --> SRM subprocess
