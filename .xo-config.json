@@ -1,3 +1,6 @@
 {
-  "space": true
+  "space": true,
+  "rules": {
+    "@typescript-eslint/no-floating-promises": "off"
+  }
 }
