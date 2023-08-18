@@ -11,7 +11,7 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@process-analytics/bv-experimental-add-ons": "~0.1.1",
+    "@process-analytics/bv-experimental-add-ons": "~0.2.0",
     "bpmn-visualization": "~0.38.0",
     "notyf": "~3.10.0",
     "spectre.css": "~0.5.9",
