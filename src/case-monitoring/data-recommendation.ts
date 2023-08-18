@@ -17,10 +17,6 @@ recommendationData.set('SRM subprocess', [{
   description: 'Notify a delay'}],
 );
 
-export function getRecommendationData(): Map<string, ActivityRecommendations[]> {
-  return recommendationData;
-}
-
 export function getActivityRecommendationData(activityName: string): ActivityRecommendations[] {
   return recommendationData.get(activityName) ?? [];
 }

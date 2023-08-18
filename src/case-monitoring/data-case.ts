@@ -90,18 +90,7 @@ class SubProcessCaseMonitoringDataProvider extends AbstractCaseMonitoringDataPro
 export function fetchCaseMonitoringData(processId: string, bpmnVisualization: BpmnVisualization): CaseMonitoringData {
   const bpmnElementsRegistry = bpmnVisualization.bpmnElementsRegistry;
   const caseMonitoringDataProvider = processId === 'main' ? new MainProcessCaseMonitoringDataProvider(bpmnElementsRegistry) : new SubProcessCaseMonitoringDataProvider(bpmnElementsRegistry);
-
-  const executedShapes = caseMonitoringDataProvider.getExecutedShapes();
-  const runningShapes = caseMonitoringDataProvider.getRunningShapes();
-  const pendingShapes = caseMonitoringDataProvider.getPendingShapes();
-
-  const visitedEdges = new PathResolver(bpmnElementsRegistry).getVisitedEdges([...executedShapes, ...runningShapes, ...pendingShapes]);
-  return {
-    executedShapes,
-    pendingShapes,
-    runningShapes,
-    visitedEdges,
-  };
+  return caseMonitoringDataProvider.fetch();
 }
 
 function addNonNullElement(elements: string[], elt: string | undefined) {

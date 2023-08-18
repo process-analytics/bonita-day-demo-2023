@@ -31,10 +31,6 @@ class DiagramLoadManager {
       this.bpmnDiagramIsAlreadyLoad = true;
     }
   }
-
-  isAlreadyLoad(): boolean {
-    return this.bpmnDiagramIsAlreadyLoad;
-  }
 }
 
 const mainProcessDiagramLoadManager = new DiagramLoadManager(mainBpmnVisualization, mainDiagram);
