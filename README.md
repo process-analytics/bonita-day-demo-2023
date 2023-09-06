@@ -1,6 +1,6 @@
 # bonita-day-demo-2023
 
-WIP This demo application was created as part of a presentation made during Bonita Day Paris 2023.
+This demo application was created as part of a presentation made during Bonita Day Paris 2023.
 
 Content:
 - `none`/`home`: display the BPMN processes used in this demo and navigate to the sub-process which is also part of the demo
