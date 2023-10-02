@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@process-analytics/bv-experimental-add-ons": "~0.5.0",
-    "bpmn-visualization": "~0.40.0",
+    "bpmn-visualization": "~0.41.0",
     "notyf": "~3.10.0",
     "spectre.css": "~0.5.9",
     "tippy.js": "~6.3.7"
