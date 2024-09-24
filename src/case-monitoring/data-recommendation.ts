@@ -14,7 +14,8 @@ recommendationData.set('SRM subprocess', [{
 {
   id: 'contact-supplier',
   title: 'Contact Supplier',
-  description: 'Notify a delay'}],
+  description: 'Notify a delay',
+}],
 );
 
 export function getActivityRecommendationData(activityName: string): ActivityRecommendations[] {

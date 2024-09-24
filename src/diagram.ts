@@ -1,7 +1,7 @@
-import {type BpmnElementsRegistry, BpmnVisualization, FitType, type LoadOptions} from 'bpmn-visualization';
-// eslint-disable-next-line n/file-extension-in-import -- Vite syntax
+import {
+  type BpmnElementsRegistry, BpmnVisualization, FitType, type LoadOptions,
+} from 'bpmn-visualization';
 import mainDiagram from './diagrams/EC-purchase-orders-collapsed.bpmn?raw';
-// eslint-disable-next-line n/file-extension-in-import -- Vite syntax
 import subDiagram from './diagrams/SRM-subprocess.bpmn?raw';
 import {removeSectionInBreadcrumb, addSectionInBreadcrumb} from './breadcrumb.js';
 
@@ -128,9 +128,7 @@ export class SubProcessNavigator {
   }
 
   private getSubProcessHtmlElement() {
-    if (!this.subProcessHtmlElement) {
-      this.subProcessHtmlElement = this.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement;
-    }
+    this.subProcessHtmlElement ||= this.bpmnElementsRegistry.getElementsByIds(subProcessId)[0].htmlElement;
 
     return this.subProcessHtmlElement;
   }

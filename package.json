@@ -18,8 +18,8 @@
     "tippy.js": "~6.3.7"
   },
   "devDependencies": {
-    "typescript": "~5.1.6",
-    "vite": "~4.4.9",
-    "xo": "~0.56.0"
+    "typescript": "~5.6.2",
+    "vite": "~5.4.7",
+    "xo": "~0.59.3"
   }
 }

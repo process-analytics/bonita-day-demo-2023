@@ -89,7 +89,7 @@ class MainProcessTippySupport extends AbstractTippySupport {
     showContactSupplierAction(this.mainProcessCaseMonitoring!).then(() => {
       console.info('Contact supplier action complete!');
     })
-      .catch(error => {
+      .catch((error: unknown) => {
         console.error('Error in contact supplier action:', error);
       });
   };
@@ -99,24 +99,24 @@ class MainProcessTippySupport extends AbstractTippySupport {
     // may still exist in the DOM of the subprocess view
 
     // the "button id" comes from the recommendation data
-    const allocateActorBtn = document.querySelector(`#${instance.popper.id} #reassign-actor`);
-    if (allocateActorBtn) {
+    const allocateActorButton = document.querySelector(`#${instance.popper.id} #reassign-actor`);
+    if (allocateActorButton) {
       if (register) {
-        allocateActorBtn.addEventListener('click', showResourceAllocationAction);
+        allocateActorButton.addEventListener('click', showResourceAllocationAction);
       } else {
-        allocateActorBtn.removeEventListener('click', showResourceAllocationAction);
+        allocateActorButton.removeEventListener('click', showResourceAllocationAction);
       }
     } else {
       console.warn('NO "allocate actor" btn');
     }
 
     // The "button id" comes from the recommendation data
-    const contactSupplierBtn = document.querySelector(`#${instance.popper.id} #contact-supplier`);
-    if (contactSupplierBtn) {
+    const contactSupplierButton = document.querySelector(`#${instance.popper.id} #contact-supplier`);
+    if (contactSupplierButton) {
       if (register) {
-        contactSupplierBtn.addEventListener('click', this.contactSupplierBtnListener);
+        contactSupplierButton.addEventListener('click', this.contactSupplierBtnListener);
       } else {
-        contactSupplierBtn.removeEventListener('click', this.contactSupplierBtnListener);
+        contactSupplierButton.removeEventListener('click', this.contactSupplierBtnListener);
       }
     } else {
       console.warn('NO "supplier contact" btn');

@@ -71,21 +71,21 @@ class SubProcessTippySupport extends AbstractTippySupport {
     // may still exist in the DOM of the subprocess view
     const rows = document.querySelectorAll(`#${instance.popper.id} #popover-resources-available > tbody > tr`);
     for (const [index, row] of rows.entries()) {
-      const assignBtn = document.querySelector(`#${instance.popper.id} #popover-resources-available > tbody > tr #btn-assign-${index}`);
+      const assignButton = document.querySelector(`#${instance.popper.id} #popover-resources-available > tbody > tr #btn-assign-${index}`);
       if (register) {
         row.addEventListener('mouseenter', this.rowMouseEnterListener);
         row.addEventListener('mouseleave', this.rowMouseLeaveListener);
         // Assign button
-        if (assignBtn) {
-          assignBtn.addEventListener('click', this.assignResource);
+        if (assignButton) {
+          assignButton.addEventListener('click', this.assignResource);
         } else {
           console.warn('NO "assign" btn');
         }
       } else {
         row.removeEventListener('mouseenter', this.rowMouseEnterListener);
         row.removeEventListener('mouseleave', this.rowMouseLeaveListener);
-        if (assignBtn) {
-          assignBtn.removeEventListener('click', this.assignResource);
+        if (assignButton) {
+          assignButton.removeEventListener('click', this.assignResource);
         } else {
           console.warn('NO "assign" btn');
         }
