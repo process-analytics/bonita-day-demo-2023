@@ -34,7 +34,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
     // Activity_04d6t36 chatGPT activity
     // Activity_1oxewnq review email
     const isChatGptActivity = elementId === 'Activity_04d6t36';
-    const tippyProps: Partial<Props> = {
+    const tippyProperties: Partial<Props> = {
       theme: isChatGptActivity ? 'light' : '',
       trigger: 'manual',
       arrow: !isChatGptActivity,
@@ -52,19 +52,19 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
       // TODO temp find a better way
       // eslint-disable-next-line @typescript-eslint/no-this-alias,unicorn/no-this-assignment -- temp
       const thisInstance = this;
-      tippyProps.onShown = (instance: Instance) => {
+      tippyProperties.onShown = (instance: Instance) => {
         // Kind of duplication with AbstractTippySupport but we cannot use the regular registerEventListeners/unregisterEventListeners and the getContent methods.
         // We must pass more parameters to the related methods.
         instance.setContent(thisInstance.getEmailReviewContent(parameters));
         thisInstance.manageEmailReviewEventListeners(instance, true, parameters);
       };
 
-      tippyProps.onHide = (instance: Instance) => {
+      tippyProperties.onHide = (instance: Instance) => {
         thisInstance.manageEmailReviewEventListeners(instance, false, parameters);
       };
     }
 
-    tippyInstance.setProps(tippyProps);
+    tippyInstance.setProps(tippyProperties);
     return tippyInstance;
   }
 
@@ -91,7 +91,7 @@ class SupplierProcessTippySupport extends AbstractTippySupport {
         .then(() => {
           console.info('manageEmailReviewEventListeners, end of call resume with decision', decision);
         })
-        .catch(error => {
+        .catch((error: unknown) => {
           console.error('manageEmailReviewEventListeners, end of call resume with decision "%s"', decision, error);
         });
     };
@@ -234,7 +234,7 @@ class SupplierContact {
               })
               .then(() => {
                 parameters.resume()
-                  .catch(error => {
+                  .catch((error: unknown) => {
                     console.error('Error while resuming %s', parameters.elementId, error);
                   });
               })

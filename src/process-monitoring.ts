@@ -88,14 +88,14 @@ export class ProcessMonitoring {
   }
 
   private configureResetButton(enable = true) {
-    const btnElement = document.querySelector<HTMLButtonElement>('#' + this.getGraphContainer().id + ' #btn-reset');
-    if (btnElement) {
+    const buttonElement = document.querySelector<HTMLButtonElement>('#' + this.getGraphContainer().id + ' #btn-reset');
+    if (buttonElement) {
       if (enable) {
-        btnElement.classList.remove('d-hide');
-        btnElement.addEventListener('click', this.resetHappyPath);
+        buttonElement.classList.remove('d-hide');
+        buttonElement.addEventListener('click', this.resetHappyPath);
       } else {
-        btnElement.classList.add('d-hide');
-        btnElement.removeEventListener('click', this.resetHappyPath);
+        buttonElement.classList.add('d-hide');
+        buttonElement.removeEventListener('click', this.resetHappyPath);
       }
     }
   }
@@ -126,7 +126,7 @@ export class ProcessMonitoring {
     delay(delayBeforeShowingPopover).then(() => {
       tippyInstance.show();
     })
-      .catch(error => {
+      .catch((error: unknown) => {
         console.error('Error showing popover:', error);
       });
   }
@@ -146,7 +146,7 @@ export class ProcessMonitoring {
       .then(() => {
         this.showHappyPath();
       })
-      .catch(error => {
+      .catch((error: unknown) => {
         console.error('Error while resetting the happy path', error);
       });
   };

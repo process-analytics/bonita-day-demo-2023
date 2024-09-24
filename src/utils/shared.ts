@@ -17,9 +17,9 @@ limitations under the License.
 import {Notyf} from 'notyf';
 
 // To improve, we may use existing libraries like the ones listed in https://geshan.com.np/blog/2022/08/javascript-wait-1-second/
-export const delay = async (ms: number, args?: any) =>
+export const delay = async (ms: number, arguments_?: any) =>
 // eslint-disable-next-line no-promise-executor-return -- cannot be managed now
-  new Promise(timeup => setTimeout(timeup, ms, args));
+  new Promise(resolve => setTimeout(resolve, ms, arguments_));
 
 // Notification configuration
 export type NotificationType = 'success' | 'warning';

@@ -34,7 +34,8 @@ const executionSteps = new Map<string, ExecutionStep>([
   // Gateway_19radi6 merge start and loop
   ['Gateway_19radi6', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_0i8gykc', nextExecutionStep: 'Activity_04d6t36'}],
   // Activity_04d6t36 chatGPT activity
-  ['Activity_04d6t36', {id: 'Activity_04d6t36', incomingEdgeId: 'Flow_06y94ol',
+  ['Activity_04d6t36', {
+    id: 'Activity_04d6t36', incomingEdgeId: 'Flow_06y94ol',
     innerAction: {
       functionToCall() {
         console.info('#### action on Activity_04d6t36');
@@ -45,7 +46,8 @@ const executionSteps = new Map<string, ExecutionStep>([
     },
   }],
   // Activity_1oxewnq review email. Stop here, next step chosen by user
-  ['Activity_1oxewnq', {id: 'Activity_1oxewnq', incomingEdgeId: 'Flow_092it75',
+  ['Activity_1oxewnq', {
+    id: 'Activity_1oxewnq', incomingEdgeId: 'Flow_092it75',
     innerAction: {
       functionToCall() {
         console.info('#### action on Activity_1oxewnq');
@@ -83,7 +85,9 @@ export type ReviewEmailDecision = 'abort' | 'generate' | 'validate';
 const reviewEmailChoices = new Map<ReviewEmailDecision, string | ExecutionStep>([
   ['validate', 'Activity_0tb47yw'],
   // ExecutionStep to manage the loop, as the gateway has more than one incoming edge
-  ['generate', {id: 'Gateway_19radi6', incomingEdgeId: 'Flow_1glx5xw', nextExecutionStep: 'Activity_04d6t36', incomingEdgeDisplayExecutionCount: true}],
+  ['generate', {
+    id: 'Gateway_19radi6', incomingEdgeId: 'Flow_1glx5xw', nextExecutionStep: 'Activity_04d6t36', incomingEdgeDisplayExecutionCount: true,
+  }],
   ['abort', 'Event_13tn0ty'],
 ]);
 
@@ -221,7 +225,7 @@ export class ProcessExecutor {
             elementId,
             executionCount,
             resume: async (input?: string) => this.execute(innerAction.getElementIdToResume(input))
-              .catch(error => {
+              .catch((error: unknown) => {
                 console.error('Error while resuming from action on element %s', elementId, error);
               }),
           };
