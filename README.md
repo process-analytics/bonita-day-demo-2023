@@ -1,5 +1,9 @@
 # bonita-day-demo-2023
 
+| Archived on 2025-01-17 | We no longer maintain this repository. |
+| -------- | -------- |
+
+
 This demo application was created as part of a presentation made during Bonita Day Paris 2023.
 
 Content:
